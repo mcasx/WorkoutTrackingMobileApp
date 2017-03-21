@@ -9,6 +9,7 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.content.Intent;
 import android.os.Handler;
+import android.text.InputFilter;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
@@ -30,6 +31,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Set;
 import java.util.UUID;
 
@@ -63,6 +66,7 @@ public class ExerciseActivity extends AppCompatActivity {
     private TextView current_weightView;
     private TextView current_repsView;
     private TextView current_intensityView;
+
     private Button button;
     private TextView descriptionView;
 
@@ -183,7 +187,7 @@ public class ExerciseActivity extends AppCompatActivity {
                             total_intensity += Double.parseDouble(jsonObj.getString("meanAcc"));
                             current_weightView.setText(String.valueOf(weight));
                             current_repsView.setText(String.valueOf(rep_count));
-                            current_intensityView.setText(String.valueOf(total_intensity/rep_count));
+                            current_intensityView.setText(String.format("%.2f", (total_intensity/rep_count)));
                         }
                     }
                 } catch (JSONException je){
@@ -266,11 +270,12 @@ public class ExerciseActivity extends AppCompatActivity {
         super.onStop();
     }
 
+
     public void onClickStartButton(View view){
         if(ongoing){
             //Send stop signal to muscleDevice
             mConnectedThread.write("stop_sensors");
-            mConnectedThread.cancel();
+
             //Send exercise to history of user
             pushExercise();
 
@@ -417,7 +422,9 @@ public class ExerciseActivity extends AppCompatActivity {
             try {
                 // Connect to the remote device through the socket. This call blocks
                 // until it succeeds or throws an exception.
+
                 mmSocket.connect();
+
             } catch (IOException connectException) {
                 // Unable to connect; close the socket and return.
                 try {
