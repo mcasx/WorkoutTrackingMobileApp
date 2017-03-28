@@ -16,17 +16,20 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme">
-        <activity android:name=".ExerciseActivity"></activity>
-        <activity android:name=".PickExerciseActivity"></activity>
-        <activity android:name=".groupExercisesActivity"></activity>
-        <activity android:name=".LoginActivity" android:noHistory="true">
+        android:theme="@style/Muscle">
+        <activity android:name=".ExerciseActivity" />
+        <activity android:name=".PickExerciseActivity" />
+        <activity android:name=".groupExercisesActivity" />
+        <activity
+            android:name=".LoginActivity"
+            android:noHistory="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".FeedBack"></activity>
     </application>
 
 </manifest>

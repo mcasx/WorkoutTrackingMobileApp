@@ -38,10 +38,9 @@ public class LoginActivity extends AppCompatActivity {
         email_layout = (TextInputLayout) findViewById(R.id.email_input_layout);
         password_layout = (TextInputLayout) findViewById(R.id.password_input_layout);
         signInButton = (Button) findViewById(R.id.sign_in_button);
-        signUpButton = (Button) findViewById(R.id.sign_up_button);
+        //signUpButton = (Button) findViewById(R.id.sign_up);
         progressBar.setVisibility(View.GONE);
-        textView = (TextView)findViewById(R.id.textView);
-
+        //textView = (TextView)findViewById(R.id.textView);
 
     }
 

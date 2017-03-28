@@ -16,7 +16,8 @@
         android:layout_height="wrap_content"
         android:text="Recent exercises"
         android:textAlignment="center"
-        android:textAppearance="@style/Base.TextAppearance.AppCompat.Title" />
+        android:textAppearance="@style/Base.TextAppearance.AppCompat.Title"
+        tools:ignore="HardcodedText" />
 
     <ListView
         android:id="@+id/recent_history"
