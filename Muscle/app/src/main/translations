@@ -1,0 +1,9 @@
+date_pick : Pick Date
+dob_txt : Date of Birth
+email_hint : Email
+height_hint: Height (m)
+next_btn: Next 
+password_confirmation_hint : Confirm Password
+password_hint : Password
+sign_up_btn_text : Sign Up
+weight_hint : Weight (Kg)

@@ -17,19 +17,23 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Muscle">
-        <activity android:name=".ExerciseActivity" />
-        <activity android:name=".PickExerciseActivity" />
-        <activity android:name=".groupExercisesActivity" />
+        <!--android:theme="@style/Theme.AppCompat" was added for hot fix, fell free to change it-->
+        <activity android:name=".ExerciseActivity"  android:theme="@style/Theme.AppCompat"/>
+
+        <activity android:name=".PickExerciseActivity" android:theme="@style/Theme.AppCompat"/>
+        <activity android:name=".groupExercisesActivity" android:theme="@style/Theme.AppCompat"/>
         <activity
             android:name=".LoginActivity"
-            android:noHistory="true">
+            android:noHistory="true"
+            android:theme="@style/Theme.AppCompat">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".FeedBack"></activity>
+        <activity android:name=".RegisterActivity" android:theme="@style/Theme.AppCompat"/>
+        <activity android:name=".FeedBack" android:theme="@style/Theme.AppCompat"></activity>
     </application>
 
 </manifest>

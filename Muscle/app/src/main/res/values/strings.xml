@@ -1,3 +1,9 @@
 <resources>
     <string name="app_name">Muscle</string>
+    <string name="sign_up_btn_text">Sign Up</string>
+    <string name="email_hint">Email</string>
+    <string name="password_hint">Password</string>
+    <string name="password_confirmation_hint">Confirm Password</string>
+    <string name="height_hint">Height</string>
+    <string name="weight_hint">Weight</string>
 </resources>

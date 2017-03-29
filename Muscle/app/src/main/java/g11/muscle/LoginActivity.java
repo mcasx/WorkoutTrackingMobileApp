@@ -6,6 +6,7 @@ import android.support.design.widget.TextInputLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -19,16 +20,19 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 
+import java.util.HashMap;
+import java.util.Map;
+
 
 public class LoginActivity extends AppCompatActivity {
 
     private String email;
+    private String password;
     ProgressBar         progressBar;
     TextInputLayout    email_layout;
     TextInputLayout    password_layout;
     Button             signInButton;
-    Button             signUpButton;
-    TextView           textView;
+    TextView           signUp;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,16 +42,16 @@ public class LoginActivity extends AppCompatActivity {
         email_layout = (TextInputLayout) findViewById(R.id.email_input_layout);
         password_layout = (TextInputLayout) findViewById(R.id.password_input_layout);
         signInButton = (Button) findViewById(R.id.sign_in_button);
-        //signUpButton = (Button) findViewById(R.id.sign_up);
+        signUp = (Button) findViewById(R.id.sign_up);
         progressBar.setVisibility(View.GONE);
         //textView = (TextView)findViewById(R.id.textView);
-
     }
+
 
     public void onClickSignIn(View view){
 
-        email = ((EditText) findViewById(R.id.email_input)).getText().toString();
-        String password = ((EditText) findViewById((R.id.password_input))).getText().toString();
+        email = ((EditText) findViewById(R.id.email_input)).getText().toString().trim();
+        password = ((EditText) findViewById((R.id.password_input))).getText().toString();
         set_progressBar_visibility(View.VISIBLE);
 
 
@@ -79,11 +83,11 @@ public class LoginActivity extends AppCompatActivity {
 
         RequestQueue queue = Volley.newRequestQueue(this);
 
-        String url = "http://138.68.158.127/user_login/" + email + "/" + password;
+        String url = "https://138.68.158.127/user_login";
 
         //Create the list items through a request
 
-        StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
+        StringRequest stringRequest = new StringRequest(Request.Method.POST, url,
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response){
@@ -94,6 +98,7 @@ public class LoginActivity extends AppCompatActivity {
                             startActivity(intent);
                         }
                         else{
+
                             AlertDialog alertDialog = new AlertDialog.Builder(LoginActivity.this).create();
                             alertDialog.setTitle("Wrong Credentials");
                             alertDialog.setMessage("Invalid username or password");
@@ -114,7 +119,8 @@ public class LoginActivity extends AppCompatActivity {
                     public void onErrorResponse(VolleyError error) {
                         AlertDialog alertDialog = new AlertDialog.Builder(LoginActivity.this).create();
                         alertDialog.setTitle("No Internet Connection");
-                        alertDialog.setMessage("Please connect your device to the Internet and try again");
+                        //"Please connect your device to the Internet and try again")
+                        alertDialog.setMessage(error.toString());
                         alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
                                 new DialogInterface.OnClickListener() {
                                     public void onClick(DialogInterface dialog, int which) {
@@ -125,10 +131,33 @@ public class LoginActivity extends AppCompatActivity {
                         set_progressBar_visibility(View.GONE);
                     }
                 }
-        );
+        ){
+            // use params are specified here
+            // DoB, height, gender and weight are specefied later, for now they have default values
+            // effin not nulls
+            @Override
+            protected Map<String, String> getParams()
+            {
+                Map<String, String>  params = new HashMap<>();
+                params.put("email", email);
+                params.put("password", password);
+                return params;
+            }
+        };
 
-        queue.add(stringRequest);
+        //queue.add(stringRequest);
+        VolleyProvider.getInstance(this).addRequest(stringRequest);
+
     }
+
+    public void onClickSignUp(View view){
+
+        Intent intent = new Intent(LoginActivity.this, RegisterActivity.class);
+
+        startActivity(intent);
+    }
+
+
 
     public void set_progressBar_visibility(int view){
         if(View.GONE == view){
@@ -136,8 +165,8 @@ public class LoginActivity extends AppCompatActivity {
             email_layout.setVisibility(View.VISIBLE);
             password_layout.setVisibility(View.VISIBLE);
             signInButton.setVisibility(View.VISIBLE);
-            signUpButton.setVisibility(View.VISIBLE);
-            textView.setVisibility(View.VISIBLE);
+            signUp.setVisibility(View.VISIBLE);
+            //textView.setVisibility(View.VISIBLE);
         }
 
         else{
@@ -145,8 +174,8 @@ public class LoginActivity extends AppCompatActivity {
             email_layout.setVisibility(View.GONE);
             password_layout.setVisibility(View.GONE);
             signInButton.setVisibility(View.GONE);
-            signUpButton.setVisibility(View.GONE);
-            textView.setVisibility(View.GONE);
+            signUp.setVisibility(View.GONE);
+            //textView.setVisibility(View.GONE);
         }
     }
 
