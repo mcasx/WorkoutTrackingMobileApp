@@ -52,6 +52,11 @@ public class RegisterActivity extends AppCompatActivity {
     TextInputLayout password_confirmation_layout;
     Button signUpButton;
 
+    @Override
+    public void onBackPressed(){
+        Intent back = new Intent(RegisterActivity.this, LoginActivity.class);
+        startActivity(back);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

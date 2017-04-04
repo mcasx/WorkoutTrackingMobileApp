@@ -28,11 +28,12 @@ public class LoginActivity extends AppCompatActivity {
 
     private String email;
     private String password;
-    ProgressBar         progressBar;
-    TextInputLayout    email_layout;
-    TextInputLayout    password_layout;
-    Button             signInButton;
-    TextView           signUp;
+    private ProgressBar        progressBar;
+    private TextInputLayout    email_layout;
+    private TextInputLayout    password_layout;
+    private Button             signInButton;
+    private TextView           signUp;
+    private TextView           forgotPass;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,7 +43,8 @@ public class LoginActivity extends AppCompatActivity {
         email_layout = (TextInputLayout) findViewById(R.id.email_input_layout);
         password_layout = (TextInputLayout) findViewById(R.id.password_input_layout);
         signInButton = (Button) findViewById(R.id.sign_in_button);
-        signUp = (Button) findViewById(R.id.sign_up);
+        signUp = (TextView) findViewById(R.id.sign_up);
+        forgotPass = (TextView) findViewById(R.id.forgotPass);
         progressBar.setVisibility(View.GONE);
         //textView = (TextView)findViewById(R.id.textView);
     }
@@ -166,6 +168,7 @@ public class LoginActivity extends AppCompatActivity {
             password_layout.setVisibility(View.VISIBLE);
             signInButton.setVisibility(View.VISIBLE);
             signUp.setVisibility(View.VISIBLE);
+            forgotPass.setVisibility(View.VISIBLE);
             //textView.setVisibility(View.VISIBLE);
         }
 
@@ -175,6 +178,7 @@ public class LoginActivity extends AppCompatActivity {
             password_layout.setVisibility(View.GONE);
             signInButton.setVisibility(View.GONE);
             signUp.setVisibility(View.GONE);
+            forgotPass.setVisibility(View.GONE);
             //textView.setVisibility(View.GONE);
         }
     }
