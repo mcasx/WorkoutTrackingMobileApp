@@ -39,7 +39,8 @@
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         android:layout_marginTop="16dp"
-        app:layout_constraintHorizontal_bias="0.521" />
+        app:layout_constraintHorizontal_bias="0.521"
+        android:contentDescription="@null" />
 
     <Button
         android:id="@+id/sign_in_button"
@@ -51,7 +52,7 @@
         android:layout_marginStart="10dp"
         android:layout_marginTop="28dp"
         android:onClick="onClickSignIn"
-        android:text="Sign in"
+        android:text="@string/sign_in"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/password_input_layout" />
@@ -94,9 +95,9 @@
             android:layout_marginRight="8dp"
             android:layout_marginStart="8dp"
             android:ems="10"
-            android:hint="Password"
+            android:hint="@string/password_hint"
             android:inputType="textPassword"
-            android:text="123456"
+            android:text="@string/test_pass"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
             tools:layout_editor_absoluteY="125dp" />
@@ -125,9 +126,9 @@
             android:layout_marginRight="8dp"
             android:layout_marginTop="8dp"
             android:ems="10"
-            android:hint="Email"
-            android:inputType="textPersonName"
-            android:text="ola@ua.pt"
+            android:hint="@string/email_hint"
+            android:inputType="textEmailAddress"
+            android:text="@string/test_email"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
@@ -141,7 +142,7 @@
         android:onClick="onClickForgotPass"
         android:paddingLeft="5dp"
         android:paddingRight="5dp"
-        android:text="Forgot your password?"
+        android:text="@string/Q_forgot_pass"
         android:textAlignment="center"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
@@ -160,7 +161,7 @@
         android:clickable="true"
         android:onClick="onClickSignUp"
         android:paddingLeft="5dp"
-        android:text="Don't have an account yet?"
+        android:text="@string/Q_register"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         android:layout_marginTop="0dp"

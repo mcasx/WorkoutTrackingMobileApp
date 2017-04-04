@@ -154,12 +154,17 @@ public class LoginActivity extends AppCompatActivity {
 
     public void onClickSignUp(View view){
 
-        Intent intent = new Intent(LoginActivity.this, RegisterActivity.class);
+        Intent signUpInt = new Intent(LoginActivity.this, RegisterActivity.class);
 
-        startActivity(intent);
+        startActivity(signUpInt);
     }
 
+    public void onClickForgotPass(View view){
 
+        Intent forgotPassInt = new Intent(LoginActivity.this, ResetPassActivity.class);
+
+        startActivity(forgotPassInt);
+    }
 
     public void set_progressBar_visibility(int view){
         if(View.GONE == view){

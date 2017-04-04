@@ -1,9 +1,33 @@
 <resources>
     <string name="app_name">Muscle</string>
-    <string name="sign_up_btn_text">Sign Up</string>
+
+    <!-- Temporary strings -->
+    <string name="test_exercise_name">Chest Press</string>
+    <string name="test_exercise_kind">Strength</string>
+    <string name="test_exercise_desc">1. Sit down on the Chest Press Machine and select the weight\n2. Step on the lever provided by the machine since it will help you bring the handles forward so that you can grab the handles and fully extend forward.\n3. Grab the handles with a palm down grip&#8230;</string>
+    <string name="test_email">ola@ua.pt</string>
+    <string name="test_pass">123456</string>
+
+    <!-- Log in | Register | Forgot Pass -->
+    <string name="sign_up">Sign Up</string>
+    <string name="sign_in">Sign In</string>
     <string name="email_hint">Email</string>
     <string name="password_hint">Password</string>
     <string name="password_confirmation_hint">Confirm Password</string>
+    <string name="reset_pass">Reset Password</string>
+    <string name="reset">Reset</string>
+    <string name="Q_forgot_pass">Forgot your password?</string>
+    <string name="Q_register">Don\'t have an account yet?</string>
+    <string name="create_account">Create Account</string>
+    <string name="register_note">Note: Your password must be at least 6 chars long</string>
+
+    <!-- Exercise -->
+    <string name="start">Start</string>
     <string name="height_hint">Height</string>
     <string name="weight_hint">Weight</string>
+
+    <string name="title_activity_home">home</string>
+    <string name="title_home">Home</string>
+    <string name="title_dashboard">Dashboard</string>
+    <string name="title_notifications">Notifications</string>
 </resources>
