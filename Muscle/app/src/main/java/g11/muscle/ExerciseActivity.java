@@ -60,12 +60,6 @@ public class ExerciseActivity extends AppCompatActivity {
     private TextView exerciseView;
     private TextView kindView;
     private ImageView imgView;
-    private TextView last_weightView;
-    private TextView last_repsView;
-    private TextView last_intensityView;
-    private TextView current_weightView;
-    private TextView current_repsView;
-    private TextView current_intensityView;
 
     private Button button;
     private TextView descriptionView;
@@ -108,12 +102,6 @@ public class ExerciseActivity extends AppCompatActivity {
         exerciseView  = (TextView)findViewById(R.id.exercise);
         kindView  = (TextView)findViewById(R.id.kind);
         imgView = (ImageView)findViewById(R.id.image);
-        last_weightView = (TextView)findViewById(R.id.last_weight);
-        last_repsView  = (TextView)findViewById(R.id.last_reps);
-        last_intensityView = (TextView)findViewById(R.id.last_intensity);
-        current_weightView  = (TextView)findViewById(R.id.current_weight);
-        current_repsView = (TextView)findViewById(R.id.current_reps);
-        current_intensityView = (TextView)findViewById(R.id.current_intensity);
         button = (Button)findViewById(R.id.button);
         descriptionView = (TextView)findViewById(R.id.description);
 
@@ -185,9 +173,10 @@ public class ExerciseActivity extends AppCompatActivity {
                             weight = 40;
                             rep_count += 1;
                             total_intensity += Double.parseDouble(jsonObj.getString("meanAcc"));
-                            current_weightView.setText(String.valueOf(weight));
-                            current_repsView.setText(String.valueOf(rep_count));
-                            current_intensityView.setText(String.format("%.2f", (total_intensity/rep_count)));
+                            //current_weightView.setText(String.valueOf(weight));
+                            //current_repsView.setText(String.valueOf(rep_count));
+                            //current_intensityView.setText(String.format("%.2f", (total_intensity/rep_count)));
+                            System.out.println("Get Data");
                         }
                     }
                 } catch (JSONException je){
@@ -226,9 +215,9 @@ public class ExerciseActivity extends AppCompatActivity {
             public void onResponse(JSONObject response) {
 
                 try{
-                    last_weightView.setText(response.getString("Weight"));
-                    last_repsView.setText(response.getString("Repetitions"));
-                    last_intensityView.setText(response.getString("Intensity"));
+                    //last_weightView.setText(response.getString("Weight"));
+                    //last_repsView.setText(response.getString("Repetitions"));
+                    //last_intensityView.setText(response.getString("Intensity"));
                     Log.e(TAG,response.toString());
                 } catch (Exception e){
                     Log.e(TAG, e.toString());
@@ -239,9 +228,9 @@ public class ExerciseActivity extends AppCompatActivity {
             public void onErrorResponse(VolleyError error) {
                 // User doesn't have anything in it's exercise history
                 Log.i(TAG,"User never did this exercise");
-                last_weightView.setText("0");
-                last_repsView.setText("0");
-                last_intensityView.setText("0");
+                //last_weightView.setText("0");
+                //last_repsView.setText("0");
+                //last_intensityView.setText("0");
             }
         }
         );
@@ -280,12 +269,12 @@ public class ExerciseActivity extends AppCompatActivity {
             pushExercise();
 
             //Set UI elements
-            last_weightView.setText(String.valueOf(weight));
-            last_repsView.setText(String.valueOf(rep_count));
-            last_intensityView.setText(String.valueOf(total_intensity));
-            current_weightView.setText("0");
-            current_repsView.setText("0");
-            current_intensityView.setText("0");
+            //last_weightView.setText(String.valueOf(weight));
+            //last_repsView.setText(String.valueOf(rep_count));
+            //last_intensityView.setText(String.valueOf(total_intensity));
+            //current_weightView.setText("0");
+            //current_repsView.setText("0");
+            //current_intensityView.setText("0");
 
             ongoing = false;
             button.setText("Start");
