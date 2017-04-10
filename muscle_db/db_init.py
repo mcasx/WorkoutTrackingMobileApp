@@ -60,6 +60,7 @@ c.execute('''CREATE TABLE TRAINING_EXERCISE(
     Exercise_name VARCHAR(128),
     Sets TINYINT UNSIGNED NOT NULL,
     Repetitions TINYINT UNSIGNED NOT NULL,
+    Resting_time TIME,
     Weight TINYINT UNSIGNED,
     FOREIGN KEY(Plan_id) REFERENCES PLAN(ID),
     FOREIGN KEY(Exercise_name) REFERENCES EXERCISE(Name),
@@ -89,14 +90,26 @@ c.execute('''CREATE TABLE EXERCISE_HISTORY(
     Date_Time DATETIME NOT NULL,
     Exercise_name VARCHAR(128) NOT NULL,
     User_email VARCHAR(255) NOT NULL,
-    Repetitions TINYINT UNSIGNED NOT NULL,
-    Sets TINYINT UNSIGNED NOT NULL,
-    Weight FLOAT(3,1) NOT NULL,
-    Intensity INTEGER,
+    Average_intensity FLOAT(3,1),
+    Set_amount INTEGER,
     PRIMARY KEY(ID),
     FOREIGN KEY(Exercise_name) REFERENCES EXERCISE(Name),
     FOREIGN KEY(User_email) REFERENCES USER(Email)
     )'''
+)
+
+c.execute('''CREATE TABLE SETS(
+	Exercise_history_id INTEGER,
+	Set_number INTEGER,
+	Repetitions INTEGER,
+	Weight INTEGER,
+	Intensity FLOAT(3,1),
+	Resting_Time TIME,
+        Average_rep_time TIME,
+        Rep_time_deviation FLOAT,
+	PRIMARY KEY (Exercise_history_id, Set_number),
+	FOREIGN KEY (Exercise_history_id) REFERENCES EXERCISE_HISTORY(ID)
+	)'''
 )
 
 c.execute('''CREATE TABLE PLAN_HISTORY(
