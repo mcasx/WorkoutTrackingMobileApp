@@ -148,7 +148,7 @@ public class JumpActivity extends AppCompatActivity implements SensorEventListen
             if (threshold > 11 && !thresholdup) {
 
                 count++;
-                countText.setText(String.format("%d", count));
+                countText.setText(String.format("%d", count/2));
                 thresholdup = true;
                 time = System.currentTimeMillis();
             } else
