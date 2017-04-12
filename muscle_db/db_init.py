@@ -105,8 +105,7 @@ c.execute('''CREATE TABLE SETS(
 	Weight INTEGER,
 	Intensity FLOAT(3,1),
 	Resting_Time TIME,
-        Average_rep_time TIME,
-        Rep_time_deviation FLOAT,
+        Intensity_deviation FLOAT,
 	PRIMARY KEY (Exercise_history_id, Set_number),
 	FOREIGN KEY (Exercise_history_id) REFERENCES EXERCISE_HISTORY(ID)
 	)'''
