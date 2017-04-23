@@ -17,7 +17,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Muscle">
-        <!--android:theme="@style/Theme.AppCompat" was added for hot fix, fell free to change it-->
+        <!--android:theme="@style/Theme.AppCompat" was added for hot fix, feel free to change it-->
         <activity android:name=".ExerciseActivity"  android:theme="@style/Theme.AppCompat"/>
         <activity android:name=".ResetPassActivity" android:theme="@style/Theme.AppCompat"/>
         <activity android:name=".PickExerciseActivity" android:theme="@style/Theme.AppCompat"/>
@@ -32,7 +32,8 @@
             </intent-filter>
         </activity>
         <activity android:name=".RegisterActivity" android:theme="@style/Theme.AppCompat"/>
-        <activity android:name=".FeedBack" android:theme="@style/Theme.AppCompat"></activity>
+        <activity android:name=".FeedBack" android:theme="@style/Theme.AppCompat" android:label="@string/app_name" />
+        <activity android:name=".FormActivity" android:theme="@style/Theme.AppCompat" android:label="Settings" />
     </application>
 
 </manifest>

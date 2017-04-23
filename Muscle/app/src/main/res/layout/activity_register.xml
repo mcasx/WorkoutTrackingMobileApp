@@ -22,7 +22,7 @@
 
     <Button
         android:id="@+id/sign_up_button"
-        android:onClick="onClickNext"
+        android:onClick="onClickSignUp"
         android:text="@string/sign_up"
         android:layout_width="96dp"
         android:layout_height="39dp"

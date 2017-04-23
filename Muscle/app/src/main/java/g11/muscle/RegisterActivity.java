@@ -88,7 +88,7 @@ public class RegisterActivity extends AppCompatActivity {
                             inputManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(),
                                     InputMethodManager.HIDE_NOT_ALWAYS);
 
-                            onClickNext(v.getRootView());
+                            onClickSignUp(v.getRootView());
                             password_confirmation.setImeOptions(EditorInfo.IME_ACTION_DONE);
 
 
@@ -101,7 +101,7 @@ public class RegisterActivity extends AppCompatActivity {
 
 
 
-    public void onClickNext(View view){
+    public void onClickSignUp(View view){
 
         TextInputEditText email_input, password_input, repPass_input;
 
@@ -123,15 +123,14 @@ public class RegisterActivity extends AppCompatActivity {
 
         StringRequest stringRequest = new StringRequest(Request.Method.POST, baseUrl + addUserUrl,
                 new Response.Listener<String>() {
-                    @Override
                     public void onResponse(String response){
 
                         if(response.equals("User added")) {
 
                             // Intent intent = new Intent(RegisterActivity.this, FormActivity.class);
-                            // Later in development (like tomorrow) it will redirect to a page where user specefies more parameters
+                            // Later in development (like tomorrow) it will redirect to a page where user specifies more parameters
                             // For now it takes the user to the PickExerciseActivity
-                            Intent intent = new Intent(RegisterActivity.this, PickExerciseActivity.class);
+                            Intent intent = new Intent(RegisterActivity.this, FormActivity.class);
                             intent.putExtra("email", email);
                             startActivity(intent);
                         }
@@ -172,7 +171,7 @@ public class RegisterActivity extends AppCompatActivity {
                 params.put("password", password);
                 // in this step we put name = email, because fkn not nulls
 
-                params.put("date_of_birth", getDeafaultAgeDoB());
+                params.put("date_of_birth", getDefaultAgeDoB());
                 // we literally assume the gender
                 params.put("gender", "1");
                 // i assume it's in centimeters, could be height and weight were mixed tho
@@ -181,6 +180,7 @@ public class RegisterActivity extends AppCompatActivity {
                 return params;
             }
         };
+
 
         VolleyProvider.getInstance(this).addRequest(stringRequest);
 
@@ -260,18 +260,21 @@ public class RegisterActivity extends AppCompatActivity {
         }
     }
 
-    public String getDeafaultAgeDoB(){
+    public String getDefaultAgeDoB(){
         String pattern = "dd-MM-yyyy";
         Calendar cal = Calendar.getInstance();
         Date today = cal.getTime();
-        cal.add(Calendar.YEAR, -25); // to get previous year add -1
+        cal.add(Calendar.YEAR, -25); // get date minus 25 years
         Date age = cal.getTime();
         SimpleDateFormat formatter = new SimpleDateFormat(pattern);
         String mysqlDateString = formatter.format(age);
         return mysqlDateString;
     }
 
+    public void FormIntent(View view) {
+        Intent intent = new Intent(RegisterActivity.this, FormActivity.class);
+        intent.putExtra("email", "ola@ua.pt");
+        startActivity(intent);
+    }
 
-
-
-}
+    }
