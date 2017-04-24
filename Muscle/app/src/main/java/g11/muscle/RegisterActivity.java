@@ -22,21 +22,17 @@ import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
-
-
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-
 import g11.muscle.PickExerciseActivity;
 
 
@@ -51,11 +47,11 @@ public class RegisterActivity extends AppCompatActivity {
     TextInputLayout password_input_layout;
     TextInputLayout password_confirmation_layout;
     Button signUpButton;
+    View note;
 
     @Override
     public void onBackPressed(){
-        Intent back = new Intent(RegisterActivity.this, LoginActivity.class);
-        startActivity(back);
+        finish();
     }
 
     @Override
@@ -71,6 +67,9 @@ public class RegisterActivity extends AppCompatActivity {
         password_input_layout = (TextInputLayout) findViewById(R.id.password_input_layout);
         password_confirmation_layout = (TextInputLayout) findViewById(R.id.password_confirmation_layout);
         signUpButton = (Button) findViewById(R.id.sign_up_button);
+        note = findViewById(R.id.textView2);
+
+        progressBar.setVisibility(View.GONE);
 
         // all this code to submit when done button is pressed fcn java man
         final TextInputEditText password_confirmation = (TextInputEditText)findViewById(R.id.password_confirmation);
@@ -89,7 +88,7 @@ public class RegisterActivity extends AppCompatActivity {
                             inputManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(),
                                     InputMethodManager.HIDE_NOT_ALWAYS);
 
-                            onClickNext(v.getRootView());
+                            onClickSignUp(v.getRootView());
                             password_confirmation.setImeOptions(EditorInfo.IME_ACTION_DONE);
 
 
@@ -102,7 +101,7 @@ public class RegisterActivity extends AppCompatActivity {
 
 
 
-    public void onClickNext(View view){
+    public void onClickSignUp(View view){
 
         TextInputEditText email_input, password_input, repPass_input;
 
@@ -124,15 +123,14 @@ public class RegisterActivity extends AppCompatActivity {
 
         StringRequest stringRequest = new StringRequest(Request.Method.POST, baseUrl + addUserUrl,
                 new Response.Listener<String>() {
-                    @Override
                     public void onResponse(String response){
 
                         if(response.equals("User added")) {
 
                             // Intent intent = new Intent(RegisterActivity.this, FormActivity.class);
-                            // Later in development (like tomorrow) it will redirect to a page where user specefies more parameters
+                            // Later in development (like tomorrow) it will redirect to a page where user specifies more parameters
                             // For now it takes the user to the PickExerciseActivity
-                            Intent intent = new Intent(RegisterActivity.this, PickExerciseActivity.class);
+                            Intent intent = new Intent(RegisterActivity.this, FormActivity.class);
                             intent.putExtra("email", email);
                             startActivity(intent);
                         }
@@ -162,7 +160,7 @@ public class RegisterActivity extends AppCompatActivity {
                 }
         ){
             // use params are specified here
-            // DoB, height, gender and weight are specefied later, for now they have default values
+            // DoB, height, gender and weight are specified later, for now they have default values
             // effin not nulls
             @Override
             protected Map<String, String> getParams()
@@ -171,9 +169,9 @@ public class RegisterActivity extends AppCompatActivity {
                 params.put("email", email);
                 params.put("name", email);
                 params.put("password", password);
-                // in this step we put name = email, beacause fkn not nulls
+                // in this step we put name = email, because fkn not nulls
 
-                params.put("date_of_birth", getDeafaultAgeDoB());
+                params.put("date_of_birth", getDefaultAgeDoB());
                 // we literally assume the gender
                 params.put("gender", "1");
                 // i assume it's in centimeters, could be height and weight were mixed tho
@@ -182,6 +180,7 @@ public class RegisterActivity extends AppCompatActivity {
                 return params;
             }
         };
+
 
         VolleyProvider.getInstance(this).addRequest(stringRequest);
 
@@ -195,16 +194,16 @@ public class RegisterActivity extends AppCompatActivity {
             password_input_layout.setVisibility(View.VISIBLE);
             password_confirmation_layout.setVisibility(View.VISIBLE);
             signUpButton.setVisibility(View.VISIBLE);
+            note.setVisibility(View.VISIBLE);
         }
 
         else{
-
             progressBar.setVisibility(View.VISIBLE);
             email_layout.setVisibility(View.GONE);
             password_input_layout.setVisibility(View.GONE);
             password_confirmation_layout.setVisibility(View.GONE);
             signUpButton.setVisibility(View.GONE);
-
+            note.setVisibility(View.GONE);
         }
     }
 
@@ -216,7 +215,7 @@ public class RegisterActivity extends AppCompatActivity {
         password_confirmation_layout.setError(null);
 
         if(email.equals("")){
-            email_layout.setError("Insert your account's email address");
+            email_layout.setError("Please insert your Muscle account email address!");
             set_progressBar_visibility(View.GONE);
              return false;
         }
@@ -228,25 +227,25 @@ public class RegisterActivity extends AppCompatActivity {
         }
 
         if(password.length() < 6){
-            password_input_layout.setError("Password Invalid");
+            password_input_layout.setError("Invalid Password!");
             set_progressBar_visibility(View.GONE);
             return false;
         }
 
         if(password.length() < 6){
-            password_input_layout.setError("Password Invalid");
+            password_input_layout.setError("Invalid Password!");
             set_progressBar_visibility(View.GONE);
             return false;
         }
 
         if(repeatedPassword.equals("")){
-            password_confirmation_layout.setError("Confirm your password");
+            password_confirmation_layout.setError("Please confirm your password!");
             set_progressBar_visibility(View.GONE);
             return false;
         }
 
         if(!repeatedPassword.equals(password)) {
-            password_confirmation_layout.setError("Password doesn't match");
+            password_confirmation_layout.setError("Passwords don't match!");
             set_progressBar_visibility(View.GONE);
             return false;
         }
@@ -261,18 +260,21 @@ public class RegisterActivity extends AppCompatActivity {
         }
     }
 
-    public String getDeafaultAgeDoB(){
+    public String getDefaultAgeDoB(){
         String pattern = "dd-MM-yyyy";
         Calendar cal = Calendar.getInstance();
         Date today = cal.getTime();
-        cal.add(Calendar.YEAR, -25); // to get previous year add -1
+        cal.add(Calendar.YEAR, -25); // get date minus 25 years
         Date age = cal.getTime();
         SimpleDateFormat formatter = new SimpleDateFormat(pattern);
         String mysqlDateString = formatter.format(age);
         return mysqlDateString;
     }
 
+    public void FormIntent(View view) {
+        Intent intent = new Intent(RegisterActivity.this, FormActivity.class);
+        intent.putExtra("email", "ola@ua.pt");
+        startActivity(intent);
+    }
 
-
-
-}
+    }

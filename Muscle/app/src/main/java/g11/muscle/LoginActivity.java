@@ -2,53 +2,76 @@ package g11.muscle;
 
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.media.Image;
 import android.support.design.widget.TextInputLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
-
 import java.util.HashMap;
 import java.util.Map;
+
+import android.util.Log;
 
 
 public class LoginActivity extends AppCompatActivity {
 
-    private String email;
-    private String password;
+    private String             email;
+    private String             password;
     private ProgressBar        progressBar;
     private TextInputLayout    email_layout;
     private TextInputLayout    password_layout;
     private Button             signInButton;
     private TextView           signUp;
     private TextView           forgotPass;
+    private ImageView          logo;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
-        progressBar = (ProgressBar) findViewById(R.id.progressBar);
-        email_layout = (TextInputLayout) findViewById(R.id.email_input_layout);
-        password_layout = (TextInputLayout) findViewById(R.id.password_input_layout);
-        signInButton = (Button) findViewById(R.id.sign_in_button);
-        signUp = (TextView) findViewById(R.id.sign_up);
-        forgotPass = (TextView) findViewById(R.id.forgotPass);
+
+        progressBar     =      (ProgressBar) findViewById(R.id.progressBar);
+        email_layout    =      (TextInputLayout) findViewById(R.id.email_input_layout);
+        password_layout =      (TextInputLayout) findViewById(R.id.password_input_layout);
+        signInButton    =      (Button) findViewById(R.id.sign_in_button);
+        signUp          =      (TextView) findViewById(R.id.sign_up);
+        forgotPass      =      (TextView) findViewById(R.id.forgotPass);
+        logo            =      (ImageView) findViewById(R.id.logoView);
+
         progressBar.setVisibility(View.GONE);
-        //textView = (TextView)findViewById(R.id.textView);
     }
 
+    //Pressed back on Log in activity
+    //Confirm user wants to quit the app
+    @Override
+    public void onBackPressed() {
+        new AlertDialog.Builder(this)
+                .setIcon(android.R.drawable.ic_dialog_alert)
+                .setTitle("Quit Muscle")
+                .setMessage("Are you sure you want to close Muscle?")
+                .setPositiveButton("Yes", new DialogInterface.OnClickListener()
+                {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        android.os.Process.killProcess(android.os.Process.myPid());
+                        finish();
+                    }
+                })
+                .setNegativeButton("No", null)
+                .show();
+    }
 
     public void onClickSignIn(View view){
 
@@ -58,7 +81,7 @@ public class LoginActivity extends AppCompatActivity {
 
 
         if(email.equals("")){
-            email_layout.setError("Insert your account's email address");
+            email_layout.setError("Please insert your Muscle account email address!");
             set_progressBar_visibility(View.GONE);
             return;
         }
@@ -66,7 +89,7 @@ public class LoginActivity extends AppCompatActivity {
             email_layout.setError(null);
 
         if(!isValidEmail(email)){
-            email_layout.setError("Invalid Email");
+            email_layout.setError("Invalid email!");
             set_progressBar_visibility(View.GONE);
             return;
         }
@@ -75,7 +98,7 @@ public class LoginActivity extends AppCompatActivity {
 
 
         if(password.length() < 6){
-            password_layout.setError("Password Invalid");
+            password_layout.setError("Invalid password!");
             set_progressBar_visibility(View.GONE);
             return;
         }
@@ -135,7 +158,7 @@ public class LoginActivity extends AppCompatActivity {
                 }
         ){
             // use params are specified here
-            // DoB, height, gender and weight are specefied later, for now they have default values
+            // DoB, height, gender and weight are specified later, for now they have default values
             // effin not nulls
             @Override
             protected Map<String, String> getParams()
@@ -156,14 +179,14 @@ public class LoginActivity extends AppCompatActivity {
 
         Intent signUpInt = new Intent(LoginActivity.this, RegisterActivity.class);
 
-        startActivity(signUpInt);
+        LoginActivity.this.startActivity(signUpInt);
     }
 
     public void onClickForgotPass(View view){
 
         Intent forgotPassInt = new Intent(LoginActivity.this, ResetPassActivity.class);
 
-        startActivity(forgotPassInt);
+        LoginActivity.this.startActivity(forgotPassInt);
     }
 
     public void set_progressBar_visibility(int view){
