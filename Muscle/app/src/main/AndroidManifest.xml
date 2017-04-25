@@ -24,7 +24,7 @@
         </activity>
         <activity android:name=".ResetPassActivity" android:theme="@style/Theme.AppCompat.NoActionBar"/>
         <activity android:name=".PickExerciseActivity" android:theme="@style/Theme.AppCompat.NoActionBar"/>
-        <activity android:name=".groupExercisesActivity" android:theme="@style/Theme.AppCompat.NoActionBar"/>
+        <activity android:name=".GroupExercisesActivity" android:theme="@style/Theme.AppCompat.NoActionBar"/>
         <activity android:name=".LoginActivity" android:theme="@style/Theme.AppCompat.NoActionBar"/>
         <activity android:name=".HomeActivity" android:theme="@style/Theme.AppCompat.NoActionBar">
             <intent-filter>
