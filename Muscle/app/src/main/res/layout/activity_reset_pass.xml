@@ -23,8 +23,8 @@
     <Button
         android:id="@+id/reset_pass"
         android:onClick="onClickSubmit"
-        android:layout_width="82dp"
-        android:layout_height="34dp"
+        android:layout_width="84dp"
+        android:layout_height="35dp"
         android:layout_weight="1"
         android:text="Submit"
         android:layout_marginRight="8dp"
@@ -49,15 +49,16 @@
 
     <android.support.design.widget.TextInputLayout
         android:id="@+id/email_input_layout"
-        android:layout_width="284dp"
-        android:layout_height="73dp"
+        android:layout_width="286dp"
+        android:layout_height="95dp"
         android:layout_marginLeft="8dp"
         android:layout_marginTop="32dp"
         android:inputType="textEmailAddress"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textView3"
         android:layout_marginRight="8dp"
-        app:layout_constraintRight_toRightOf="parent">
+        app:layout_constraintRight_toRightOf="parent"
+        tools:layout_editor_absoluteY="187dp">
 
         <EditText
             android:id="@+id/email_input"

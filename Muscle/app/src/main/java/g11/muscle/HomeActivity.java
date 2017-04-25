@@ -7,7 +7,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
 import android.widget.TextView;
 
-public class home extends AppCompatActivity {
+public class HomeActivity extends AppCompatActivity {
 
     private TextView mTextMessage;
 
@@ -20,11 +20,17 @@ public class home extends AppCompatActivity {
                 case R.id.navigation_home:
                     mTextMessage.setText(R.string.title_home);
                     return true;
-                case R.id.navigation_dashboard:
-                    mTextMessage.setText(R.string.title_dashboard);
+                case R.id.navigation_exerciseList:
+                    mTextMessage.setText(R.string.title_exerciseList);
                     return true;
-                case R.id.navigation_notifications:
-                    mTextMessage.setText(R.string.title_notifications);
+                case R.id.navigation_exerciseHistory:
+                    mTextMessage.setText(R.string.title_exerciseList);
+                    return true;
+                case R.id.navigation_myPlan:
+                    mTextMessage.setText(R.string.title_myPlan);
+                    return true;
+                case R.id.navigation_myProfile:
+                    mTextMessage.setText(R.string.title_myProfile);
                     return true;
             }
             return false;
@@ -41,5 +47,4 @@ public class home extends AppCompatActivity {
         BottomNavigationView navigation = (BottomNavigationView) findViewById(R.id.navigation);
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
     }
-
 }

@@ -18,21 +18,21 @@
         android:supportsRtl="true"
         android:theme="@style/Muscle">
         <!--android:theme="@style/Theme.AppCompat" was added for hot fix, fell free to change it-->
-        <activity android:name=".ExerciseActivity"  android:theme="@style/Theme.AppCompat"/>
-        <activity android:name=".ResetPassActivity" android:theme="@style/Theme.AppCompat"/>
-        <activity android:name=".PickExerciseActivity" android:theme="@style/Theme.AppCompat"/>
-        <activity android:name=".groupExercisesActivity" android:theme="@style/Theme.AppCompat"/>
-        <activity
-            android:name=".LoginActivity"
-            android:theme="@style/Theme.AppCompat">
+        <activity android:name=".ExerciseActivity" android:theme="@style/Theme.AppCompat.NoActionBar">
+
+        </activity>
+        <activity android:name=".ResetPassActivity" android:theme="@style/Theme.AppCompat.NoActionBar"/>
+        <activity android:name=".PickExerciseActivity" android:theme="@style/Theme.AppCompat.NoActionBar"/>
+        <activity android:name=".groupExercisesActivity" android:theme="@style/Theme.AppCompat.NoActionBar"/>
+        <activity android:name=".LoginActivity" android:theme="@style/Theme.AppCompat.NoActionBar"/>
+        <activity android:name=".HomeActivity" android:theme="@style/Theme.AppCompat.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".RegisterActivity" android:theme="@style/Theme.AppCompat"/>
-        <activity android:name=".FeedBack" android:theme="@style/Theme.AppCompat"></activity>
+        <activity android:name=".RegisterActivity" android:theme="@style/Theme.AppCompat.NoActionBar"/>
+        <activity android:name=".FeedBackActivity" android:theme="@style/Theme.AppCompat.NoActionBar"/>
     </application>
 
 </manifest>
