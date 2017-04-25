@@ -27,7 +27,10 @@
     <string name="weight_hint">Weight</string>
 
     <string name="title_activity_home">home</string>
+
     <string name="title_home">Home</string>
-    <string name="title_dashboard">Dashboard</string>
-    <string name="title_notifications">Notifications</string>
+    <string name="title_exerciseList">Exercise List</string>
+    <string name="title_exerciseHistory">History</string>
+    <string name="title_myPlan">My Plan</string>
+    <string name="title_myProfile">My Profile</string>
 </resources>
