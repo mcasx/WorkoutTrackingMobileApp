@@ -87,7 +87,7 @@ public class PickExerciseActivity extends AppCompatActivity {
                         groupsView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                             public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
                                 //Go to exercise page
-                                Intent intent = new Intent(PickExerciseActivity.this, groupExercisesActivity.class);
+                                Intent intent = new Intent(PickExerciseActivity.this, GroupExercisesActivity.class);
                                 intent.putExtra("group", groups[position]);
                                 intent.putExtra("email", email);
                                 startActivity(intent);
