@@ -21,7 +21,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class groupExercisesActivity extends AppCompatActivity {
+public class GroupExercisesActivity extends AppCompatActivity {
 
     private static final String TAG = "groupExercisesActivity";
     private String email;
@@ -70,7 +70,7 @@ public class groupExercisesActivity extends AppCompatActivity {
                         }
 
                         // Define the groupView adapter
-                        ArrayAdapter<String> adapter = new ArrayAdapter<>(groupExercisesActivity.this, android.R.layout.simple_list_item_1, exercises);
+                        ArrayAdapter<String> adapter = new ArrayAdapter<>(GroupExercisesActivity.this, android.R.layout.simple_list_item_1, exercises);
                         exercisesView.setAdapter(adapter);
 
                         // Set the listeners on the list items
@@ -78,7 +78,7 @@ public class groupExercisesActivity extends AppCompatActivity {
                             public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
                                 //Go to exercise page
                                 String exercise_name = (String) parent.getAdapter().getItem(position);
-                                Intent intent = new Intent(groupExercisesActivity.this, ExerciseActivity.class);
+                                Intent intent = new Intent(GroupExercisesActivity.this, ExerciseActivity.class);
                                 intent.putExtra("exercise_name", exercise_name);
                                 intent.putExtra("email", email);
                                 startActivity(intent);
