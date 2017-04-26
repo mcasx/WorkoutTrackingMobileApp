@@ -118,7 +118,7 @@ public class LoginActivity extends AppCompatActivity {
                     public void onResponse(String response){
                         if(response.equals("True")) {
 
-                            Intent intent = new Intent(LoginActivity.this, PickExerciseActivity.class);
+                            Intent intent = new Intent(LoginActivity.this, HomeActivity.class);
                             intent.putExtra("email", email);
                             startActivity(intent);
                         }
