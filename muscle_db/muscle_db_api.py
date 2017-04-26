@@ -55,11 +55,11 @@ def add_user():
 	    password = pbkdf2_sha256.encrypt(password, rounds=200000, salt_size=16)
 
 	    if c.fetchall():
-	        return jsonify(status = 'User already Registered')
+	        return "User already Registered"
 	    
 
 	    if profile_image != "":
-	        c.execute('''INSERT INTO USER (Email, Password, Name, Height, Weight, Date_of_birth, Profile_image, Gender, status) VALUES (%s, %s, %s , %s, %s, %s, %s, %s, 1)''', (email, password, name, height, weight, date_of_birth, profile_image_name, gender))
+	        c.execute('''INSERT INTO USER (Email, Password, Name, Height, Weight, Date_of_birth, Profile_image, Gender) VALUES (%s, %s, %s , %s, %s, %s, %s, %s)''', (email, password, name, height, weight, date_of_birth, profile_image_name, gender))
 	        
 	        """
 	        Para: David
@@ -71,19 +71,17 @@ def add_user():
 	        f.write(profile_image)
 	        f.close()
 	    else:
-	        c.execute('''INSERT INTO USER (Email, Password, Name, Height, Weight, Date_of_birth, Gender, status) VALUES (%s, %s, %s , %s, %s, %s, %s, 1)''', (email, password, name, height, weight, date_of_birth, gender))
+	        c.execute('''INSERT INTO USER (Email, Password, Name, Height, Weight, Date_of_birth, Gender) VALUES (%s, %s, %s , %s, %s, %s, %s)''', (email, password, name, height, weight, date_of_birth, gender))
 
 	    u_id = c.lastrowid
 	    conn.commit()
 
 	    c.close()
 	    conn.close()
-	    
-	    #return "User added"
-	    return jsonify(status = "User added", id = u_id)
 
+	    return "User added"
     except Exception as e:
-        return  jsonify(status = str(e))
+        return  str(e)
 
 
 #FIELDS REQUIRED: email
@@ -468,7 +466,7 @@ def user_login():
         c.execute('USE muscle2')
  
  
-        c.execute("SELECT Password FROM user WHERE Email = %s", [email])
+        c.execute("SELECT Password FROM USER WHERE Email = %s", [email])
         fetched = c.fetchall();
         c.close()
         conn.close()
@@ -515,8 +513,6 @@ def update_user_char():
             dob_substring = "Date_of_birth = %s, "
             var_insert_tuple += (request.form['date_of_birth'],)
 
-        ##ID WILL REPLACE EMAIL AHHH
-
         if 'profile_pic' in request.form:
             profile_pic_substring = "Profile_image = %s, "
 
@@ -535,7 +531,7 @@ def update_user_char():
         c = conn.cursor(MySQLdb.cursors.DictCursor)
         c.execute('USE muscle2')
 
-        print("UPDATE user SET " + 
+        print("UPDATE USER SET " + 
             name_substring +
             height_substring + 
             weight_substring + 
@@ -543,7 +539,7 @@ def update_user_char():
             profile_pic_substring +
             "Gender = %s WHERE Email = %s", var_insert_tuple + (gender, email))
         
-        c.execute("UPDATE user SET " + 
+        c.execute("UPDATE USER SET " + 
             name_substring + 
             height_substring + 
             weight_substring + 
@@ -675,7 +671,7 @@ def get_exercise_history_of_user():
 
 
 @app.route('/get_last_exercise_of_user', methods=['POST'])
-def get_last_exercise_of_user(user_email, exercise_name):
+def get_last_exercise_of_user():
 
     try:
         user_email = request.form['user_email']
@@ -686,6 +682,24 @@ def get_last_exercise_of_user(user_email, exercise_name):
 
                   
         c.execute("SELECT * FROM EXERCISE_HISTORY WHERE User_email = %s and Exercise_name = %s and Date_Time=(SELECT MAX(Date_Time) FROM EXERCISE_HISTORY WHERE User_email = %s and Exercise_name = %s)", [user_email, exercise_name, user_email, exercise_name])
+        fetched = c.fetchall()
+        c.close()
+        conn.close()
+        return jsonify(fetched[0])
+    except Exception as e:
+        return str(e)
+
+
+
+
+@app.route('/get_exercise_types_stats_of_user', methods=['POST'])
+def get_exercise_types_stats_of_user():
+    try:
+        user_email = request.form['User_email']
+        conn = MySQLdb.connect(host='localhost', user='muscle', password='some_pass')
+        c = conn.cursor(MySQLdb.cursors.DictCursor)
+        c.execute('USE muscle2')                  
+        c.execute("SELECT count(ID), Kind FROM EXERCISE_HISTORY as eh join EXERCISE as e on e.Name=eh.Exercise_name WHERE eh.User_email = %s GROUP BY Kind;", [user_email])
         fetched = c.fetchall()
         c.close()
         conn.close()
@@ -710,43 +724,67 @@ def get_muscle_groups():
     except Exception as e:
         return str(e)
 
+@app.route('/get_weight_history', methods=['POST'])
+def get_weight_history():
+	try:
+		user_email = request.form['user_email']
+		conn = MySQLdb.connect(host='localhost', user='muscle', password='some_pass')
+		c = conn.cursor(MySQLdb.cursors.DictCursor)
+		c.execute('USE muscle2')
+		c.execute("SELECT * FROM USER_WEIGHT_HISTORY WHERE User_email = %s", [user_email])
+		fetched = c.fetchall()
+		c.close()
+		conn.close()
+		return jsonify(fetched)
+	except Exception as e:
+		return str(e)
+
 #####################
 ## DATA PROCESSING ##
 #####################
 
-def exerciseAverages(user_id, exercise_name, weight, repetitions):
+@app.route('/get_expectedExerciseResult', methods=['POST'])
+def get_expectedExerciseResult():
 	try:
+		user_email = request.form['user_email']
+		exercise_name = request.form['exercise_name']
+		weight = request.form['weight']
+		repetitions = request.form['repetitions']
+		set_number = request.form['set_number']
+		
 		conn = MySQLdb.connect(host='localhost', user='muscle', password='some_pass', database='muscle')
 		c = conn.cursor(MySQLdb.cursors.DictCursor)
 
 		c.execute('USE muscle2')
 		c.execute("""
 			SELECT Gender, Weight 
-			FROM (User WHERE Email = '%s') AS u
-			JOIN User_History
-			ON u.Email = User_history.User
-			ORDER BY Date DESC
-			""", (user_id))
+			FROM (SELECT * FROM USER WHERE Email = %s) AS u
+			JOIN EXERCISE_HISTORY
+			ON u.Email = EXERCISE_HISTORY.User_email
+			ORDER BY Date_time DESC""", [user_email])
 
 		r = c.fetchall()[0]
-		return r
 		gender, u_weight = r["Gender"], r["Weight"]
 		weight_min = u_weight - 5
 		weight_max = u_weight + 5
 			
 		c.execute("""
-			SELECT Objective
-			FROM (SELECT * FROM USER WHERE Email = %s) AS u
-			JOIN PLAN
-			ON u.Plan = PLAN.ID""", (user_id))
+			SELECT Objective 
+			FROM (SELECT * FROM USER WHERE Email = %s) AS u 
+			JOIN PLAN 
+			ON u.Plan = PLAN.ID""", [user_email])
 
 		objective = c.fetchall()[0]['Objective']
 		
 		c.execute("""
-			SELECT AVG(Intensity) AS avg_int, AVG(Intensity_deviation) AS int_dev
+			SELECT AVG(Intensity) AS avg_int, AVG(Intensity_deviation) AS avg_deviation, AVG(Resting_Time) as avg_rest
 			FROM USER 
-			WHERE Gender = %s AND Exercise_name = %s AND User_weight BETWEEN %s AND %s AND Weight = %s AND Repetitions = %s
-			""", (gender, exercise_name, weight_min, weight_max, weight, repetitions))
+			JOIN (SELECT User_email, Intensity, Intensity_deviation, Resting_Time
+				FROM (SELECT * FROM SETS WHERE Repetitions = %s AND Weight = %s AND Set_number = %s) AS s
+				JOIN (SELECT * FROM EXERCISE_HISTORY WHERE Exercise_name = %s) AS e_h
+				ON s.Exercise_history_id = e_h.ID) AS temp
+			ON USER.Email = temp.User_email
+			WHERE Gender = %s AND Weight BETWEEN %s AND %s""", [repetitions, weight, set_number, exercise_name, gender, weight_min, weight_max])
 		
 		r = c.fetchall()
 		c.close()
@@ -757,8 +795,11 @@ def exerciseAverages(user_id, exercise_name, weight, repetitions):
 	except Exception as e:
 		return str(e)
 
-def recommendNextExercise(user_id):
+
+@app.route('/get_recommendedExercises', methods=['POST'])
+def get_recommendedExercises():
 	try:
+		user_email = request.form['user_email']
 		conn = MySQLdb.connect(host='localhost', user='muscle', password='some_pass', database='muscle')
 		c = conn.cursor(MySQLdb.cursors.DictCursor)
 		
@@ -770,14 +811,14 @@ def recommendNextExercise(user_id):
 					FROM USER
 					JOIN (SELECT * 
 						FROM EXERCISE_HISTORY
-						WHERE Exercise_name IN (Select Exercise_name FROM EXERCISE_HISTORY WHERE User = %s) ) AS e_h
-						ON USER.Email = e_h.User) AS u
-				JOIN ( SELECT Exercise_name
+						WHERE Exercise_name IN (Select Exercise_name FROM EXERCISE_HISTORY WHERE User_email = %s) ) AS e_h
+						ON USER.Email = e_h.User_email) AS u
+				JOIN ( SELECT Exercise_name, User_email
 					FROM EXERCISE_HISTORY ) AS e
-				ON u.Email = e.User )
+				ON u.Email = e.User_email ) AS temp
 			GROUP BY Exercise_name
 			ORDER BY count DESC
-			""", (user_id))
+			""", [user_email])
 		r = c.fetchall()
 		c.close()
 		conn.close()
@@ -786,8 +827,10 @@ def recommendNextExercise(user_id):
 	except Exception as e:
 		return str(e)
 
-def recommendNextPlan(user_id):
+@app.route('/get_recommendedPlan', methods=['POST'])
+def get_recommendedPlans():
 	try:
+		user_email = request.form['user_email']
 		conn = MySQLdb.connect(host='localhost', user='muscle', password='some_pass', database='muscle')
 		c = conn.cursor(MySQLdb.cursors.DictCursor)
 		
@@ -799,14 +842,13 @@ def recommendNextPlan(user_id):
 					FROM USER
 					JOIN (SELECT * 
 						FROM EXERCISE_HISTORY
-						WHERE Exercise_name IN (Select Exercise_name FROM EXERCISE_HISTORY WHERE User = %s) ) AS e_h
-					ON USER.Email = e_h.User) AS u
-				JOIN ( SELECT ID
+						WHERE Exercise_name IN (Select Exercise_name FROM EXERCISE_HISTORY WHERE User_email = %s) ) AS e_h
+					ON USER.Email = e_h.User_email) AS u
+				JOIN ( SELECT ID, User_email
 					FROM PLAN_HISTORY ) AS e
-				ON u.Email = e.User )
-			GROUP BY Exercise_name
-			ORDER BY count DESC
-			""", (user_id))
+				ON u.Email = e.User_email ) AS temp
+			GROUP BY ID
+			ORDER BY count DESC""", [user_email])
 		r = c.fetchall()
 		c.close()
 		conn.close()
