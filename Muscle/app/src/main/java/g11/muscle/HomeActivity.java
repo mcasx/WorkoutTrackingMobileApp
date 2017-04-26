@@ -14,7 +14,8 @@ import android.support.v4.app.FragmentManager;
 
 import android.net.Uri;
 
-public class HomeActivity extends AppCompatActivity implements PickExerciseFragment.OnFragmentInteractionListener{
+public class HomeActivity extends AppCompatActivity implements PickExerciseFragment.OnFragmentInteractionListener,
+        ExerciseHistoryFragment.OnFragmentInteractionListener{
 
     private TextView mTextMessage;
     private static String email;
@@ -34,6 +35,7 @@ public class HomeActivity extends AppCompatActivity implements PickExerciseFragm
                     return true;
                 case R.id.navigation_exerciseHistory:
                     mTextMessage.setText(R.string.title_exerciseList);
+                    switchToFragmentExerciseHistory();
                     return true;
                 case R.id.navigation_myPlan:
                     mTextMessage.setText(R.string.title_myPlan);
@@ -68,5 +70,11 @@ public class HomeActivity extends AppCompatActivity implements PickExerciseFragm
     public void switchToFragmentPickExercise() {
         FragmentManager manager = getSupportFragmentManager();
         manager.beginTransaction().replace(R.id.content, new PickExerciseFragment()).commit();
+    }
+
+    // Method used to switch to Exercise History Fragment
+    public void switchToFragmentExerciseHistory() {
+        FragmentManager manager = getSupportFragmentManager();
+        manager.beginTransaction().replace(R.id.content, new ExerciseHistoryFragment()).commit();
     }
 }

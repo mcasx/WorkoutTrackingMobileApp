@@ -11,7 +11,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.GridView;
+import android.widget.ListView;
 
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
@@ -27,33 +27,31 @@ import org.json.JSONObject;
 /**
  * A simple {@link Fragment} subclass.
  * Activities that contain this fragment must implement the
- * {@link PickExerciseFragment.OnFragmentInteractionListener} interface
+ * {@link ExerciseHistoryFragment.OnFragmentInteractionListener} interface
  * to handle interaction events.
- * Use the {@link PickExerciseFragment#newInstance} factory method to
+ * Use the {@link ExerciseHistoryFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class PickExerciseFragment extends Fragment {
+public class ExerciseHistoryFragment extends Fragment {
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
-    private static final String TAG = "PickExerciseFragment";
+    private static final String TAG = "ExerciseHistoryFragment";
 
     // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
     private String email;
 
-
-    private String[] groups;
     private RequestQueue queue;
 
     //GUI
-    private GridView groupsView;
+    private ListView recent_historyView;
 
     private OnFragmentInteractionListener mListener;
 
-    public PickExerciseFragment() {
+    public ExerciseHistoryFragment() {
         // Required empty public constructor
     }
 
@@ -63,11 +61,11 @@ public class PickExerciseFragment extends Fragment {
      *
      * @param param1 Parameter 1.
      * @param param2 Parameter 2.
-     * @return A new instance of fragment PickExerciseFragment.
+     * @return A new instance of fragment ExerciseHistoryFragment.
      */
     // TODO: Rename and change types and number of parameters
-    public static PickExerciseFragment newInstance(String param1, String param2) {
-        PickExerciseFragment fragment = new PickExerciseFragment();
+    public static ExerciseHistoryFragment newInstance(String param1, String param2) {
+        ExerciseHistoryFragment fragment = new ExerciseHistoryFragment();
         Bundle args = new Bundle();
         args.putString(ARG_PARAM1, param1);
         args.putString(ARG_PARAM2, param2);
@@ -95,11 +93,17 @@ public class PickExerciseFragment extends Fragment {
         // Fragment View
         View fView = inflater.inflate(R.layout.fragment_pick_exercise, container, false);
         //GUI elements
-        groupsView  = (GridView) fView.findViewById(R.id.groups);
-        //UI Static elements (dynamic should be defined in start method)
-        createMuscleGroupGrid();
+        recent_historyView = (ListView) fView.findViewById(R.id.recent_history);
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_pick_exercise, container, false);
+        return inflater.inflate(R.layout.fragment_exercise_history, container, false);
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+
+        //UI Dynamic elements
+        createExerciseHistoryList();
     }
 
     @Override
@@ -147,32 +151,33 @@ public class PickExerciseFragment extends Fragment {
         void onFragmentInteraction(Uri uri);
     }
 
-    private void createMuscleGroupGrid() {
-        String url = "http://138.68.158.127/get_muscle_groups";
-
-        //Create the request
+    private void createExerciseHistoryList(){
+        //Create the exercise history request
+        String url = "http://138.68.158.127/get_exercise_history_of_user/" + email;
         JsonArrayRequest jsonarrayRequest = new JsonArrayRequest(url,
                 new Response.Listener<JSONArray>() {
                     @Override
                     public void onResponse(JSONArray response) {
                         //From the response create the history array
-                        groups = new String[response.length()];
+                        String[] history = new String[response.length()];
                         try {
                             for (int i = 0; i < response.length(); i++) {
-                                groups[i] = new JSONObject(response.getString(i)).getString("Name");
+                                history[i] = new JSONObject(response.getString(i)).getString("Exercise_name");
                             }
                         } catch (JSONException je){
                             Log.e(TAG, je.toString());
                         }
 
-                        // Set the listeners on the groups items
-                        ArrayAdapter<String> adapter = new ArrayAdapter<>(getActivity(), android.R.layout.simple_list_item_1, groups);
-                        groupsView.setAdapter(adapter);
-                        groupsView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                        // Define the groupView adapter
+                        ArrayAdapter<String> adapter = new ArrayAdapter<>(getActivity(), android.R.layout.simple_list_item_1, history);
+                        recent_historyView.setAdapter(adapter);
+                        // Set the listeners on the list items
+                        recent_historyView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                             public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
                                 //Go to exercise page
-                                Intent intent = new Intent(getActivity(), GroupExercisesActivity.class);
-                                intent.putExtra("group", groups[position]);
+                                String exercise_name = (String) parent.getAdapter().getItem(position);
+                                Intent intent = new Intent(getActivity(), ExerciseActivity.class);
+                                intent.putExtra("exercise_name", exercise_name);
                                 intent.putExtra("email", email);
                                 startActivity(intent);
                             }

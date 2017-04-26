@@ -2,20 +2,19 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="g11.muscle.PickExerciseFragment">
-
-    <!-- TODO: Update blank fragment layout -->
-    <GridView
-        android:id="@+id/groups"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+    tools:context="g11.muscle.ExerciseHistoryFragment">
 
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Groups of Exercises"
+        android:text="Recent Exercises"
         android:textAlignment="center"
         android:textAppearance="@style/Base.TextAppearance.AppCompat.Title"
         tools:ignore="HardcodedText" />
+
+    <ListView
+        android:id="@+id/recent_history"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
 
 </FrameLayout>
