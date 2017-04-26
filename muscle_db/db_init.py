@@ -56,15 +56,16 @@ c.execute('''CREATE TABLE EXERCISE(
 )
 
 c.execute('''CREATE TABLE TRAINING_EXERCISE(
-    Plan_id INTEGER,
+    ID Integer AUTO_INCREMENT,
+    Training_id INTEGER,
     Exercise_name VARCHAR(128),
     Sets TINYINT UNSIGNED NOT NULL,
     Repetitions TINYINT UNSIGNED NOT NULL,
     Resting_time TIME,
     Weight TINYINT UNSIGNED,
-    FOREIGN KEY(Plan_id) REFERENCES PLAN(ID),
+    FOREIGN KEY(Training_id) REFERENCES TRAINING(ID),
     FOREIGN KEY(Exercise_name) REFERENCES EXERCISE(Name),
-    PRIMARY KEY(Plan_id, Exercise_name)
+    PRIMARY KEY(ID)
     )'''
 )
 
@@ -118,6 +119,16 @@ c.execute('''CREATE TABLE PLAN_HISTORY(
     Met_objective BIT NOT NULL,
     Plan_id INTEGER NOT NULL,
     User_email VARCHAR(255) NOT NULL,
+    PRIMARY KEY(ID),
+    FOREIGN KEY(Plan_id) REFERENCES PLAN(ID),
+    FOREIGN KEY(User_email) REFERENCES USER(Email)
+    )'''
+)
+
+c.execute('''CREATE TABLE USER_WEIGHT_HISTORY(
+    User_email Varchar(255),
+    Weight Integer,
+    `Date` date,
     PRIMARY KEY(ID),
     FOREIGN KEY(Plan_id) REFERENCES PLAN(ID),
     FOREIGN KEY(User_email) REFERENCES USER(Email)

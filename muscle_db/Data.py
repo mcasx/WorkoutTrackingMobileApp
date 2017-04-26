@@ -23,7 +23,7 @@ muscle_group_rows = [
 ('3', 'Abs'),
 ('4', 'Arms'),
 ('5', 'Legs'),
-('6', 'Sholders')
+('6', 'Shoulders')
 ]
 
 user_rows = [
@@ -347,7 +347,7 @@ plan_rows = [
 ('10', '60')
 ]
 
-muscles_worked_row = [
+muscles_worked_rows = [
 ('Back', 'Back Lat Pulldowns', '1'),
 ('Back', 'Front Lat Pulldowns', '1'),
 ('Back', 'Front Lat Pullover', '1'),
@@ -362,7 +362,46 @@ muscles_worked_row = [
 ('Legs', 'Leg curl', '1'),
 ('Legs', 'Leg extension', '1'),
 ('Legs', 'Outer Thigh', '1'),
+('Shoulders', 'Bent Over Low-Pulley Side Lateral', '1'),
+('Shoulders', 'External Rotation', '1'),
 ('Triceps', 'Chest Press', '0'),
 ('Triceps', 'Triceps Extension From High Pulley', '1'),
 ('Triceps', 'Triceps pushdown', '1')
+]
+
+training_rows = [
+('1', 'Legs and Shoulders', '1'),
+('2', 'Chest and Triceps', '1'),
+('3', 'Back and Biceps', '1'),
+('4', 'Chest and Triceps', '2'),
+('5', 'Back and Biceps', '2'),
+('6', 'Legs', '2'),
+('7', 'Shoulders', '2'),
+('8', 'Chest and Triceps', '3'),
+('9', 'Back and Biceps', '3'),
+('10', 'Legs', '3'),
+('11', 'Shoulders', '3'),
+('12', 'Back, Shoulders and Biceps', '4'),
+('13', 'Chest, Legs and Triceps', '4'),
+('14', 'Legs and Shoulders', '5'),
+('15', 'Chest and Triceps', '5'),
+('16', 'Back and Biceps', '5'),
+('17', 'Legs and Shoulders', '6'),
+('18', 'Chest and Triceps', '6'),
+('19', 'Back and Biceps', '6'),
+('20', 'Chest and Triceps', '7'),
+('21', 'Back and Biceps', '7'),
+('22', 'Legs', '7'),
+('23', 'Shoulders', '7'),
+('24', 'Legs and Shoulders', '8'),
+('25', 'Chest and Triceps', '8'),
+('26', 'Back and Biceps', '8'),
+('27', 'Chest and Triceps', '9'),
+('28', 'Back and Biceps', '9'),
+('29', 'Legs', '9'),
+('30', 'Shoulders', '9'),
+('31', 'Chest and Triceps', '10'),
+('32', 'Back and Biceps', '10'),
+('33', 'Legs', '10'),
+('34', 'Shoulders', '10')
 ]

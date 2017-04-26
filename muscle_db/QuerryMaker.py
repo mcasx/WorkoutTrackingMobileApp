@@ -2,6 +2,7 @@ from Data import *
 import random
 from random import randint
 from passlib.hash import pbkdf2_sha256
+from functools import reduce
 
 domains = [ "hotmail.com", "gmail.com", "aol.com", "mail.com" , "mail.kz", "yahoo.com"]
 letters = ["a", "b", "c", "d","e", "f", "g", "h", "i", "j", "k", "l"]
@@ -96,19 +97,55 @@ for row in exercise_history_rows:
 
 
 for row in plan_rows:
-    rand = randint(2,4)
+#    rand = randint(2,4)
+#
+#    if rand == 2:
+#        print("INSERT INTO TRAINING (Name, Plan_id) VALUES ('Back, Shoulders and Biceps', {});".format(row[0]))
+#        print("INSERT INTO TRAINING (Name, Plan_id) VALUES ('Chest, Legs and Triceps', {});".format(row[0]))
+#
+#    elif rand == 3:
+#        print("INSERT INTO TRAINING (Name, Plan_id) VALUES ('Legs and Shoulders', {});".format(row[0]))
+#        print("INSERT INTO TRAINING (Name, Plan_id) VALUES ('Chest and Triceps', {});".format(row[0]))
+#        print("INSERT INTO TRAINING (Name, Plan_id) VALUES ('Back and Biceps', {});".format(row[0]))
+#
+#    elif rand == 4:
+#        print("INSERT INTO TRAINING (Name, Plan_id) VALUES ('Chest and Triceps', {});".format(row[0]))
+#        print("INSERT INTO TRAINING (Name, Plan_id) VALUES ('Back and Biceps', {});".format(row[0]))
+#        print("INSERT INTO TRAINING (Name, Plan_id) VALUES ('Legs', {});".format(row[0]))
+#        print("INSERT INTO TRAINING (Name, Plan_id) VALUES ('Shoulders', {});".format(row[0]))
+    pass
 
-    if rand == 2:
-        print("INSERT INTO TRAINING (Name, Plan_id) VALUES ('Back, Sholders and Biceps', {});".format(row[0]))
-        print("INSERT INTO TRAINING (Name, Plan_id) VALUES ('Chest, Legs and Triceps', {});".format(row[0]))
+for row in training_rows:
 
-    elif rand == 3:
-        print("INSERT INTO TRAINING (Name, Plan_id) VALUES ('Legs and Shoulders', {});".format(row[0]))
-        print("INSERT INTO TRAINING (Name, Plan_id) VALUES ('Chest and Triceps', {});".format(row[0]))
-        print("INSERT INTO TRAINING (Name, Plan_id) VALUES ('Back and Biceps', {});".format(row[0]))
+#    muscles_worked = [x.strip() for x in reduce(lambda x,y: x+y, [y.split('and') for y in row[1].split(',')])]
+#
+#    resting_times = ["00:00:15", "00:00:30", "00:00:45", "00:01:00"]
+#
+#
+#    for muscle in muscles_worked:
+#        for i in range(0, randint(2,4)):
+#            exercise = None
+#            while(exercise == None):
+#                r = randint(0, len(muscles_worked_rows) - 1)
+#                if (muscles_worked_rows[r][0] == muscle):
+#                    exercise = muscles_worked_rows[r][1]
+#
+#
+#            print("INSERT INTO TRAINING_EXERCISE (Training_id, Exercise_name, Sets, Repetitions, Resting_Time, Weight) VALUES ({}, '{}', {}, {}, '{}', {});".format(\
+#            row[0],
+#            exercise,
+#            randint(2,5),
+#            randint(6,15),
+#            resting_times[randint(0, 3)],
+#            abs(int(random.gauss(6, 1))*5)
+#            ))
+    pass
 
-    elif rand == 4:
-        print("INSERT INTO TRAINING (Name, Plan_id) VALUES ('Chest and Triceps', {});".format(row[0]))
-        print("INSERT INTO TRAINING (Name, Plan_id) VALUES ('Back and Biceps', {});".format(row[0]))
-        print("INSERT INTO TRAINING (Name, Plan_id) VALUES ('Legs', {});".format(row[0]))
-        print("INSERT INTO TRAINING (Name, Plan_id) VALUES ('Shoulders', {});".format(row[0]))
+for row in user_rows:
+    for i in range(0, randint(50,250)):
+        print("INSERT INTO EXERCISE_HISTORY (Date_Time, Exercise_name, User_email, Set_amount, Average_intensity) Values ('{}', '{}', '{}', {}, {});".format(\
+        str(randint(2014, 2017)) + "-" + str(randint(1, 12)) + "-" + str(randint(1,27)) + " " +  str(randint(0, 24)) + ":" + str(randint(0, 60)) + ":" + str(randint(0, 24)),\
+        str(exercise_rows[randint(0, len(exercise_rows) - 1)][0]),
+        row[0],
+        randint(1,5),
+        random.gauss(1, 0.3)))
