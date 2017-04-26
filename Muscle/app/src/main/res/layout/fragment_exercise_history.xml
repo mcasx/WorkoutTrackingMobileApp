@@ -12,7 +12,7 @@
         android:textAppearance="@style/Base.TextAppearance.AppCompat.Title"
         tools:ignore="HardcodedText" />
 
-    <ListView
+    <GridView
         android:id="@+id/recent_history"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />

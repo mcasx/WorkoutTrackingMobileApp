@@ -18,9 +18,6 @@ public class HomeActivity extends AppCompatActivity implements PickExerciseFragm
         ExerciseHistoryFragment.OnFragmentInteractionListener, HomeFragment.OnFragmentInteractionListener
         ,ProfileFragment.OnFragmentInteractionListener,MyPlanFragment.OnFragmentInteractionListener{
 
-    private TextView mTextMessage;
-    private static String email;
-
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
             = new BottomNavigationView.OnNavigationItemSelectedListener() {
 
@@ -28,23 +25,18 @@ public class HomeActivity extends AppCompatActivity implements PickExerciseFragm
         public boolean onNavigationItemSelected(@NonNull MenuItem item) {
             switch (item.getItemId()) {
                 case R.id.navigation_home:
-                    mTextMessage.setText(R.string.title_home);
                     switchToFragmentHome();
                     return true;
                 case R.id.navigation_exerciseList:
-                    mTextMessage.setText(R.string.title_exerciseList);
                     switchToFragmentPickExercise();
                     return true;
                 case R.id.navigation_exerciseHistory:
-                    mTextMessage.setText(R.string.title_exerciseList);
                     switchToFragmentExerciseHistory();
                     return true;
                 case R.id.navigation_myPlan:
-                    mTextMessage.setText(R.string.title_myPlan);
                     switchToFragmentMyPlan();
                     return true;
                 case R.id.navigation_myProfile:
-                    mTextMessage.setText(R.string.title_myProfile);
                     switchToFragmentProfile();
                     return true;
             }
@@ -63,9 +55,6 @@ public class HomeActivity extends AppCompatActivity implements PickExerciseFragm
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
 
-        email = getIntent().getStringExtra("email");
-
-        mTextMessage = (TextView) findViewById(R.id.message);
         BottomNavigationView navigation = (BottomNavigationView) findViewById(R.id.navigation);
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
     }
@@ -75,7 +64,6 @@ public class HomeActivity extends AppCompatActivity implements PickExerciseFragm
         super.onStart();
 
         // Start in Home Fragment
-        mTextMessage.setText(R.string.title_home);
         switchToFragmentHome();
     }
 

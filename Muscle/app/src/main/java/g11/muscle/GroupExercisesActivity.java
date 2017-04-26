@@ -15,11 +15,15 @@ import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
+import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class GroupExercisesActivity extends AppCompatActivity {
 
@@ -27,7 +31,6 @@ public class GroupExercisesActivity extends AppCompatActivity {
     private String email;
     private TextView titleView;
     private ListView exercisesView;
-    private RequestQueue queue;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,29 +47,36 @@ public class GroupExercisesActivity extends AppCompatActivity {
 
         //Get muscle group and email
         Intent intent = getIntent();
-        String group = intent.getStringExtra("group");
+        final String group = intent.getStringExtra("group");
         email = intent.getStringExtra("email");
 
         // Define title
         titleView.setText(group);
 
-        // Create request queue
-        queue = Volley.newRequestQueue(this);
-
         //Create the list items through a request
-        String url = "http://138.68.158.127/get_exercises_by_muscle_group/" + group;
-        JsonArrayRequest jsonarrayRequest = new JsonArrayRequest(url,
-                new Response.Listener<JSONArray>() {
+        String url = "https://138.68.158.127/get_exercises_by_muscle_group";
+        StringRequest ExeListReq = new StringRequest(Request.Method.POST,url,
+                new Response.Listener<String>() {
                     @Override
-                    public void onResponse(JSONArray response) {
-                        //From the response create the list items
-                        String[] exercises = new String[response.length()];
+                    public void onResponse(String response) {
+
+                        // Initialization of exercises list
+                        String[] exercises = new String[0];
+
                         try {
-                            for (int i = 0; i < response.length(); i++) {
-                                exercises[i] = new JSONObject(response.getString(i)).getString("Exercise_name");
+                            JSONArray jsonArray = new JSONArray(response);
+                            Log.e(TAG,jsonArray.toString());
+                            //From the response create the list items
+                            exercises = new String[jsonArray.length()];
+                            try {
+                                for (int i = 0; i < jsonArray.length(); i++) {
+                                    exercises[i] = new JSONObject(jsonArray.getString(i)).getString("Exercise_name");
+                                }
+                            } catch (JSONException je){
+                                Log.e(TAG, je.toString());
                             }
-                        } catch (JSONException je){
-                            Log.e(TAG, je.toString());
+                        }catch (JSONException e2){
+                            e2.printStackTrace();
                         }
 
                         // Define the groupView adapter
@@ -93,15 +103,17 @@ public class GroupExercisesActivity extends AppCompatActivity {
                         System.out.println(error.toString());
                     }
                 }
-        );
+        ) {
+            // use params are specified here
+            @Override
+            protected Map<String, String> getParams() {
+                Map<String, String> params = new HashMap<>();
+                params.put("muscle_group", group);
+                return params;
+            }
+        };
 
         //Queue the request
-        queue.add(jsonarrayRequest);
-    }
-
-    @Override
-    protected void onStop() {
-        queue.cancelAll(this);
-        super.onStop();
+        VolleyProvider.getInstance(GroupExercisesActivity.this).addRequest(ExeListReq);
     }
 }
