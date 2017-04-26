@@ -172,14 +172,25 @@ public class FormActivity extends AppCompatActivity {
                             // Later in development (like tomorrow <- xD lol nope)
                             // it will redirect to a page where user specifies more parameters
                             // For now it takes the user to the PickExerciseActivity
-                            Intent intent = new Intent(FormActivity.this, PickExerciseActivity.class);
+                            Intent intent = new Intent(FormActivity.this, HomeActivity.class);
                             intent.putExtra("email", email);
                             startActivity(intent);
                         }
 
                         else{
-                            Log.i("TG",response);
-                            set_progressBar_visibility(View.GONE);
+
+                                AlertDialog alertDialog = new AlertDialog.Builder(FormActivity.this).create();
+                                alertDialog.setTitle("Error");
+                                // Please connect your device to the Internet and try again
+                                alertDialog.setMessage(response.toString());
+                                alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
+                                        new DialogInterface.OnClickListener() {
+                                            public void onClick(DialogInterface dialog, int which) {
+                                                dialog.dismiss();
+                                            }
+                                        });
+                                alertDialog.show();
+                                set_progressBar_visibility(View.GONE);
                         }
 
                     }

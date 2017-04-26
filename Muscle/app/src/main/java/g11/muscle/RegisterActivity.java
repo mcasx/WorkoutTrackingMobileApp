@@ -143,7 +143,7 @@ public class RegisterActivity extends AppCompatActivity {
                             intent.putExtra("email", email);
                             startActivity(intent);
                         }
-                        else if(response.equals("User Already Registered")){
+                        else if(response.equals("User already Registered")){
                             email_layout.setError("Email already in use");
                             set_progressBar_visibility(View.GONE);
                         }
