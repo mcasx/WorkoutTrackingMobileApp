@@ -105,9 +105,6 @@ public class LoginActivity extends AppCompatActivity {
         else
             password_layout.setError(null);
 
-
-        RequestQueue queue = Volley.newRequestQueue(this);
-
         String url = "https://138.68.158.127/user_login";
 
         //Create the list items through a request
