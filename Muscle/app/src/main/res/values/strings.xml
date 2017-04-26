@@ -23,15 +23,9 @@
 
     <!-- Exercise -->
     <string name="start">Start</string>
-    <string name="height_hint">Height</string>
-    <string name="weight_hint">Weight</string>
-
-    <!-- Home -->
+    <string name="height_hint">Height (cm)</string>
+    <string name="weight_hint">Weight (Kg)</string>
     <string name="title_activity_home">home</string>
-
-    <!-- Form -->
-    <string name="date_pick">Pick Date</string>
-    <string name="dob_txt">Date of Birth</string>
 
     <!-- Menu -->
     <string name="title_home">Home</string>
@@ -39,5 +33,9 @@
     <string name="title_exerciseHistory">History</string>
     <string name="title_myPlan">My Plan</string>
     <string name="title_myProfile">My Profile</string>
-    
+    <string name="title_dashboard">Dashboard</string>
+    <string name="title_notifications">Notifications</string>
+    <string name="dob_txt">Date of Birth</string>
+    <string name="date_pick">Pick Date</string>
+
 </resources>
