@@ -15,7 +15,8 @@ import android.support.v4.app.FragmentManager;
 import android.net.Uri;
 
 public class HomeActivity extends AppCompatActivity implements PickExerciseFragment.OnFragmentInteractionListener,
-        ExerciseHistoryFragment.OnFragmentInteractionListener{
+        ExerciseHistoryFragment.OnFragmentInteractionListener, HomeFragment.OnFragmentInteractionListener
+        ,ProfileFragment.OnFragmentInteractionListener,MyPlanFragment.OnFragmentInteractionListener{
 
     private TextView mTextMessage;
     private static String email;
@@ -28,6 +29,7 @@ public class HomeActivity extends AppCompatActivity implements PickExerciseFragm
             switch (item.getItemId()) {
                 case R.id.navigation_home:
                     mTextMessage.setText(R.string.title_home);
+                    switchToFragmentHome();
                     return true;
                 case R.id.navigation_exerciseList:
                     mTextMessage.setText(R.string.title_exerciseList);
@@ -39,9 +41,11 @@ public class HomeActivity extends AppCompatActivity implements PickExerciseFragm
                     return true;
                 case R.id.navigation_myPlan:
                     mTextMessage.setText(R.string.title_myPlan);
+                    switchToFragmentMyPlan();
                     return true;
                 case R.id.navigation_myProfile:
                     mTextMessage.setText(R.string.title_myProfile);
+                    switchToFragmentProfile();
                     return true;
             }
             return false;
@@ -66,6 +70,15 @@ public class HomeActivity extends AppCompatActivity implements PickExerciseFragm
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
     }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+        // Start in Home Fragment
+        mTextMessage.setText(R.string.title_home);
+        switchToFragmentHome();
+    }
+
     // Method used to switch to PickExercise Fragment
     public void switchToFragmentPickExercise() {
         FragmentManager manager = getSupportFragmentManager();
@@ -76,5 +89,23 @@ public class HomeActivity extends AppCompatActivity implements PickExerciseFragm
     public void switchToFragmentExerciseHistory() {
         FragmentManager manager = getSupportFragmentManager();
         manager.beginTransaction().replace(R.id.content, new ExerciseHistoryFragment()).commit();
+    }
+
+    // Method used to switch to Exercise History Fragment
+    public void switchToFragmentHome() {
+        FragmentManager manager = getSupportFragmentManager();
+        manager.beginTransaction().replace(R.id.content, new HomeFragment()).commit();
+    }
+
+    // Method used to switch to Exercise History Fragment
+    public void switchToFragmentMyPlan() {
+        FragmentManager manager = getSupportFragmentManager();
+        manager.beginTransaction().replace(R.id.content, new MyPlanFragment()).commit();
+    }
+
+    // Method used to switch to Exercise History Fragment
+    public void switchToFragmentProfile() {
+        FragmentManager manager = getSupportFragmentManager();
+        manager.beginTransaction().replace(R.id.content, new ProfileFragment()).commit();
     }
 }
