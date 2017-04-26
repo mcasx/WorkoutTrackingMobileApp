@@ -6,6 +6,7 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.database.sqlite.SQLiteDatabase;
 import android.provider.SyncStateContract;
 import android.support.design.widget.TextInputEditText;
 import android.support.design.widget.TextInputLayout;
@@ -28,6 +29,10 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -58,7 +63,6 @@ public class RegisterActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
-        Log.i("TG","on create");
         setContentView(R.layout.activity_register);
 
         // needed to set visibility
@@ -120,24 +124,43 @@ public class RegisterActivity extends AppCompatActivity {
 
         String addUserUrl = "/add_user";
         //Create the list items through a request
+        MuscleDbHelper dbHelper= new MuscleDbHelper(getApplicationContext());
+
+
 
         StringRequest stringRequest = new StringRequest(Request.Method.POST, baseUrl + addUserUrl,
                 new Response.Listener<String>() {
                     public void onResponse(String response){
+                        //int id;
 
+                        //JSONObject jsonObject = new JSONObject(response);
+                        //String status = (String) jsonObject.get("status");
                         if(response.equals("User added")) {
-
-                            // Intent intent = new Intent(RegisterActivity.this, FormActivity.class);
-                            // Later in development (like tomorrow) it will redirect to a page where user specifies more parameters
-                            // For now it takes the user to the PickExerciseActivity
+                            //int id = (Integer) jsonObject.get("id");
                             Intent intent = new Intent(RegisterActivity.this, FormActivity.class);
+                            //intent.putExtra("id", id);
+                            // email is kept for now
                             intent.putExtra("email", email);
                             startActivity(intent);
                         }
-                        else{
+                        else if(response.equals("User Already Registered")){
                             email_layout.setError("Email already in use");
                             set_progressBar_visibility(View.GONE);
                         }
+                        else{
+                            AlertDialog alertDialog = new AlertDialog.Builder(RegisterActivity.this).create();
+                            alertDialog.setTitle("Error");
+                            alertDialog.setMessage(response);
+                            alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
+                                    new DialogInterface.OnClickListener() {
+                                        public void onClick(DialogInterface dialog, int which) {
+                                            dialog.dismiss();
+                                        }
+                                    });
+                            alertDialog.show();
+                            set_progressBar_visibility(View.GONE);
+                        }
+
                     }
                 },
                 new Response.ErrorListener() {
@@ -273,6 +296,7 @@ public class RegisterActivity extends AppCompatActivity {
 
     public void FormIntent(View view) {
         Intent intent = new Intent(RegisterActivity.this, FormActivity.class);
+        intent.putExtra("id", 10);
         intent.putExtra("email", "ola@ua.pt");
         startActivity(intent);
     }

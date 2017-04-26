@@ -73,7 +73,6 @@ public class FormActivity extends AppCompatActivity {
     TextView viewDob;
     ImageView imgView;
     ProgressBar progressBar;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
