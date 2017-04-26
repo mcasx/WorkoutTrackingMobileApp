@@ -999,6 +999,41 @@ INSERT INTO SETS (exercise_history_id, Set_number, Repetitions, Weight, Intensit
 INSERT INTO SETS (exercise_history_id, Set_number, Repetitions, Weight, Intensity, Resting_time, Intensity_deviation) Values (199, 2, 9, 35, 1.0816437700432353, '0:1:29', 0.1772733884882847);
 INSERT INTO SETS (exercise_history_id, Set_number, Repetitions, Weight, Intensity, Resting_time, Intensity_deviation) Values (200, 1, 10, 25, 1.056976495933676, '0:1:47', 0.0027987534508511925);
 
+
+
+INSERT INTO TRAINING (Name, Plan_id) VALUES ('Legs and Shoulders', 1);
+INSERT INTO TRAINING (Name, Plan_id) VALUES ('Chest and Triceps', 1);
+INSERT INTO TRAINING (Name, Plan_id) VALUES ('Back and Biceps', 1);
+INSERT INTO TRAINING (Name, Plan_id) VALUES ('Chest and Triceps', 2);
+INSERT INTO TRAINING (Name, Plan_id) VALUES ('Back and Biceps', 2);
+INSERT INTO TRAINING (Name, Plan_id) VALUES ('Legs', 2);
+INSERT INTO TRAINING (Name, Plan_id) VALUES ('Shoulders', 2);
+INSERT INTO TRAINING (Name, Plan_id) VALUES ('Chest and Triceps', 3);
+INSERT INTO TRAINING (Name, Plan_id) VALUES ('Back and Biceps', 3);
+INSERT INTO TRAINING (Name, Plan_id) VALUES ('Legs', 3);
+INSERT INTO TRAINING (Name, Plan_id) VALUES ('Shoulders', 3);
+INSERT INTO TRAINING (Name, Plan_id) VALUES ('Back, Sholders and Biceps', 4);
+INSERT INTO TRAINING (Name, Plan_id) VALUES ('Chest, Legs and Triceps', 4);
+INSERT INTO TRAINING (Name, Plan_id) VALUES ('Legs and Shoulders', 5);
+INSERT INTO TRAINING (Name, Plan_id) VALUES ('Chest and Triceps', 5);
+INSERT INTO TRAINING (Name, Plan_id) VALUES ('Back and Biceps', 5);
+INSERT INTO TRAINING (Name, Plan_id) VALUES ('Legs and Shoulders', 6);
+INSERT INTO TRAINING (Name, Plan_id) VALUES ('Chest and Triceps', 6);
+INSERT INTO TRAINING (Name, Plan_id) VALUES ('Back and Biceps', 6);
+INSERT INTO TRAINING (Name, Plan_id) VALUES ('Chest and Triceps', 7);
+INSERT INTO TRAINING (Name, Plan_id) VALUES ('Back and Biceps', 7);
+INSERT INTO TRAINING (Name, Plan_id) VALUES ('Legs', 7);
+INSERT INTO TRAINING (Name, Plan_id) VALUES ('Shoulders', 7);
+INSERT INTO TRAINING (Name, Plan_id) VALUES ('Legs and Shoulders', 8);
+INSERT INTO TRAINING (Name, Plan_id) VALUES ('Chest and Triceps', 8);
+INSERT INTO TRAINING (Name, Plan_id) VALUES ('Back and Biceps', 8);
+INSERT INTO TRAINING (Name, Plan_id) VALUES ('Chest and Triceps', 9);
+INSERT INTO TRAINING (Name, Plan_id) VALUES ('Back and Biceps', 9);
+INSERT INTO TRAINING (Name, Plan_id) VALUES ('Legs', 9);
+INSERT INTO TRAINING (Name, Plan_id) VALUES ('Shoulders', 9);
+INSERT INTO TRAINING (Name, Plan_id) VALUES ('Chest and Triceps', 10);
+INSERT INTO TRAINING (Name, Plan_id) VALUES ('Back and Biceps', 10);
+INSERT INTO TRAINING (Name, Plan_id) VALUES ('Legs', 10);
+INSERT INTO TRAINING (Name, Plan_id) VALUES ('Shoulders', 10);
+
 */
-
-

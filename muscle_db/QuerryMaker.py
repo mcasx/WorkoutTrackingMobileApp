@@ -93,3 +93,22 @@ for row in exercise_history_rows:
 #        abs(random.gauss(1, 0.25)),
 #        str(randint(0, 0)) + ":" + str(randint(0, 1)) + ":" + str(randint(0, 50)),
 #        random.gauss(0.0, 0.1)))
+
+
+for row in plan_rows:
+    rand = randint(2,4)
+
+    if rand == 2:
+        print("INSERT INTO TRAINING (Name, Plan_id) VALUES ('Back, Sholders and Biceps', {});".format(row[0]))
+        print("INSERT INTO TRAINING (Name, Plan_id) VALUES ('Chest, Legs and Triceps', {});".format(row[0]))
+
+    elif rand == 3:
+        print("INSERT INTO TRAINING (Name, Plan_id) VALUES ('Legs and Shoulders', {});".format(row[0]))
+        print("INSERT INTO TRAINING (Name, Plan_id) VALUES ('Chest and Triceps', {});".format(row[0]))
+        print("INSERT INTO TRAINING (Name, Plan_id) VALUES ('Back and Biceps', {});".format(row[0]))
+
+    elif rand == 4:
+        print("INSERT INTO TRAINING (Name, Plan_id) VALUES ('Chest and Triceps', {});".format(row[0]))
+        print("INSERT INTO TRAINING (Name, Plan_id) VALUES ('Back and Biceps', {});".format(row[0]))
+        print("INSERT INTO TRAINING (Name, Plan_id) VALUES ('Legs', {});".format(row[0]))
+        print("INSERT INTO TRAINING (Name, Plan_id) VALUES ('Shoulders', {});".format(row[0]))

@@ -12,7 +12,9 @@ exercise_rows = [
 ('Overhead Biceps Curl', 'overhead_biceps_curl.png', 'Instructions:\n 1. Attach the straight bar to the high pulley.\n 2. Sit facing the machine and lock your knees under the knee hold-down pads.\n 3. Grab the straight bar with an underhand grip.\n 4. Concentrate on keeping your upper arm stationary while curling the straight bar behind your head.\n 5. Return slowly', 'Strenght'),
 ('Seated cable row', 'seated_cable_row.png', 'Instructions:\n 1. Stand facing the machine, and adjust the upper roller pads to hit just above your knees.\n 2. Hook one foot under lower roller pad, and grip the press arm for balance.\n 3. Curl your leg upward, and hold your position momentarily.\n 4. Slowly return to the starting position', 'Strenght'),
 ('Triceps Extension From High Pulley', 'triceps_extension_from_high_pulley.png', 'Instructions:\n 1. Attach the straight bar to the high pulley.\n 2. Sit in the seat leaning slightly forward and grab the straight bar with an overhand grip.\n 3. Try to hold your upper arm locked into a horizontal position while extending your lower arm at the elbow.\n 4. Return slowly.', 'Strenght'),
-('Triceps pushdown', 'triceps_pushdown.png', 'Instructions:\n 1. Attach the easy curl bar to the high pulley.\n 2. Stand facing towards the machine.\n 3. Grip the bar with your hands 4 to 6 inch apart, palms facing forward.\n 4. Bring the bar to chest height. Keep your arms tight against your body, and push the bar down slowly.\n 5. Slowly return to the starting position.', 'Strenght')
+('Triceps pushdown', 'triceps_pushdown.png', 'Instructions:\n 1. Attach the easy curl bar to the high pulley.\n 2. Stand facing towards the machine.\n 3. Grip the bar with your hands 4 to 6 inch apart, palms facing forward.\n 4. Bring the bar to chest height. Keep your arms tight against your body, and push the bar down slowly.\n 5. Slowly return to the starting position.', 'Strenght'),
+('Bent Over Low-Pulley Side Lateral', 'bent_over_low-pulley_side_lateral.jpg', 'Instruction:\\n 1. Select a weight and hold the handle of the low pulley with your right hand. \\n2. Bend at the waist until your torso is nearly parallel to the floor. Your legs should be slightly bent with your left hand placed on your lower left thigh. Your right arm should be hanging from your shoulder in front of you and with a slight bend at the elbow. This will be your starting position. \\n3. Raise your right arm, elbow slightly bent, to the side until the arm is parallel to the floor and in line with your right ear. Breathe out as you perform this step.\\n4. Slowly lower the weight back to the starting position as you breathe in.\\n5. Repeat for the recommended amount of repetitions and repeat the movement with the other arm.', 'Strenght'),
+('External Rotation', 'external_rotation.jpg', 'Choke the band around a post. The band should be at the same height as your elbow. Stand with your left side to the band a couple of feet away.\nGrasp the end of the band with your right hand, and keep your elbow pressed firmly to your side. We recommend you hold a pad or foam roll in place with your elbow to keep it firmly in position.\nWith your upper arm in position, your elbow should be flexed to 90 degrees with your hand reaching across the front of your torso. This will be your starting position.\nExecute the movement by rotating your arm in a backhand motion, keeping your elbow in place.\nContinue as far as you are able, pause, and then return to the starting position.', 'Strenght')
 ]
 
 muscle_group_rows = [
@@ -20,7 +22,8 @@ muscle_group_rows = [
 ('2', 'Back'),
 ('3', 'Abs'),
 ('4', 'Arms'),
-('5', 'Legs')
+('5', 'Legs'),
+('6', 'Sholders')
 ]
 
 user_rows = [
@@ -328,4 +331,38 @@ exercise_history_rows = [
 ('198', '1952-03-03 23:11:02', 'Butterfly', 'ola@ua.pt', '1.4', '2'),
 ('199', '1953-01-17 08:18:10', 'Seated cable row', 'ola@ua.pt', '0.7', '2'),
 ('200', '0000-00-00 00:00:00', 'Outer Thigh', 'ola@ua.pt', '0.9', '1')
+]
+
+
+plan_rows = [
+('1', '65'),
+('2', '113'),
+('3', '65'),
+('4', '86'),
+('5', '60'),
+('6', '80'),
+('7', '82'),
+('8', '66'),
+('9', '120'),
+('10', '60')
+]
+
+muscles_worked_row = [
+('Back', 'Back Lat Pulldowns', '1'),
+('Back', 'Front Lat Pulldowns', '1'),
+('Back', 'Front Lat Pullover', '1'),
+('Back', 'Seated cable row', '1'),
+('Biceps', 'Front Lat Pulldowns', '0'),
+('Biceps', 'Overhead Biceps Curl', '1'),
+('Biceps', 'Seated cable row', '0'),
+('Chest', 'Butterfly', '1'),
+('Chest', 'Chest Press', '1'),
+('Legs', 'Glute Kick', '1'),
+('Legs', 'Inner Thigh', '1'),
+('Legs', 'Leg curl', '1'),
+('Legs', 'Leg extension', '1'),
+('Legs', 'Outer Thigh', '1'),
+('Triceps', 'Chest Press', '0'),
+('Triceps', 'Triceps Extension From High Pulley', '1'),
+('Triceps', 'Triceps pushdown', '1')
 ]

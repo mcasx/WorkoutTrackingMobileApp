@@ -11,9 +11,9 @@ if confirmation in ('n','N'):
 
 conn = MySQLdb.connect(host='localhost', user='muscle', password='some_pass')
 c = conn.cursor()
-c.execute('DROP DATABASE IF EXISTS muscle')
-c.execute('CREATE DATABASE muscle')
-c.execute('USE muscle')
+c.execute('DROP DATABASE IF EXISTS muscle2')
+c.execute('CREATE DATABASE muscle2')
+c.execute('USE muscle2')
 
 c.execute('''CREATE TABLE PLAN(
     ID INTEGER AUTO_INCREMENT,
