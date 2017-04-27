@@ -9,11 +9,6 @@
         android:title="@string/title_home"/>
 
     <item
-        android:id="@+id/navigation_exerciseList"
-        android:icon="@drawable/ic_exercise_list"
-        android:title="@string/title_exerciseList"/>
-
-    <item
         android:id="@+id/navigation_myPlan"
         android:icon="@drawable/ic_my_plan"
         android:title="@string/title_myPlan" />
@@ -24,8 +19,12 @@
         android:title="@string/title_exerciseHistory" />
 
     <item
-        android:id="@+id/navigation_myProfile"
-        android:icon="@drawable/ic_profile"
-        android:title="@string/title_myProfile" />
+        android:id="@+id/navigation_Feed"
+        android:icon="@drawable/ic_feed"
+        android:title="@string/title_Feed" />
 
+    <item
+        android:id="@+id/navigation_exerciseList"
+        android:icon="@drawable/ic_exercise_list"
+        android:title="@string/title_exerciseList"/>
 </menu>

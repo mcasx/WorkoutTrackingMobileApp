@@ -18,7 +18,7 @@ import android.net.Uri;
 
 public class HomeActivity extends AppCompatActivity implements PickExerciseFragment.OnFragmentInteractionListener,
         ExerciseHistoryFragment.OnFragmentInteractionListener, HomeFragment.OnFragmentInteractionListener
-        ,ProfileFragment.OnFragmentInteractionListener,MyPlanFragment.OnFragmentInteractionListener{
+        ,FeedFragment.OnFragmentInteractionListener,MyPlanFragment.OnFragmentInteractionListener{
 
     private VolleyProvider req_queue;
 
@@ -31,17 +31,17 @@ public class HomeActivity extends AppCompatActivity implements PickExerciseFragm
                 case R.id.navigation_home:
                     switchToFragmentHome();
                     return true;
-                case R.id.navigation_exerciseList:
-                    switchToFragmentPickExercise();
+                case R.id.navigation_myPlan:
+                    switchToFragmentMyPlan();
                     return true;
                 case R.id.navigation_exerciseHistory:
                     switchToFragmentExerciseHistory();
                     return true;
-                case R.id.navigation_myPlan:
-                    switchToFragmentMyPlan();
+                case R.id.navigation_Feed:
+                    switchToFragmentFeed();
                     return true;
-                case R.id.navigation_myProfile:
-                    switchToFragmentProfile();
+                case R.id.navigation_exerciseList:
+                    switchToFragmentPickExercise();
                     return true;
             }
             return false;
@@ -89,17 +89,6 @@ public class HomeActivity extends AppCompatActivity implements PickExerciseFragm
                 .show();
     }
 
-    // Method used to switch to PickExercise Fragment
-    public void switchToFragmentPickExercise() {
-        FragmentManager manager = getSupportFragmentManager();
-        manager.beginTransaction().replace(R.id.content, new PickExerciseFragment()).commit();
-    }
-
-    // Method used to switch to Exercise History Fragment
-    public void switchToFragmentExerciseHistory() {
-        FragmentManager manager = getSupportFragmentManager();
-        manager.beginTransaction().replace(R.id.content, new ExerciseHistoryFragment()).commit();
-    }
 
     // Method used to switch to Exercise History Fragment
     public void switchToFragmentHome() {
@@ -114,8 +103,20 @@ public class HomeActivity extends AppCompatActivity implements PickExerciseFragm
     }
 
     // Method used to switch to Exercise History Fragment
-    public void switchToFragmentProfile() {
+    public void switchToFragmentExerciseHistory() {
         FragmentManager manager = getSupportFragmentManager();
-        manager.beginTransaction().replace(R.id.content, new ProfileFragment()).commit();
+        manager.beginTransaction().replace(R.id.content, new ExerciseHistoryFragment()).commit();
+    }
+
+    // Method used to switch to Feed Fragment
+    public void switchToFragmentFeed() {
+        FragmentManager manager = getSupportFragmentManager();
+        manager.beginTransaction().replace(R.id.content, new FeedFragment()).commit();
+    }
+
+    // Method used to switch to PickExercise Fragment
+    public void switchToFragmentPickExercise() {
+        FragmentManager manager = getSupportFragmentManager();
+        manager.beginTransaction().replace(R.id.content, new PickExerciseFragment()).commit();
     }
 }
