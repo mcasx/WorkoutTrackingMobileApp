@@ -158,43 +158,24 @@ public class FeedBackActivity extends AppCompatActivity implements
 
         // Get a handle on the bluetooth radio
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-        enableAdapter();
     }
 
     @Override
     protected void onStop(){
-        //Send stop signal to muscleDevice
-        //mConnectedThread.write("stop_sensors");
-
         //Send exercise to history of user
         //pushExercise();
-
         req_queue.cancelAll(this);
-        //mConnectedThread.cancel();
+        if(mConnectedThread != null) mConnectedThread.cancel();
+        if (chTread != null) {
+            chTread.interrupt();
+        }
         super.onStop();
     }
 
     @Override
     protected void onStart(){
         super.onStart();
-        //Send start signal to muscleDevice
-        //mConnectedThread.write("start_sensors");
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-
-        if (chTread != null) {
-            chTread.interrupt();
-        }
-    }
-
-    @Override
-    public void onBackPressed() {
-        Intent back = new Intent(FeedBackActivity.this, ExerciseActivity.class);
-
-        startActivity(back);
+        enableAdapter();
     }
 
     public void onClickAddEntryButton(View view){
@@ -581,6 +562,7 @@ public class FeedBackActivity extends AppCompatActivity implements
             byte[] buffer = new byte[1024];     // buffer store for the stream
             int bytes;                          // bytes returned from read()
 
+            write("start_sensors");
             // Keep listening to the InputStream until an exception occurs
             while (true) {
                 try {
@@ -600,15 +582,18 @@ public class FeedBackActivity extends AppCompatActivity implements
             try {
                 mmOutStream.write(bytes);
             } catch (IOException e) {
-
+                Log.e(TAG, "Could not write into mmOutStream", e);
             }
         }
 
         /* Call this from the main activity to shutdown the connection */
         public void cancel() {
             try {
+                write("stop_sensors");
                 mmSocket.close();
-            } catch (IOException e) { }
+            } catch (IOException e) {
+                Log.e(TAG, "Error during connectedThread cancel", e);
+            }
         }
     }
 }

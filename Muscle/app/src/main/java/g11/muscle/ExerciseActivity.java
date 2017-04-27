@@ -9,10 +9,12 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.ImageView;
 
+import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 
 import org.json.JSONException;
@@ -40,6 +42,8 @@ public class ExerciseActivity extends AppCompatActivity {
     //User email
     private String email;
 
+    private VolleyProvider req_queue;
+
 
     // Defines several constants used when transmitting messages between the
     // service and the UI.
@@ -64,38 +68,39 @@ public class ExerciseActivity extends AppCompatActivity {
         // Exercise Name
         exerciseView.setText(exercise);
 
+        req_queue = VolleyProvider.getInstance(ExerciseActivity.this);
+
         // get exercise information
-        String urlEx = "http://138.68.158.127/get_exercise";
+        String urlEx = "https://138.68.158.127/get_exercise";
 
-        JsonObjectRequest Ex_Req = new JsonObjectRequest(
-            JsonObjectRequest.Method.POST, urlEx, null, new Response.Listener<JSONObject>() {
+        StringRequest Ex_Req = new StringRequest(StringRequest.Method.POST, urlEx,
+            new Response.Listener<String>() {
+                @Override
+                public void onResponse(String response) {
 
-            @Override
-            public void onResponse(JSONObject response) {
+                    try{
+                        JSONObject jsonObject = new JSONObject(response);
+                        descriptionView.setText(jsonObject.getString("Description"));
+                        kindView.setText(jsonObject.getString("Kind"));
 
-                try{
-                    Log.e(TAG,response.toString());
-                    descriptionView.setText(response.getString("Description"));
-                    kindView.setText(response.getString("Kind"));
-
-                    //Image name must be in lowercase
-                    String DrawableName = response.getString("Image").toLowerCase();
-                    //Can't have extension
-                    if(DrawableName.contains("."))
-                        DrawableName = DrawableName.split("\\.")[0];
-                    int resID = getResources().getIdentifier(DrawableName,"drawable",getPackageName());
-                    imgView.setImageResource(resID);
-                } catch (JSONException je){
-                    Log.e(TAG,"GET EXERCISE DATA EXCEPTION");
-                    Log.e(TAG, je.toString());
+                        //Image name must be in lowercase
+                        String DrawableName = jsonObject.getString("Image").toLowerCase();
+                        //Can't have extension
+                        if(DrawableName.contains("."))
+                            DrawableName = DrawableName.split("\\.")[0];
+                        int resID = getResources().getIdentifier(DrawableName,"drawable",getPackageName());
+                        imgView.setImageResource(resID);
+                    } catch (JSONException je){
+                        Log.e(TAG,"GET EXERCISE DATA EXCEPTION");
+                        Log.e(TAG, je.toString());
+                    }
                 }
-            }
         }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                // Error Response
-                System.out.println(error.toString());
-            }
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    // Error Response
+                    System.out.println(error.toString());
+                }
         }
         ) {
             // use params are specified here
@@ -106,66 +111,56 @@ public class ExerciseActivity extends AppCompatActivity {
                 return params;
             }
         };
-
-        //Queue the request
-        VolleyProvider.getInstance(ExerciseActivity.this).addRequest(Ex_Req);
+        req_queue.addRequest(Ex_Req);
     }
 
     @Override
     protected void onStart(){
         super.onStart();
-
         getLastExerciseInfo();
     }
 
-    @Override
-    public void onBackPressed() {
-        Intent back = new Intent(ExerciseActivity.this, HomeActivity.class);
-        back.putExtra("email",email);
-
-        startActivity(back);
-    }
 
     //Get last exercise info
     private void getLastExerciseInfo(){
         String urlLast = "https://138.68.158.127/get_last_exercise_of_user";
 
         // get last exercise information
-        JsonObjectRequest Last_Ex_Req = new JsonObjectRequest(
-                JsonObjectRequest.Method.POST, urlLast, null, new Response.Listener<JSONObject>() {
+        StringRequest Last_Ex_Req = new StringRequest(Request.Method.POST, urlLast,
+            new Response.Listener<String>() {
+                @Override
+                public void onResponse(String response) {
 
-            @Override
-            public void onResponse(JSONObject response) {
-
-                try{
-                    //last_weightView.setText(response.getString("Weight"));
-                    //last_repsView.setText(response.getString("Repetitions"));
-                    //last_intensityView.setText(response.getString("Intensity"));
-                    Log.e(TAG,response.toString());
-                } catch (Exception e){
-                    Log.e(TAG, e.toString());
+                    try{
+                        JSONObject jsonObject = new JSONObject(response);
+                        //last_weightView.setText(response.getString("Weight"));
+                        //last_repsView.setText(response.getString("Repetitions"));
+                        //last_intensityView.setText(response.getString("Intensity"));
+                        Log.e(TAG,jsonObject.toString());
+                    } catch (Exception e){
+                        Log.e(TAG, e.toString());
+                    }
                 }
-            }
         }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                // User doesn't have anything in it's exercise history
-                Log.i(TAG,"User never did this exercise");
-            }
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    // User doesn't have anything in it's exercise history
+                    Log.i(TAG,"User never did this exercise");
+                }
         }
         ){
             // use params are specified here
             @Override
             protected Map<String, String> getParams() {
                 Map<String, String> params = new HashMap<>();
-                params.put("user_email",email);
+                params.put("user_email", email);
                 params.put("exercise_name", exercise);
                 return params;
             }
         };
 
         //Queue the request
-        VolleyProvider.getInstance(ExerciseActivity.this).addRequest(Last_Ex_Req);
+        req_queue.addRequest(Last_Ex_Req);
     }
 
     public void onClickStartButton(View view){
