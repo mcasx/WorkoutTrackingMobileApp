@@ -688,11 +688,31 @@ def get_exercise_types_stats_of_user():
         fetched = c.fetchall()
         c.close()
         conn.close()
-        return jsonify(fetched[0])
+        return jsonify(fetched)
     except Exception as e:
         return str(e)
 
+@app.route('/get_exercise_muscle_stats_of_user', methods=['POST'])
+def get_exercise_muscle_stats_of_user():
+	try:
+		user_email = request.form['User_email']
+        conn = MySQLdb.connect(host='localhost', user='muscle', password='some_pass')
+        c = conn.cursor(MySQLdb.cursors.DictCursor)
+        c.execute('USE muscle2')                  
+		c.execute("""
+				SELECT count(*), Kind
+				FROM (SELECT Name, Kind FROM EXERCISE) AS e
+				JOIN (SELECT Exercise_name, User_email FROM EXERCISE_HISTORY) AS e_h
+				ON e.Name = e_h.Exercise_name AND e_h.User_email = %s
+				GROUP BY Kind
+				""", [user_email])
+        fetched = c.fetchall()
+        c.close()
+        conn.close()
+        return jsonify(fetched)
 
+    except Exception as e:
+        return str(e)
 
 @app.route('/get_muscle_groups', methods=['POST'])
 def get_muscle_groups():
@@ -716,11 +736,111 @@ def get_weight_history():
 		conn = MySQLdb.connect(host='localhost', user='muscle', password='some_pass')
 		c = conn.cursor(MySQLdb.cursors.DictCursor)
 		c.execute('USE muscle2')
-		c.execute("SELECT * FROM USER_WEIGHT_HISTORY WHERE User_email = %s", [user_email])
+		c.execute("SELECT Weight, Date FROM USER_WEIGHT_HISTORY WHERE User_email = %s", [user_email])
 		fetched = c.fetchall()
 		c.close()
 		conn.close()
 		return jsonify(fetched)
+	except Exception as e:
+		return str(e)
+
+#####################
+##   SOCIAL FEED   ##
+#####################
+
+@app.route('/get_user_feed', methods=['POST'])
+def get_user_feed():
+	try:
+		user_email = request.form['user_email']
+		amount = request.form['amount']
+
+		conn = MySQLdb.connect(host='localhost', user='muscle', password='some_pass', database='muscle')
+		c = conn.cursor(MySQLdb.cursors.DictCursor)
+		
+		c.execute('USE muscle2')
+		c.execute("""
+			SELECT *
+			FROM EXERCISE_HISTORY
+			LEFT JOIN (SELECT Following FROM FOLLOWERS WHERE User_email = %s) AS f
+			ON EXERCISE_HISTORY.User_email = f.Following
+			ORDER BY Date_Time
+			LIMIT %s
+			""", [user_email, amount])
+
+		r = c.fetchall()
+		c.close()
+		conn.close()
+		return jsonify(r)
+
+	except Exception as e:
+		return str(e)
+	
+@app.route('/get_comments_exercise', methods=['POST'])
+def get_comments_exercise():
+	try:
+		exercise_id = request.form['exercise_id']
+
+		conn = MySQLdb.connect(host='localhost', user='muscle', password='some_pass', database='muscle')
+		c = conn.cursor(MySQLdb.cursors.DictCursor)
+		
+		c.execute('USE muscle2')
+		c.execute("""
+			SELECT User_email, Comment
+			FROM COMMENTS
+			WHERE Exercise = %s
+			""", [exercise_id])
+
+		r = c.fetchall()
+		c.close()
+		conn.close()
+		return jsonify(r)
+
+	except Exception as e:
+		return str(e)
+
+@app.route('/get_bumps_exercise', methods=['POST'])
+def get_bumps_exercise():
+	try:
+		exercise_id = request.form['exercise_id']
+
+		conn = MySQLdb.connect(host='localhost', user='muscle', password='some_pass', database='muscle')
+		c = conn.cursor(MySQLdb.cursors.DictCursor)
+		
+		c.execute('USE muscle2')
+		c.execute("""
+			SELECT COUNT(*) as bumps
+			FROM BUMPS
+			WHERE Exercise = %s
+			""", [exercise_id])
+
+		r = c.fetchall()
+		c.close()
+		conn.close()
+		return jsonify(r)
+
+	except Exception as e:
+		return str(e)
+
+@app.route('/get_users_bumped_exercise', methods=['POST'])
+def get_users_bumped_exercise():
+	try:
+		exercise_id = request.form['exercise_id']
+
+		conn = MySQLdb.connect(host='localhost', user='muscle', password='some_pass', database='muscle')
+		c = conn.cursor(MySQLdb.cursors.DictCursor)
+		
+		c.execute('USE muscle2')
+		c.execute("""
+			SELECT User_email
+			FROM BUMPS
+			WHERE Exercise = %s
+			""", [exercise_id])
+
+		r = c.fetchall()
+		c.close()
+		conn.close()
+		return jsonify(r)
+
 	except Exception as e:
 		return str(e)
 
@@ -803,11 +923,12 @@ def get_recommended_exercises():
 				ON u.Email = e.User_email ) AS temp
 			GROUP BY Exercise_name
 			ORDER BY count DESC
+			LIMIT 3
 			""", [user_email])
 		r = c.fetchall()
 		c.close()
 		conn.close()
-		return jsonify(r[:3])
+		return jsonify(r)
 
 	except Exception as e:
 		return str(e)
@@ -833,11 +954,13 @@ def get_recommended_plans():
 					FROM PLAN_HISTORY ) AS e
 				ON u.Email = e.User_email ) AS temp
 			GROUP BY ID
-			ORDER BY count DESC""", [user_email])
+			ORDER BY count DESC
+			LIMIT 3""", [user_email])
+
 		r = c.fetchall()
 		c.close()
 		conn.close()
-		return jsonify(r[:3])
+		return jsonify(r)
 
 	except Exception as e:
 		return str(e)
