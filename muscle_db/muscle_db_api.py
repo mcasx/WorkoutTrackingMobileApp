@@ -692,6 +692,28 @@ def get_exercise_types_stats_of_user():
     except Exception as e:
         return str(e)
 
+@app.route('/get_exercise_muscle_stats_of_user', methods=['POST'])
+def get_exercise_muscle_stats_of_user():
+	try:
+		user_email = request.form['User_email']
+        conn = MySQLdb.connect(host='localhost', user='muscle', password='some_pass')
+        c = conn.cursor(MySQLdb.cursors.DictCursor)
+        c.execute('USE muscle2')                  
+		c.execute("""
+				SELECT count(*), Kind
+				FROM (SELECT Name, Kind FROM EXERCISE) AS e
+				JOIN (SELECT Exercise_name, User_email FROM EXERCISE_HISTORY) AS e_h
+				ON e.Name = e_h.Exercise_name AND e_h.User_email = %s
+				GROUP BY Kind
+				""", [user_email])
+        fetched = c.fetchall()
+        c.close()
+        conn.close()
+        return jsonify(fetched)
+
+    except Exception as e:
+        return str(e)
+
 @app.route('/get_muscle_groups', methods=['POST'])
 def get_muscle_groups():
 
@@ -753,8 +775,8 @@ def get_user_feed():
 	except Exception as e:
 		return str(e)
 	
-@app.route('get_comments_exercise', methods=['POST'])
-def get_comments_exercise:
+@app.route('/get_comments_exercise', methods=['POST'])
+def get_comments_exercise():
 	try:
 		exercise_id = request.form['exercise_id']
 
@@ -776,8 +798,8 @@ def get_comments_exercise:
 	except Exception as e:
 		return str(e)
 
-@app.route('get_bumps_exercise', methods=['POST'])
-def get_bumps_exercise:
+@app.route('/get_bumps_exercise', methods=['POST'])
+def get_bumps_exercise():
 	try:
 		exercise_id = request.form['exercise_id']
 
@@ -799,8 +821,8 @@ def get_bumps_exercise:
 	except Exception as e:
 		return str(e)
 
-@app.route('get_users_bumped_exercise', methods=['POST'])
-def get_users_bumped_exercise:
+@app.route('/get_users_bumped_exercise', methods=['POST'])
+def get_users_bumped_exercise():
 	try:
 		exercise_id = request.form['exercise_id']
 
