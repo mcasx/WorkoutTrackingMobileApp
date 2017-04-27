@@ -166,6 +166,9 @@ public class FeedBackActivity extends AppCompatActivity implements
         //pushExercise();
         req_queue.cancelAll(this);
         if(mConnectedThread != null) mConnectedThread.cancel();
+        if (chTread != null) {
+            chTread.interrupt();
+        }
         super.onStop();
     }
 
@@ -173,14 +176,6 @@ public class FeedBackActivity extends AppCompatActivity implements
     protected void onStart(){
         super.onStart();
         enableAdapter();
-    }
-
-    @Override
-    protected void onPause() {
-        if (chTread != null) {
-            chTread.interrupt();
-        }
-        super.onPause();
     }
 
     public void onClickAddEntryButton(View view){

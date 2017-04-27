@@ -51,6 +51,8 @@ public class ExerciseHistoryFragment extends Fragment {
     // Used by Main Activity
     private OnFragmentInteractionListener mListener;
 
+    private VolleyProvider req_queue;
+
     public ExerciseHistoryFragment() {
         // Required empty public constructor
     }
@@ -58,7 +60,7 @@ public class ExerciseHistoryFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
+        req_queue = VolleyProvider.getInstance(getActivity());
         email = getActivity().getIntent().getStringExtra("email");
     }
 
@@ -176,6 +178,6 @@ public class ExerciseHistoryFragment extends Fragment {
         };
 
         //Queue the request
-        VolleyProvider.getInstance(getActivity()).addRequest(StrHistReq);
+        req_queue.addRequest(StrHistReq);
     }
 }
