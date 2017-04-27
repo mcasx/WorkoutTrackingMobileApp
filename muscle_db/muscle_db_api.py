@@ -688,11 +688,9 @@ def get_exercise_types_stats_of_user():
         fetched = c.fetchall()
         c.close()
         conn.close()
-        return jsonify(fetched[0])
+        return jsonify(fetched)
     except Exception as e:
         return str(e)
-
-
 
 @app.route('/get_muscle_groups', methods=['POST'])
 def get_muscle_groups():
@@ -716,7 +714,7 @@ def get_weight_history():
 		conn = MySQLdb.connect(host='localhost', user='muscle', password='some_pass')
 		c = conn.cursor(MySQLdb.cursors.DictCursor)
 		c.execute('USE muscle2')
-		c.execute("SELECT * FROM USER_WEIGHT_HISTORY WHERE User_email = %s", [user_email])
+		c.execute("SELECT Weight, Date FROM USER_WEIGHT_HISTORY WHERE User_email = %s", [user_email])
 		fetched = c.fetchall()
 		c.close()
 		conn.close()
