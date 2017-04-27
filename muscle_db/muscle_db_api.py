@@ -627,21 +627,6 @@ def get_exercises_by_muscle_group():
 
         all_exercises = []
 
-        """
-        Para: David
-        mudei cenas, capaz ter feito mrd, n sei, estava assim antes:
-
-
-        for f in fetched:
-            all_exercises += get_exercise(str(f))
-
-        return str(fetched[0])
-
-        Para Silverio:
-        obrigado pelo aviso :)
-
-        """
-
         return jsonify(exercise_names);
 
         #return str(exercise_names);
@@ -681,7 +666,7 @@ def get_last_exercise_of_user():
         c.execute('USE muscle2')
 
                   
-        c.execute("SELECT * FROM EXERCISE_HISTORY WHERE User_email = %s and Exercise_name = %s and Date_Time=(SELECT MAX(Date_Time) FROM EXERCISE_HISTORY WHERE User_email = %s and Exercise_name = %s)", [user_email, exercise_name, user_email, exercise_name])
+        c.execute("SELECT * FROM EXERCISE_HISTORY WHERE User_email = '%s' and Exercise_name = '%s' ORDER BY Date_time DESC", [user_email, exercise_name])
         fetched = c.fetchall()
         c.close()
         conn.close()
@@ -743,8 +728,8 @@ def get_weight_history():
 ## DATA PROCESSING ##
 #####################
 
-@app.route('/get_expectedExerciseResult', methods=['POST'])
-def get_expectedExerciseResult():
+@app.route('/get_expected_exercise_result', methods=['POST'])
+def get_expected_exercise_result():
 	try:
 		user_email = request.form['user_email']
 		exercise_name = request.form['exercise_name']
@@ -796,8 +781,8 @@ def get_expectedExerciseResult():
 		return str(e)
 
 
-@app.route('/get_recommendedExercises', methods=['POST'])
-def get_recommendedExercises():
+@app.route('/get_recommended_exercises', methods=['POST'])
+def get_recommended_exercises():
 	try:
 		user_email = request.form['user_email']
 		conn = MySQLdb.connect(host='localhost', user='muscle', password='some_pass', database='muscle')
@@ -827,8 +812,8 @@ def get_recommendedExercises():
 	except Exception as e:
 		return str(e)
 
-@app.route('/get_recommendedPlan', methods=['POST'])
-def get_recommendedPlans():
+@app.route('/get_recommended_plans', methods=['POST'])
+def get_recommended_plans():
 	try:
 		user_email = request.form['user_email']
 		conn = MySQLdb.connect(host='localhost', user='muscle', password='some_pass', database='muscle')

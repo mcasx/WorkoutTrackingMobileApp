@@ -9,6 +9,7 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.ImageView;
 
+import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
@@ -106,24 +107,12 @@ public class ExerciseActivity extends AppCompatActivity {
                 return params;
             }
         };
-
-        //Queue the request
-        VolleyProvider.getInstance(ExerciseActivity.this).addRequest(Ex_Req);
     }
 
     @Override
     protected void onStart(){
         super.onStart();
-
         getLastExerciseInfo();
-    }
-
-    @Override
-    public void onBackPressed() {
-        Intent back = new Intent(ExerciseActivity.this, HomeActivity.class);
-        back.putExtra("email",email);
-
-        startActivity(back);
     }
 
     //Get last exercise info
@@ -132,7 +121,7 @@ public class ExerciseActivity extends AppCompatActivity {
 
         // get last exercise information
         JsonObjectRequest Last_Ex_Req = new JsonObjectRequest(
-                JsonObjectRequest.Method.POST, urlLast, null, new Response.Listener<JSONObject>() {
+                Request.Method.POST, urlLast, null, new Response.Listener<JSONObject>() {
 
             @Override
             public void onResponse(JSONObject response) {
@@ -158,7 +147,7 @@ public class ExerciseActivity extends AppCompatActivity {
             @Override
             protected Map<String, String> getParams() {
                 Map<String, String> params = new HashMap<>();
-                params.put("user_email",email);
+                params.put("user_email", email);
                 params.put("exercise_name", exercise);
                 return params;
             }

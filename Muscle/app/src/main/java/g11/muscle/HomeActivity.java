@@ -1,9 +1,11 @@
 package g11.muscle;
 
+import android.content.DialogInterface;
 import android.os.Bundle;
 
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 
 import android.view.MenuItem;
@@ -65,6 +67,24 @@ public class HomeActivity extends AppCompatActivity implements PickExerciseFragm
 
         // Start in Home Fragment
         switchToFragmentHome();
+    }
+
+    @Override
+    public void onBackPressed() {
+        new AlertDialog.Builder(this)
+                .setIcon(android.R.drawable.ic_dialog_alert)
+                .setTitle("Quit Muscle")
+                .setMessage("Are you sure you want to close Muscle?")
+                .setPositiveButton("Yes", new DialogInterface.OnClickListener()
+                {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        android.os.Process.killProcess(android.os.Process.myPid());
+                        finish();
+                    }
+                })
+                .setNegativeButton("No", null)
+                .show();
     }
 
     // Method used to switch to PickExercise Fragment
