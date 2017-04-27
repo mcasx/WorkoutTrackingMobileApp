@@ -135,4 +135,32 @@ c.execute('''CREATE TABLE USER_WEIGHT_HISTORY(
     )'''
 )
 
+c.execute('''CREATE TABLE FOLLOWERS(
+	User_email VARCHAR(255) NOT NULL,
+	Following VARCHAR(255) NOT NULL,
+	PRIMARY KEY(User_email, Following),
+	FOREIGN KEY(User_email) REFERENCES USER(Email),
+	FOREIGN KEY(Following) REFERENCES USER(Email)
+	)'''
+)
+
+c.execute('''CREATE TABLE BUMPS(
+	User_email VARCHAR(255) NOT NULL,
+	Exercise Integer NOT NULL,
+	PRIMARY KEY(User_email, Exercise),
+	FOREIGN KEY(User_email) REFERENCES USER(Email),
+	FOREIGN KEY(Exercise) REFERENCES EXERCISE_HISTORY(ID)
+	)'''
+)
+
+c.execute('''CREATE TABLE COMMENTS(
+	User_email VARCHAR(255) NOT NULL,
+	Exercise Integer NOT NULL,
+	Comment VARCHAR(255) NOT NULL,
+	PRIMARY KEY(User_email, Exercise),
+	FOREIGN KEY(User_email) REFERENCES USER(Email),
+	FOREIGN KEY(Exercise) REFERENCES EXERCISE_HISTORY(ID)
+	)'''
+)
+		
 print("Database successfully initialized")
