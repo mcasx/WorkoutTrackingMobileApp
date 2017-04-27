@@ -71,6 +71,7 @@ public class ExerciseHistoryFragment extends Fragment {
         View fView = inflater.inflate(R.layout.fragment_exercise_history, container, false);
         //GUI elements
         recent_historyView = (GridView) fView.findViewById(R.id.recent_history);
+
         // Inflate the layout for this fragment
         return fView;
     }
@@ -78,7 +79,6 @@ public class ExerciseHistoryFragment extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
-
         //UI Dynamic elements
         createExerciseHistoryList();
     }
