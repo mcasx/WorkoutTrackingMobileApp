@@ -22,6 +22,9 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * A simple {@link Fragment} subclass.
  * Activities that contain this fragment must implement the
@@ -40,6 +43,7 @@ public class PickExerciseFragment extends Fragment {
 
     //GUI
     private GridView groupsView;
+    private GridView recent_historyView;
 
     // Used by Main Activity
     private OnFragmentInteractionListener mListener;
@@ -63,12 +67,19 @@ public class PickExerciseFragment extends Fragment {
         View fView = inflater.inflate(R.layout.fragment_pick_exercise, container, false);
         //GUI elements
         groupsView  = (GridView) fView.findViewById(R.id.groups);
-
+        recent_historyView = (GridView) fView.findViewById(R.id.recent_history);
         //UI Static elements
         createMuscleGroupGrid();
 
         // Inflate the layout for this fragment
         return fView;
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        //UI Dynamic elements
+        createExerciseHistoryList();
     }
 
     @Override
@@ -152,5 +163,71 @@ public class PickExerciseFragment extends Fragment {
 
         // Add the request to the RequestQueue
         VolleyProvider.getInstance(getActivity()).addRequest(StrPickExReq);
+    }
+
+    private void createExerciseHistoryList(){
+        String url = "https://138.68.158.127/get_exercise_history_of_user";
+
+        //Create the exercise history request
+        StringRequest StrHistReq = new StringRequest(Request.Method.POST,url,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+
+                        // Initialization of history array
+                        String[] history = new String[0];
+
+                        try {
+                            JSONArray jsonArray = new JSONArray(response);
+                            //From the response create the history array
+                            history = new String[jsonArray.length()];
+                            try {
+                                for (int i = 0; i < jsonArray.length(); i++) {
+                                    history[i] = new JSONObject(jsonArray.getString(i)).getString("Exercise_name");
+                                }
+                            } catch (JSONException je) {
+                                Log.e(TAG, je.toString());
+                            }
+                        }catch (JSONException e2){
+                            e2.printStackTrace();
+                        }
+
+
+                        // Define the groupView adapter
+                        ArrayAdapter<String> adapter = new ArrayAdapter<>(getActivity(), android.R.layout.simple_list_item_1, history);
+                        recent_historyView.setAdapter(adapter);
+                        // Set the listeners on the list items
+                        recent_historyView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                            public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
+                                //Go to exercise page
+                                String exercise_name = (String) parent.getAdapter().getItem(position);
+                                Intent intent = new Intent(getActivity(), ExerciseActivity.class);
+                                intent.putExtra("exercise_name", exercise_name);
+                                intent.putExtra("email", email);
+                                startActivity(intent);
+                            }
+                        });
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        //Handle error response
+                        System.out.println(error.toString());
+                    }
+                }
+        ){
+            // use params are specified here
+            @Override
+            protected Map<String, String> getParams()
+            {
+                Map<String, String>  params = new HashMap<>();
+                params.put("email", email);
+                return params;
+            }
+        };
+
+        // Add the request to the RequestQueue
+        VolleyProvider.getInstance(getActivity()).addRequest(StrHistReq);
     }
 }

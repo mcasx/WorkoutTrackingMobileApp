@@ -21,6 +21,20 @@
         <GridView
             android:id="@+id/groups"
             android:layout_width="match_parent"
+            android:layout_height="328dp" />
+
+        <TextView
+            android:id="@+id/textView7"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Recent Exercises"
+            android:textAlignment="center"
+            android:textAppearance="@style/Base.TextAppearance.AppCompat.Title"
+            tools:ignore="HardcodedText" />
+
+        <GridView
+            android:id="@+id/recent_history"
+            android:layout_width="match_parent"
             android:layout_height="match_parent" />
     </LinearLayout>
 
