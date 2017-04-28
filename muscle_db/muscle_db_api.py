@@ -1,10 +1,11 @@
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, make_response
 import ssl
 from passlib.hash import pbkdf2_sha256
 import MySQLdb
 from datetime import datetime
 import sys
 import base64 
+import json
 
 
 app = Flask(__name__)
@@ -189,6 +190,27 @@ def rm_training():
         return 'Training ' + id + ' removed'
     except Exception as e:
         return str(e)
+
+#FIELDS REQUIRED: user_email
+@app.route('/get_training',methods = ['POST'])
+def get_training():
+    try:
+        email = request.form['email']
+        conn = MySQLdb.connect(host='localhost', user='muscle', password='some_pass')
+        c = conn.cursor()
+
+        c.execute('USE muscle2')
+        c.execute("""SELECT ID,Name FROM TRAINING
+				 	 WHERE Plan_id IN (SELECT Plan FROM USER
+									   WHERE Email = %s);""",[email])
+		
+        fetched = c.fetchall()
+        c.close()
+        conn.close()
+        return jsonify(fetched)
+    except Exception as e:
+        return str(e)
+
 
 #FIELDS REQUIRED: name, kind, description, image 
 @app.route('/add_exercise', methods = ['POST'])
@@ -575,7 +597,7 @@ def get_all_exercises():
         return jsonify(e)
 
 
-@app.route('/get_user_plan/', methods=['POST'])
+@app.route('/get_user_plan', methods=['POST'])
 def get_user_plan():
     try:
         email = request.form['email']
@@ -743,6 +765,111 @@ def get_weight_history():
 		return jsonify(fetched)
 	except Exception as e:
 		return str(e)
+
+@app.route('/get_local_db', methods=['POST'])
+def get_local_db():
+    try:
+        email = request.form['email']
+        conn = MySQLdb.connect(host='localhost', user='muscle', password='some_pass')
+        c = conn.cursor(MySQLdb.cursors.DictCursor)
+        c.execute('USE muscle2')
+
+
+        # get user data
+        c.execute("SELECT * FROM USER WHERE Email = %s", [email])
+        fetched = c.fetchall()
+        user_data = {"USER" : [{k:fetched[0][k] for k in fetched[0] if k !='Password'}]}
+
+
+        # get plan data
+        c.execute('''SELECT * FROM PLAN ''')
+        fetched = c.fetchall()
+        plan_data = {"PLAN" : fetched}
+
+                
+        # get training data
+        c.execute('''SELECT * FROM  TRAINING''')
+        fetched = c.fetchall()
+        training_data = {"TRAINING" : fetched}
+
+
+        # get exercise data
+        c.execute('''SELECT * FROM EXERCISE ''')
+        fetched = c.fetchall()
+        exercise_data = {"EXERCISE" : fetched}
+
+        #print(exercise_data)
+
+
+        # get training_exercise data
+        c.execute('''SELECT * FROM TRAINING_EXERCISE ''')
+        fetched = c.fetchall()
+        training_exercise_data = {"TRAINING_EXERCISE" : fetched}
+
+
+        # get muscle_group data
+        c.execute('''SELECT * FROM MUSCLE_GROUP ''')
+        fetched = c.fetchall()
+        muscle_group_data = {"MUSCLE_GROUP" : fetched}
+
+
+        # get muscle_group data
+        c.execute('''SELECT * FROM MUSCLES_WORKED ''')
+        fetched = c.fetchall()
+        muscles_worked_data = {"MUSCLES_WORKED" : fetched}
+
+        # temporary table created to assure sets are sent according to chosen tuples of exercise_history
+        c.execute('''CREATE TEMPORARY TABLE IF NOT EXISTS EXERCISE_HISTORY_CACHE 
+                     AS (   SELECT * 
+                            FROM EXERCISE_HISTORY AS EH
+                            WHERE User_email = %s
+                            ORDER BY EH.Date_Time DESC
+                            LIMIT 100    )''',[email])
+
+        
+        # get exercise_history data (of user)
+        c.execute('''SELECT * FROM EXERCISE_HISTORY_CACHE''')
+        fetched = c.fetchall()
+        #print(fetched)
+        
+        exercise_history_data = {"EXERCISE_HISTORY" : fetched}
+
+        # get sets data (of selected exercise history)
+        c.execute('''SELECT  S.Exercise_history_id, S.Set_number, S.repetitions, S.Weight,S.Intensity, S.Resting_Time, S.Intensity_deviation
+                     FROM SETS AS S
+                     JOIN EXERCISE_HISTORY_CACHE AS EH
+                       ON S.Exercise_history_id = EH.ID''')
+        fetched = c.fetchall()
+        sets_data = {"SETS" : fetched}
+
+        c.execute('''DROP TEMPORARY TABLE IF EXISTS EXERCISE_HISTORY_CACHE''')
+
+
+        # get plan_history data (of user)
+        c.execute('''SELECT * FROM PLAN_HISTORY WHERE User_email = %s''',[email])
+        fetched = c.fetchall()
+        plan_history_data = {"PLAN_HISTORY" : fetched}
+
+
+        # get user_weight_history data (of user)
+        c.execute('''SELECT * FROM USER_WEIGHT_HISTORY WHERE User_email = %s''',[email])
+        fetched = c.fetchall()
+        user_weight_history_data = {"USER_WEIGHT_HISTORY" : fetched}
+
+        c.close()
+        conn.close()
+        #return jsonify(,default = str)
+        dump = json.dumps([exercise_data, plan_data, user_data, 
+                           training_data, training_exercise_data,muscle_group_data,
+                           muscles_worked_data, exercise_history_data, plan_history_data,
+                           sets_data,user_weight_history_data], indent = 4, default = str)
+
+        r = make_response(dump)
+        r.mimetype = 'application/json'
+        return r
+
+    except Exception as e:
+        raise
 
 #####################
 ##   SOCIAL FEED   ##
