@@ -4,19 +4,17 @@
     android:layout_height="match_parent"
     tools:context=".FeedFragment">
 
-    <TextView
-        android:id="@+id/textView5"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Your Feed"
-        android:textAlignment="center"
-        android:textAppearance="@style/Base.TextAppearance.AppCompat.Title"
-        tools:ignore="HardcodedText" />
+        android:layout_height="match_parent"
+        android:orientation="vertical">
 
-    <GridView
-        android:id="@+id/feed"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+
+        <GridView
+            android:id="@+id/feed"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+    </LinearLayout>
 
 </FrameLayout>
 

@@ -124,10 +124,7 @@ public class FormActivity extends AppCompatActivity {
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
             }
-
-
         });
-
     }
 
     public void onClickPickImage(View view) {
@@ -136,7 +133,7 @@ public class FormActivity extends AppCompatActivity {
     }
 
     public void onClickSkip(View view) {
-        Intent intent = new Intent(FormActivity.this, PickExerciseActivity.class);
+        Intent intent = new Intent(FormActivity.this, HomeActivity.class);
         intent.putExtra("email", email);
         startActivity(intent);
     }

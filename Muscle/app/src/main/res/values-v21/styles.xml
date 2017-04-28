@@ -6,4 +6,11 @@
         <item name="android:colorBackground">@color/background_holo_dark</item>
         <item name="android:colorForeground">@color/bright_foreground_holo_dark</item>
     </style>
+
+    <style name="thin_ab_style" parent="android:Widget.Holo.ActionBar">
+
+    <item name="android:height">30dp</item>
+
+    </style>
+
 </resources>

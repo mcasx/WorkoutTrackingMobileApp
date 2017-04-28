@@ -23,6 +23,13 @@ public class HomeActivity extends AppCompatActivity implements PickExerciseFragm
 
     private VolleyProvider req_queue;
     private FragmentManager manager;
+    private Fragment homeFragment;
+    private Fragment myPlanFragment;
+    private Fragment yourFeedFragment;
+    private Fragment historyFragment;
+    private Fragment exerciseListFragment;
+
+
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
             = new BottomNavigationView.OnNavigationItemSelectedListener() {
@@ -31,18 +38,23 @@ public class HomeActivity extends AppCompatActivity implements PickExerciseFragm
         public boolean onNavigationItemSelected(@NonNull MenuItem item) {
             switch (item.getItemId()) {
                 case R.id.navigation_home:
+                    setTitle("Home");
                     switchToFragmentHome();
                     return true;
                 case R.id.navigation_myPlan:
+                    setTitle("My Plan");
                     switchToFragmentMyPlan();
                     return true;
                 case R.id.navigation_exerciseHistory:
+                    setTitle("History");
                     switchToFragmentExerciseHistory();
                     return true;
                 case R.id.navigation_Feed:
+                    setTitle("Your Feed");
                     switchToFragmentFeed();
                     return true;
                 case R.id.navigation_exerciseList:
+                    setTitle("Exercise List");
                     switchToFragmentPickExercise();
                     return true;
             }
@@ -59,6 +71,7 @@ public class HomeActivity extends AppCompatActivity implements PickExerciseFragm
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setTitle("Home");
         setContentView(R.layout.activity_home);
         manager = getSupportFragmentManager();
         BottomNavigationView navigation = (BottomNavigationView) findViewById(R.id.navigation);

@@ -4,17 +4,12 @@
     android:layout_height="match_parent"
     tools:context="g11.muscle.ExerciseHistoryFragment">
 
-    <TextView
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Recent Exercises"
-        android:textAlignment="center"
-        android:textAppearance="@style/Base.TextAppearance.AppCompat.Title"
-        tools:ignore="HardcodedText" />
+        android:layout_height="match_parent"
+        android:orientation="vertical">
 
-    <GridView
-        android:id="@+id/recent_history"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        <!-- HERE -->
+    </LinearLayout>
 
 </FrameLayout>
