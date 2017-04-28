@@ -6,9 +6,11 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 
+import android.util.Log;
 import android.view.MenuItem;
 
 import android.widget.TextView;
@@ -106,31 +108,92 @@ public class HomeActivity extends AppCompatActivity implements PickExerciseFragm
 
     // Method used to switch to Exercise History Fragment
     public void switchToFragmentHome() {
-        if(manager.findFragmentByTag("Home") == null)
-            manager.beginTransaction().replace(R.id.content, new HomeFragment(), "Home").commit();
+        Fragment fragment = manager.findFragmentByTag("Home");
+        FragmentTransaction ft = manager.beginTransaction();
+
+        if(manager.findFragmentByTag("Home") == null) {
+            ft.replace(R.id.content, new HomeFragment(), "Home");
+            ft.addToBackStack("Home");
+            ft.commit();
+            manager.executePendingTransactions();
+            Log.e("Home","Selected Home Tag");
+        }
+        else
+            manager.beginTransaction().replace(R.id.content, fragment, "Home").commit();
+
+        getSupportFragmentManager().executePendingTransactions();
     }
 
     // Method used to switch to PickExercise Fragment
     public void switchToFragmentPickExercise() {
-        if(manager.findFragmentByTag("PickExercise") == null)
-            manager.beginTransaction().replace(R.id.content, new PickExerciseFragment(), "PickExercise").commit();
+        Fragment fragment = manager.findFragmentByTag("PickExercise");
+        FragmentTransaction ft = manager.beginTransaction();
+
+        if(fragment == null) {
+            ft.replace(R.id.content, new PickExerciseFragment(), "PickExercise");
+            ft.addToBackStack("PickExercise");
+            ft.commit();
+            manager.executePendingTransactions();
+            Log.e("PickExercise","Selected Pick Exercise Tab");
+        }
+        else
+            manager.beginTransaction().replace(R.id.content, fragment, "PickExercise").commit();
+        getSupportFragmentManager().executePendingTransactions();
     }
 
     // Method used to switch to Exercise History Fragment
     public void switchToFragmentMyPlan() {
-        if(manager.findFragmentByTag("MyPlan") == null)
-            manager.beginTransaction().replace(R.id.content, new MyPlanFragment(), "MyPlan").commit();
+
+        Fragment fragment = manager.findFragmentByTag("MyPlan");
+        FragmentTransaction ft = manager.beginTransaction();
+
+        if(fragment == null) {
+            ft.replace(R.id.content, new MyPlanFragment(), "MyPlan");
+            ft.addToBackStack("MyPlan");
+            ft.commit();
+            manager.executePendingTransactions();
+            Log.e("MyPlan","Selected MyPlan Tab");
+        }
+        else
+            manager.beginTransaction().replace(R.id.content, fragment, "MyPlan").commit();
+        getSupportFragmentManager().executePendingTransactions();
     }
 
     // Method used to switch to Feed Fragment
     public void switchToFragmentFeed() {
-        if(manager.findFragmentByTag("Feed") == null)
-            manager.beginTransaction().replace(R.id.content, new FeedFragment(), "Feed").commit();
+
+        Fragment fragment = manager.findFragmentByTag("Feed");
+        FragmentTransaction ft = manager.beginTransaction();
+
+        if(fragment == null) {
+            ft.replace(R.id.content, new FeedFragment(), "Feed");
+            ft.addToBackStack("Feed");
+            ft.commit();
+            manager.executePendingTransactions();
+            Log.e("Feed","Selected Feed Exercise Tab");
+        }
+        else
+            manager.beginTransaction().replace(R.id.content, fragment, "Feed").commit();
+        getSupportFragmentManager().executePendingTransactions();
     }
 
     // Method used to switch to Exercise History Fragment
     public void switchToFragmentExerciseHistory() {
         if(manager.findFragmentByTag("ExerciseHistory") == null)
             manager.beginTransaction().replace(R.id.content, new ExerciseHistoryFragment(), "ExerciseHistory").commit();
+
+        Fragment fragment = manager.findFragmentByTag("ExerciseHistory");
+        FragmentTransaction ft = manager.beginTransaction();
+
+        if(fragment == null) {
+            ft.replace(R.id.content, new ExerciseHistoryFragment(), "ExerciseHistory");
+            ft.addToBackStack("ExerciseHistory");
+            ft.commit();
+            manager.executePendingTransactions();
+            Log.e("ExerciseHistory", "Selected ExerciseHistory Tab");
+        }
+        else
+            manager.beginTransaction().replace(R.id.content, fragment, "ExerciseHistory").commit();
+        getSupportFragmentManager().executePendingTransactions();
     }
 }
