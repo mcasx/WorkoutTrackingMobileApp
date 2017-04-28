@@ -971,6 +971,52 @@ def get_users_bumped_exercise():
 	except Exception as e:
 		return str(e)
 
+@app.route('/get_user_following_amount', methods=['POST'])
+def get_user_following_amount():
+	try:
+		email = request.form['user_email']
+
+		conn = MySQLdb.connect(host='localhost', user='muscle', password='some_pass', database='muscle')
+		c = conn.cursor(MySQLdb.cursors.DictCursor)
+		
+		c.execute('USE muscle2')
+		c.execute("""
+			SELECT COUNT(*) as Amount
+			FROM FOLLOWERS
+			WHERE User_email = %s
+			""", [email])
+
+		r = c.fetchall()
+		c.close()
+		conn.close()
+		return jsonify(r)
+
+	except Exception as e:
+		return str(e)
+
+@app.route('/get_user_following', methods=['POST'])
+def get_user_following():
+	try:
+		email = request.form['user_email']
+
+		conn = MySQLdb.connect(host='localhost', user='muscle', password='some_pass', database='muscle')
+		c = conn.cursor(MySQLdb.cursors.DictCursor)
+		
+		c.execute('USE muscle2')
+		c.execute("""
+			SELECT Following
+			FROM FOLLOWERS
+			WHERE User_email = %s
+			""", [email])
+
+		r = c.fetchall()
+		c.close()
+		conn.close()
+		return jsonify(r)
+
+	except Exception as e:
+		return str(e)
+
 #####################
 ## DATA PROCESSING ##
 #####################
