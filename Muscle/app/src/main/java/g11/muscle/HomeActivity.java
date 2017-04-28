@@ -5,6 +5,7 @@ import android.os.Bundle;
 
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
+import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 
@@ -18,9 +19,10 @@ import android.net.Uri;
 
 public class HomeActivity extends AppCompatActivity implements PickExerciseFragment.OnFragmentInteractionListener,
         ExerciseHistoryFragment.OnFragmentInteractionListener, HomeFragment.OnFragmentInteractionListener
-        ,ProfileFragment.OnFragmentInteractionListener,MyPlanFragment.OnFragmentInteractionListener{
+        ,FeedFragment.OnFragmentInteractionListener,MyPlanFragment.OnFragmentInteractionListener{
 
     private VolleyProvider req_queue;
+    private FragmentManager manager;
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
             = new BottomNavigationView.OnNavigationItemSelectedListener() {
@@ -31,17 +33,17 @@ public class HomeActivity extends AppCompatActivity implements PickExerciseFragm
                 case R.id.navigation_home:
                     switchToFragmentHome();
                     return true;
-                case R.id.navigation_exerciseList:
-                    switchToFragmentPickExercise();
+                case R.id.navigation_myPlan:
+                    switchToFragmentMyPlan();
                     return true;
                 case R.id.navigation_exerciseHistory:
                     switchToFragmentExerciseHistory();
                     return true;
-                case R.id.navigation_myPlan:
-                    switchToFragmentMyPlan();
+                case R.id.navigation_Feed:
+                    switchToFragmentFeed();
                     return true;
-                case R.id.navigation_myProfile:
-                    switchToFragmentProfile();
+                case R.id.navigation_exerciseList:
+                    switchToFragmentPickExercise();
                     return true;
             }
             return false;
@@ -58,7 +60,7 @@ public class HomeActivity extends AppCompatActivity implements PickExerciseFragm
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
-
+        manager = getSupportFragmentManager();
         BottomNavigationView navigation = (BottomNavigationView) findViewById(R.id.navigation);
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
     }
@@ -89,33 +91,33 @@ public class HomeActivity extends AppCompatActivity implements PickExerciseFragm
                 .show();
     }
 
-    // Method used to switch to PickExercise Fragment
-    public void switchToFragmentPickExercise() {
-        FragmentManager manager = getSupportFragmentManager();
-        manager.beginTransaction().replace(R.id.content, new PickExerciseFragment()).commit();
-    }
-
-    // Method used to switch to Exercise History Fragment
-    public void switchToFragmentExerciseHistory() {
-        FragmentManager manager = getSupportFragmentManager();
-        manager.beginTransaction().replace(R.id.content, new ExerciseHistoryFragment()).commit();
-    }
-
     // Method used to switch to Exercise History Fragment
     public void switchToFragmentHome() {
-        FragmentManager manager = getSupportFragmentManager();
-        manager.beginTransaction().replace(R.id.content, new HomeFragment()).commit();
+        if(manager.findFragmentByTag("Home") == null)
+            manager.beginTransaction().replace(R.id.content, new HomeFragment(), "Home").commit();
+    }
+
+    // Method used to switch to PickExercise Fragment
+    public void switchToFragmentPickExercise() {
+        if(manager.findFragmentByTag("PickExercise") == null)
+            manager.beginTransaction().replace(R.id.content, new PickExerciseFragment(), "PickExercise").commit();
     }
 
     // Method used to switch to Exercise History Fragment
     public void switchToFragmentMyPlan() {
-        FragmentManager manager = getSupportFragmentManager();
-        manager.beginTransaction().replace(R.id.content, new MyPlanFragment()).commit();
+        if(manager.findFragmentByTag("MyPlan") == null)
+            manager.beginTransaction().replace(R.id.content, new MyPlanFragment(), "MyPlan").commit();
+    }
+
+    // Method used to switch to Feed Fragment
+    public void switchToFragmentFeed() {
+        if(manager.findFragmentByTag("Feed") == null)
+            manager.beginTransaction().replace(R.id.content, new FeedFragment(), "Feed").commit();
     }
 
     // Method used to switch to Exercise History Fragment
-    public void switchToFragmentProfile() {
-        FragmentManager manager = getSupportFragmentManager();
-        manager.beginTransaction().replace(R.id.content, new ProfileFragment()).commit();
+    public void switchToFragmentExerciseHistory() {
+        if(manager.findFragmentByTag("ExerciseHistory") == null)
+            manager.beginTransaction().replace(R.id.content, new ExerciseHistoryFragment(), "ExerciseHistory").commit();
     }
 }

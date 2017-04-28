@@ -684,7 +684,7 @@ def get_exercise_types_stats_of_user():
         conn = MySQLdb.connect(host='localhost', user='muscle', password='some_pass')
         c = conn.cursor(MySQLdb.cursors.DictCursor)
         c.execute('USE muscle2')                  
-        c.execute("SELECT count(ID), Kind FROM EXERCISE_HISTORY as eh join EXERCISE as e on e.Name=eh.Exercise_name WHERE eh.User_email = %s GROUP BY Kind;", [user_email])
+        c.execute("SELECT count(ID) AS count, Kind FROM EXERCISE_HISTORY as eh join EXERCISE as e on e.Name=eh.Exercise_name WHERE eh.User_email = %s GROUP BY Kind;", [user_email])
         fetched = c.fetchall()
         c.close()
         conn.close()
@@ -696,23 +696,23 @@ def get_exercise_types_stats_of_user():
 def get_exercise_muscle_stats_of_user():
 	try:
 		user_email = request.form['User_email']
-        conn = MySQLdb.connect(host='localhost', user='muscle', password='some_pass')
-        c = conn.cursor(MySQLdb.cursors.DictCursor)
-        c.execute('USE muscle2')                  
+		conn = MySQLdb.connect(host='localhost', user='muscle', password='some_pass')
+		c = conn.cursor(MySQLdb.cursors.DictCursor)
+		c.execute('USE muscle2')                  
 		c.execute("""
-				SELECT count(*), Kind
-				FROM (SELECT Name, Kind FROM EXERCISE) AS e
+				SELECT count(*) AS count, Muscle_name
+				FROM (SELECT Muscle_Name, Exercise_name FROM MUSCLES_WORKED) AS m_w
 				JOIN (SELECT Exercise_name, User_email FROM EXERCISE_HISTORY) AS e_h
-				ON e.Name = e_h.Exercise_name AND e_h.User_email = %s
-				GROUP BY Kind
+				ON m_w.Exercise_name = e_h.Exercise_name AND e_h.User_email = %s
+				GROUP BY Muscle_name
 				""", [user_email])
-        fetched = c.fetchall()
-        c.close()
-        conn.close()
-        return jsonify(fetched)
+		fetched = c.fetchall()
+		c.close()
+		conn.close()
+		return jsonify(fetched)
 
-    except Exception as e:
-        return str(e)
+	except Exception as e:
+		return str(e)
 
 @app.route('/get_muscle_groups', methods=['POST'])
 def get_muscle_groups():
@@ -762,7 +762,7 @@ def get_user_feed():
 			SELECT *
 			FROM EXERCISE_HISTORY
 			LEFT JOIN (SELECT Following FROM FOLLOWERS WHERE User_email = %s) AS f
-			ON EXERCISE_HISTORY.User_email = f.Following
+			ON EXERCISE_HISTORY.User_email = f.Following AND EXERCISE_HISTORY.Shared = 1
 			ORDER BY Date_Time
 			LIMIT %s
 			""", [user_email, amount])

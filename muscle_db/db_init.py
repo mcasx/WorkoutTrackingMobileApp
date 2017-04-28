@@ -93,6 +93,7 @@ c.execute('''CREATE TABLE EXERCISE_HISTORY(
     User_email VARCHAR(255) NOT NULL,
     Average_intensity FLOAT(3,1),
     Set_amount INTEGER,
+	Shared BIT,
     PRIMARY KEY(ID),
     FOREIGN KEY(Exercise_name) REFERENCES EXERCISE(Name),
     FOREIGN KEY(User_email) REFERENCES USER(Email)
@@ -106,7 +107,7 @@ c.execute('''CREATE TABLE SETS(
 	Weight INTEGER,
 	Intensity FLOAT(3,1),
 	Resting_Time TIME,
-        Intensity_deviation FLOAT,
+    Intensity_deviation FLOAT,
 	PRIMARY KEY (Exercise_history_id, Set_number),
 	FOREIGN KEY (Exercise_history_id) REFERENCES EXERCISE_HISTORY(ID)
 	)'''

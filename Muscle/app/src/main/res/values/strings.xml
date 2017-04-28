@@ -29,13 +29,16 @@
 
     <!-- Menu -->
     <string name="title_home">Home</string>
-    <string name="title_exerciseList">Exercise List</string>
-    <string name="title_exerciseHistory">History</string>
     <string name="title_myPlan">My Plan</string>
-    <string name="title_myProfile">My Profile</string>
-    <string name="title_dashboard">Dashboard</string>
-    <string name="title_notifications">Notifications</string>
+    <string name="title_exerciseHistory">History</string>
+    <string name="title_Feed">Feed</string>
+    <string name="title_exerciseList">Exercise List</string>
+
+    <!-- Profile -->
     <string name="dob_txt">Date of Birth</string>
     <string name="date_pick">Pick Date</string>
+
+    <!-- Feed -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 
 </resources>
