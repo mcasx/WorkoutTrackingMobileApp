@@ -703,7 +703,7 @@ def get_exercise_muscle_stats_of_user():
 				SELECT count(*) AS count, Muscle_name
 				FROM (SELECT Muscle_Name, Exercise_name FROM MUSCLES_WORKED) AS m_w
 				JOIN (SELECT Exercise_name, User_email FROM EXERCISE_HISTORY) AS e_h
-				ON m_w.Name = e_h.Exercise_name AND e_h.User_email = %s
+				ON m_w.Exercise_name = e_h.Exercise_name AND e_h.User_email = %s
 				GROUP BY Muscle_name
 				""", [user_email])
 		fetched = c.fetchall()
@@ -711,8 +711,8 @@ def get_exercise_muscle_stats_of_user():
 		conn.close()
 		return jsonify(fetched)
 
-    except Exception as e:
-        return str(e)
+	except Exception as e:
+		return str(e)
 
 @app.route('/get_muscle_groups', methods=['POST'])
 def get_muscle_groups():
