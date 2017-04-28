@@ -21,7 +21,9 @@
         <GridView
             android:id="@+id/groups"
             android:layout_width="match_parent"
-            android:layout_height="328dp" />
+            android:layout_height="wrap_content"
+            android:numColumns="3"
+            android:divider="@drawable/border" android:dividerHeight="2px"/>
 
         <TextView
             android:id="@+id/textView7"
@@ -32,10 +34,11 @@
             android:textAppearance="@style/Base.TextAppearance.AppCompat.Title"
             tools:ignore="HardcodedText" />
 
-        <GridView
+        <ListView
             android:id="@+id/recent_history"
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            android:layout_height="wrap_content"
+            android:divider="@drawable/border" android:dividerHeight="2px"/>
     </LinearLayout>
 
 </FrameLayout>

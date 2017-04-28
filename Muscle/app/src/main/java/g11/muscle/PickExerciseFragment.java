@@ -12,6 +12,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.GridView;
+import android.widget.ListView;
 
 import com.android.volley.Request;
 import com.android.volley.Response;
@@ -43,7 +44,7 @@ public class PickExerciseFragment extends Fragment {
 
     //GUI
     private GridView groupsView;
-    private GridView recent_historyView;
+    private ListView recent_historyView;
 
     // Used by Main Activity
     private OnFragmentInteractionListener mListener;
@@ -67,7 +68,7 @@ public class PickExerciseFragment extends Fragment {
         View fView = inflater.inflate(R.layout.fragment_pick_exercise, container, false);
         //GUI elements
         groupsView  = (GridView) fView.findViewById(R.id.groups);
-        recent_historyView = (GridView) fView.findViewById(R.id.recent_history);
+        recent_historyView = (ListView) fView.findViewById(R.id.recent_history);
         //UI Static elements
         createMuscleGroupGrid();
 
