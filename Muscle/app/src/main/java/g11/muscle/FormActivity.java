@@ -64,9 +64,9 @@ public class FormActivity extends AppCompatActivity {
     String email;
     String profile_pic;
     //Boolean imageChosen = false;
-    Button skipButton;
+    TextView skipButton;
     Button saveButton;
-    Button pickImage;
+    ImageView pickImage;
     Button pickDoB;
     RadioGroup radioGenderGroup;
     TextView dobInput;
@@ -82,9 +82,9 @@ public class FormActivity extends AppCompatActivity {
         weight_input_layout = (TextInputLayout) findViewById(R.id.weight_input_layout);
         name_input_layout = (TextInputLayout) findViewById(R.id.name_input_layout);
 
-        skipButton = ((Button) findViewById(R.id.skip_button));
+        skipButton = ((TextView) findViewById(R.id.skip_button));
         saveButton = ((Button) findViewById(R.id.save_button));
-        pickImage = ((Button) findViewById(R.id.pick_profile_img_btn));
+        pickImage = ((ImageView) findViewById(R.id.pick_profile_img_btn));
         imgView = ((ImageView)findViewById(R.id.imageView));
         pickDoB = ((Button) findViewById(R.id.button_bod_picker));
         dobInput = ((TextView) findViewById(R.id.textView));
@@ -321,9 +321,9 @@ public class FormActivity extends AppCompatActivity {
         }
         public void onDateSet(DatePicker view, int year, int month, int day) {
             // Do something with the date chosen by the user
-            TextView tv= (TextView) getActivity().findViewById(R.id.textView);
-            tv.setText(new StringBuilder().append(year).append("-")
-                    .append(month).append("-").append(day));
+            TextView tv= (TextView) getActivity().findViewById(R.id.button_bod_picker);
+            tv.setText(new StringBuilder().append(year).append("/")
+                    .append(month).append("/").append(day));
         }
     }
 

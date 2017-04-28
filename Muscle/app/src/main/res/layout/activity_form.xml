@@ -7,18 +7,14 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:scrollbars="none"
-    android:fillViewport="true"
-    android:layout_marginEnd="16dp"
-    android:layout_marginRight="0dp">
+    android:fillViewport="true">
 
 <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:layout_editor_absoluteY="81dp"
-    app:layout_constraintLeft_toRightOf="@+id/imageView"
-    android:layout_marginLeft="0dp">
+    app:layout_constraintLeft_toRightOf="@+id/imageView">
 
 
 
@@ -27,28 +23,32 @@
     <TextView
         android:id="@+id/textViewDob"
         android:text="@string/dob_txt"
-        android:layout_width="104dp"
-        android:layout_height="39dp"
-        android:layout_marginLeft="16dp"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintBaseline_toBaselineOf="@+id/textView"
-        app:layout_constraintRight_toLeftOf="@+id/textView"
-        android:layout_marginRight="8dp"
-        app:layout_constraintHorizontal_bias="0.0"
+        android:layout_width="81dp"
+        android:layout_height="22dp"
         android:layout_marginStart="8dp"
-        android:layout_marginEnd="8dp" />
+        android:layout_marginEnd="8dp"
+        android:layout_marginTop="22dp"
+        app:layout_constraintTop_toBottomOf="@+id/name_input_layout"
+        android:layout_marginLeft="8dp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        android:layout_marginRight="8dp"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintHorizontal_bias="0.798" />
 
     <Button
         android:id="@+id/button_bod_picker"
-        android:layout_width="100dp"
-        android:layout_height="48dp"
-        android:layout_marginRight="16dp"
+        android:layout_width="99dp"
+        android:layout_height="39dp"
         android:onClick="onClickPickDate"
-        android:text="@string/date_pick"
-        app:layout_constraintRight_toRightOf="parent"
+        android:text="____/__/__"
         android:layout_marginEnd="16dp"
-        android:layout_marginTop="16dp"
-        app:layout_constraintTop_toBottomOf="@+id/weight_input_layout" />
+        android:layout_marginTop="0dp"
+        app:layout_constraintTop_toBottomOf="@+id/textViewDob"
+        android:layout_marginLeft="8dp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        android:layout_marginRight="8dp"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintHorizontal_bias="0.853" />
 
     <TextView
         android:id="@+id/textView"
@@ -59,39 +59,16 @@
         android:layout_marginRight="8dp"
         android:layout_marginEnd="8dp" />
 
-
-    <ImageView
-        android:id="@+id/imageView"
-        android:layout_width="100dp"
-        android:layout_height="100dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginRight="8dp"
-        android:layout_marginTop="8dp"
-        android:cropToPadding="true"
-        app:layout_constraintRight_toLeftOf="@+id/pick_profile_img_btn"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <Button
-        android:id="@+id/pick_profile_img_btn"
-        android:layout_width="100dp"
-        android:layout_height="100dp"
-        android:layout_marginRight="16dp"
-        android:layout_marginTop="8dp"
-        android:onClick="onClickPickImage"
-        android:text="Pick Profile Picture"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        android:layout_marginEnd="16dp" />
-
     <android.support.design.widget.TextInputLayout
         android:id="@+id/name_input_layout"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
+        android:layout_width="322dp"
+        android:layout_height="71dp"
         app:errorEnabled="true"
-        app:layout_constraintHorizontal_bias="0.0"
+        android:layout_marginLeft="8dp"
         app:layout_constraintLeft_toLeftOf="parent"
+        android:layout_marginRight="8dp"
         app:layout_constraintRight_toRightOf="parent"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="7dp"
         app:layout_constraintTop_toBottomOf="@+id/pick_profile_img_btn">
 
         <android.support.design.widget.TextInputEditText
@@ -104,97 +81,28 @@
             android:layout_marginStart="8dp"
             android:ems="10"
             android:hint="Name"
-            android:maxLength="128"
             android:inputType="text"
+            android:maxLength="128"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent" />
         <!--android:imeOptions="actionDone"-->
 
     </android.support.design.widget.TextInputLayout>
 
-    <android.support.design.widget.TextInputLayout
-        android:id="@+id/height_input_layout"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        app:errorEnabled="true"
-        app:layout_constraintHorizontal_bias="1.0"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        android:layout_marginTop="16dp"
-        app:layout_constraintTop_toBottomOf="@+id/radioSex">
 
-        <android.support.design.widget.TextInputEditText
-            android:id="@+id/height_input"
-            android:layout_width="match_parent"
-            android:layout_height="49dp"
-            android:layout_marginLeft="8dp"
-            android:layout_marginRight="8dp"
-            android:layout_marginTop="8dp"
-            android:digits="0123456789"
-            android:maxLength="3"
-            android:ems="10"
-            android:hint="@string/height_hint"
-            android:inputType="number"
-            android:imeOptions="actionNext"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-    </android.support.design.widget.TextInputLayout>
-
-    <android.support.design.widget.TextInputLayout
-        android:id="@+id/weight_input_layout"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        app:errorEnabled="true"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/height_input_layout">
-
-        <android.support.design.widget.TextInputEditText
-            android:id="@+id/weight_input"
-            android:layout_width="match_parent"
-            android:layout_height="49dp"
-            android:layout_marginEnd="8dp"
-            android:layout_marginLeft="8dp"
-            android:layout_marginRight="8dp"
-            android:layout_marginStart="8dp"
-            android:digits="0123456789."
-            android:ems="10"
-            android:hint="@string/weight_hint"
-            android:maxLength="6"
-            android:inputType="number"
-            android:imeOptions="actionDone"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toRightOf="parent" />
-
-    </android.support.design.widget.TextInputLayout>
-
-    <Button
-        android:id="@+id/skip_button"
-        android:layout_width="125dp"
-        android:layout_height="48dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginRight="16dp"
-        android:layout_marginTop="16dp"
-        android:onClick="onClickSkip"
-        android:text="Skip"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView"
-        app:layout_constraintBottom_toBottomOf="parent"
-        android:layout_marginBottom="8dp" />
 
     <Button
         android:id="@+id/save_button"
-        android:layout_width="125dp"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="8dp"
-        android:layout_marginStart="16dp"
+        android:gravity="center"
+        android:layout_width="82dp"
+        android:layout_height="39dp"
         android:onClick="onClickSave"
         android:text="Save"
-        app:layout_constraintBaseline_toBaselineOf="@+id/skip_button"
+        android:layout_marginRight="8dp"
+        app:layout_constraintRight_toRightOf="parent"
+        android:layout_marginTop="31dp"
+        app:layout_constraintTop_toBottomOf="@+id/weight_input_layout"
+        android:layout_marginLeft="8dp"
         app:layout_constraintLeft_toLeftOf="parent" />
 
     <ProgressBar
@@ -215,38 +123,129 @@
 
     <RadioGroup
         android:id="@+id/radioSex"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
+        android:layout_width="187dp"
+        android:layout_height="39dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginTop="42dp"
         android:orientation="horizontal"
         android:weightSum="1"
-        app:layout_constraintTop_toBottomOf="@+id/name_input_layout"
-        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintHorizontal_bias="0.156"
         app:layout_constraintLeft_toLeftOf="parent"
-        android:layout_marginTop="16dp"
-        android:layout_marginLeft="16dp"
-        android:layout_marginRight="16dp">
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/name_input_layout">
 
         <RadioButton
             android:id="@+id/radioMale"
             android:layout_width="50dp"
-            android:layout_height="match_parent"
-            android:checked="true"
-            android:layout_weight="0.5"
+            android:layout_height="wrap_content"
             android:layout_marginLeft="0dp"
+            android:layout_weight="0.31"
+            android:checked="true"
             android:text="Male"
             app:layout_constraintBaseline_toBaselineOf="@+id/radioFemale"
             app:layout_constraintRight_toLeftOf="@+id/radioFemale" />
 
         <RadioButton
             android:id="@+id/radioFemale"
-            android:layout_width="50dp"
-            android:layout_height="match_parent"
-            android:layout_weight="0.5"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_marginRight="0dp"
             android:text="Female"
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/weight_input_layout" />
     </RadioGroup>
+
+    <ImageView
+        android:id="@+id/pick_profile_img_btn"
+        android:onClick="onClickPickImage"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:srcCompat="@drawable/ic_profile"
+        android:layout_marginLeft="8dp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        android:layout_marginRight="8dp"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_marginTop="35dp" />
+
+    <TextView
+        android:id="@+id/skip_button"
+        android:onClick="onClickSkip"
+        android:gravity="center"
+        android:layout_width="75dp"
+        android:layout_height="30dp"
+        android:text="Skip"
+        android:layout_marginTop="24dp"
+        app:layout_constraintTop_toBottomOf="@+id/save_button"
+        android:layout_marginRight="8dp"
+        app:layout_constraintRight_toRightOf="parent"
+        android:layout_marginLeft="8dp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintHorizontal_bias="0.501" />
+
+    <android.support.design.widget.TextInputLayout
+        android:id="@+id/height_input_layout"
+        android:layout_width="120dp"
+        android:layout_height="75dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginTop="23dp"
+        app:errorEnabled="true"
+        app:layout_constraintHorizontal_bias="0.16"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/radioSex">
+
+        <android.support.design.widget.TextInputEditText
+            android:id="@+id/height_input"
+            android:layout_width="match_parent"
+            android:layout_height="49dp"
+            android:layout_marginLeft="8dp"
+            android:layout_marginRight="8dp"
+            android:layout_marginTop="8dp"
+            android:digits="0123456789"
+            android:ems="10"
+            android:hint="@string/height_hint"
+            android:imeOptions="actionNext"
+            android:inputType="number"
+            android:maxLength="3"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+    </android.support.design.widget.TextInputLayout>
+
+    <android.support.design.widget.TextInputLayout
+        android:id="@+id/weight_input_layout"
+        android:layout_width="125dp"
+        android:layout_height="77dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginTop="21dp"
+        app:errorEnabled="true"
+        app:layout_constraintHorizontal_bias="0.799"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/button_bod_picker">
+
+        <android.support.design.widget.TextInputEditText
+            android:id="@+id/weight_input"
+            android:layout_width="match_parent"
+            android:layout_height="49dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginLeft="8dp"
+            android:layout_marginRight="8dp"
+            android:layout_marginStart="8dp"
+            android:digits="0123456789."
+            android:ems="10"
+            android:hint="@string/weight_hint"
+            android:imeOptions="actionDone"
+            android:inputType="number"
+            android:maxLength="6"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent" />
+    </android.support.design.widget.TextInputLayout>
 
 
 </android.support.constraint.ConstraintLayout>
