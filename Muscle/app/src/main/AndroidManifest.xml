@@ -19,9 +19,7 @@
         android:theme="@style/Muscle">
 
         <!--android:theme="@style/Theme.AppCompat" was added for hot fix, fell free to change it-->
-        <activity android:name=".ExerciseActivity" android:theme="@style/Theme.AppCompat.NoActionBar">
-
-        </activity>
+        <activity android:name=".ExerciseActivity" android:theme="@style/Theme.AppCompat.NoActionBar"/>
         <activity android:name=".ResetPassActivity" android:theme="@style/Theme.AppCompat.NoActionBar"/>
         <activity android:name=".PickExerciseActivity" android:theme="@style/Theme.AppCompat.NoActionBar"/>
         <activity android:name=".GroupExercisesActivity" android:theme="@style/Theme.AppCompat.NoActionBar"/>
@@ -34,7 +32,6 @@
         <activity android:name=".HomeActivity" android:theme="@style/Theme.AppCompat.NoActionBar"/>
         <activity android:name=".RegisterActivity" android:theme="@style/Theme.AppCompat.NoActionBar"/>
         <activity android:name=".FeedBackActivity" android:theme="@style/Theme.AppCompat.NoActionBar"/>
-        <activity android:name=".FormActivity" android:theme="@style/Theme.AppCompat" android:label="Settings" />8
+        <activity android:name=".FormActivity" android:theme="@style/Theme.AppCompat.NoActionBar"/>
     </application>
-
 </manifest>
