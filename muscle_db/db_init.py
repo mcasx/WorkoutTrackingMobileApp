@@ -93,7 +93,7 @@ c.execute('''CREATE TABLE EXERCISE_HISTORY(
     User_email VARCHAR(255) NOT NULL,
     Average_intensity FLOAT(3,1),
     Set_amount INTEGER,
-	Shared BIT,
+	Shared INTEGER NOT NULL,
     PRIMARY KEY(ID),
     FOREIGN KEY(Exercise_name) REFERENCES EXERCISE(Name),
     FOREIGN KEY(User_email) REFERENCES USER(Email)

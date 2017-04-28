@@ -752,7 +752,7 @@ def get_weight_history():
 def get_user_feed():
 	try:
 		user_email = request.form['user_email']
-		amount = request.form['amount']
+		amount = int(request.form['amount'])
 
 		conn = MySQLdb.connect(host='localhost', user='muscle', password='some_pass', database='muscle')
 		c = conn.cursor(MySQLdb.cursors.DictCursor)
@@ -761,7 +761,7 @@ def get_user_feed():
 		c.execute("""
 			SELECT *
 			FROM EXERCISE_HISTORY
-			LEFT JOIN (SELECT Following FROM FOLLOWERS WHERE User_email = %s) AS f
+			JOIN (SELECT Following FROM FOLLOWERS WHERE User_email = %s) AS f
 			ON EXERCISE_HISTORY.User_email = f.Following AND EXERCISE_HISTORY.Shared = 1
 			ORDER BY Date_Time
 			LIMIT %s
