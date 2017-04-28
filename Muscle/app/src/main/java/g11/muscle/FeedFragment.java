@@ -1,5 +1,6 @@
 package g11.muscle;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
@@ -12,7 +13,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.BaseAdapter;
 import android.widget.GridView;
+import android.widget.TextView;
 
 import com.android.volley.Request;
 import com.android.volley.Response;
@@ -147,7 +150,6 @@ public class FeedFragment extends Fragment {
 
                         // Initialization of history array
                         feedItem[] history = new feedItem[0];
-                        System.out.println(response);
                         try {
                             JSONArray jsonArray = new JSONArray(response);
                             //From the response create the history array
@@ -166,7 +168,7 @@ public class FeedFragment extends Fragment {
 
                         // Define the groupView adapter
 
-                        ArrayAdapter<feedItem> adapter = new ArrayAdapter<>(getActivity(), android.R.layout.simple_list_item_1, history);
+                        FeedViewAdapter adapter = new FeedViewAdapter(getActivity(), history);
                         feedView.setAdapter(adapter);
 
                         // Set the listeners on the list items
@@ -211,15 +213,82 @@ public class FeedFragment extends Fragment {
                 exercise_name = jo.getString("Exercise_name");
                 user = jo.getString("User_email");
                 set_amount = jo.getInt("Set_amount");
-                datetime = jo.getString("Date_Time");
+                datetime = jo.getString("Date_Time").substring(0,15);
             }catch(JSONException je){
                 Log.e(TAG, "Exception creating feedItem", je);
             }
         }
 
+        public String getExercise_name() {
+            return exercise_name;
+        }
+
+        public String getUser() {
+            return user;
+        }
+
+        public int getSet_amount() {
+            return set_amount;
+        }
+
+        public String getDatetime() {
+            return datetime;
+        }
+    }
+
+    public class FeedViewAdapter extends BaseAdapter {
+
+        public feedItem[] list;
+        Activity activity;
+        TextView txtExercise;
+        TextView txtUser;
+        TextView txtDate;
+
+        public FeedViewAdapter(Activity activity,feedItem[] list){
+            super();
+            this.activity=activity;
+            this.list=list;
+        }
+
         @Override
-        public String toString(){
-            return this.user + " did " + this.set_amount + " sets of " + this.exercise_name + "!\n" + this.datetime;
+        public int getCount() {
+            // TODO Auto-generated method stub
+            return list.length;
+        }
+
+        @Override
+        public Object getItem(int position) {
+            // TODO Auto-generated method stub
+            return list[position];
+        }
+
+        @Override
+        public long getItemId(int position) {
+            // TODO Auto-generated method stub
+            return 0;
+        }
+
+
+
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            LayoutInflater inflater=activity.getLayoutInflater();
+
+            if(convertView == null){
+
+                convertView=inflater.inflate(R.layout.feed_row, null);
+
+                txtExercise=(TextView) convertView.findViewById(R.id.exercise);
+                txtUser=(TextView) convertView.findViewById(R.id.user);
+                txtDate=(TextView) convertView.findViewById(R.id.date);
+            }
+
+            feedItem item=list[position];
+            txtExercise.setText(item.getSet_amount() + " sets of " + item.getExercise_name());
+            txtUser.setText(item.getUser());
+            txtDate.setText(item.getDatetime());
+
+            return convertView;
         }
     }
 }
