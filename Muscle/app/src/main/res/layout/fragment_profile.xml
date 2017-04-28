@@ -10,12 +10,12 @@
         android:orientation="vertical">
 
         <com.github.mikephil.charting.charts.RadarChart
-            android:id="@+id/chart1"
+            android:id="@+id/rChart"
             android:layout_width="match_parent"
             android:layout_height="265dp" />
 
         <com.github.mikephil.charting.charts.LineChart
-            android:id="@+id/chart"
+            android:id="@+id/lChart"
             android:layout_width="match_parent"
             android:layout_height="300dp" />
 
