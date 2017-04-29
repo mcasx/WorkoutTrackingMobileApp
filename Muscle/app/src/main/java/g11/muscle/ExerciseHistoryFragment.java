@@ -165,8 +165,8 @@ public class ExerciseHistoryFragment extends Fragment {
                                     Log.e(TAG, je.toString());
                                 }
 
-                                Intent intent = new Intent(getActivity(), ExerciseActivity.class);
-                                intent.putExtra("exercise_name", exercise_name);
+                                DetailedExerciseHistoryActivity.exerciseHistoryItem = (JSONObject) parent.getAdapter().getItem(position);
+                                Intent intent = new Intent(getActivity(), DetailedExerciseHistoryActivity.class);
                                 intent.putExtra("email", email);
 
                                 startActivity(intent);
@@ -201,4 +201,5 @@ public class ExerciseHistoryFragment extends Fragment {
         // Needed to compile
         void onFragmentInteraction(Uri uri);
     }
+
 }
