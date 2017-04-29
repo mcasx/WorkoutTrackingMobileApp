@@ -193,7 +193,7 @@ public class ExerciseHistoryFragment extends Fragment {
         };
 
         // Add the request to the RequestQueue
-        VolleyProvider.getInstance(getActivity()).addRequest(StrHistReq);
+        req_queue.addRequest(StrHistReq);
     }
 
 

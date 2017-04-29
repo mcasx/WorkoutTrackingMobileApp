@@ -3,6 +3,7 @@ package g11.muscle;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -56,7 +57,7 @@ public class FeedFragment extends Fragment {
     private ArrayAdapter<String> people_list_adapter;
 
     //GUI
-    private GridView feedView;
+    private ListView feedView;
     private ListView people_listView;
     private SearchView search_barView;
 
@@ -95,7 +96,7 @@ public class FeedFragment extends Fragment {
                              Bundle savedInstanceState) {
         View fView = inflater.inflate(R.layout.fragment_feed, container, false);
         //GUI elements
-        feedView = (GridView) fView.findViewById(R.id.feed);
+        feedView = (ListView) fView.findViewById(R.id.feed);
         people_listView = (ListView) fView.findViewById(R.id.people_list);
 
         people_list_adapter = new ArrayAdapter<>(getActivity(), android.R.layout.simple_list_item_1);
@@ -108,6 +109,7 @@ public class FeedFragment extends Fragment {
             public boolean onQueryTextSubmit(String query) {
                 search_queue.getQueue().cancelAll(getActivity());
                 searchResponse();
+                search_barView.onActionViewCollapsed();
                 return true;
             }
 
@@ -371,6 +373,8 @@ public class FeedFragment extends Fragment {
                 txtExercise=(TextView) convertView.findViewById(R.id.exercise);
                 txtUser=(TextView) convertView.findViewById(R.id.user);
                 txtDate=(TextView) convertView.findViewById(R.id.date);
+                txtUser.setTextColor(Color.LTGRAY);
+                txtDate.setTextColor(Color.LTGRAY);
             }
 
             feedItem item=list[position];
