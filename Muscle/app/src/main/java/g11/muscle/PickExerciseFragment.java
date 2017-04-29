@@ -71,7 +71,7 @@ public class PickExerciseFragment extends Fragment {
         recent_historyView = (ListView) fView.findViewById(R.id.recent_history);
         //UI Static elements
         createMuscleGroupGrid();
-
+        createExerciseHistoryList();
         // Inflate the layout for this fragment
         return fView;
     }
@@ -80,7 +80,7 @@ public class PickExerciseFragment extends Fragment {
     public void onStart() {
         super.onStart();
         //UI Dynamic elements
-        createExerciseHistoryList();
+
     }
 
     @Override
@@ -110,6 +110,7 @@ public class PickExerciseFragment extends Fragment {
      * "http://developer.android.com/training/basics/fragments/communicating.html"
      * >Communicating with Other Fragments</a> for more information.
      */
+
     public interface OnFragmentInteractionListener {
         // Needed to compile
         void onFragmentInteraction(Uri uri);

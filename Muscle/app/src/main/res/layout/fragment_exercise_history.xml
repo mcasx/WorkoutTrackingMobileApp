@@ -9,6 +9,12 @@
         android:layout_height="match_parent"
         android:orientation="vertical">
 
+        <ListView
+            android:id="@+id/recent_history"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:divider="@drawable/border" android:dividerHeight="2dp"/>
+
         <!-- HERE -->
     </LinearLayout>
 
