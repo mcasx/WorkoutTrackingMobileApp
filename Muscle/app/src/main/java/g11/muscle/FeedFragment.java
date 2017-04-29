@@ -4,10 +4,15 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v7.widget.RecyclerView;
+import android.util.Base64;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -16,6 +21,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
 import android.widget.GridView;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.SearchView;
 import android.widget.TextView;
@@ -55,6 +61,7 @@ public class FeedFragment extends Fragment {
     private VolleyProvider req_queue;
     private VolleyProvider search_queue;
     private ArrayAdapter<String> people_list_adapter;
+    private HashMap<String,Bitmap> profilePic = new HashMap<>();
 
     //GUI
     private ListView feedView;
@@ -96,6 +103,7 @@ public class FeedFragment extends Fragment {
                              Bundle savedInstanceState) {
         View fView = inflater.inflate(R.layout.fragment_feed, container, false);
         //GUI elements
+
         feedView = (ListView) fView.findViewById(R.id.feed);
         people_listView = (ListView) fView.findViewById(R.id.people_list);
 
@@ -152,11 +160,13 @@ public class FeedFragment extends Fragment {
                                 people_list_adapter.addAll(history);
 
                                 // Set the listeners on the list items
+                                /*
                                 feedView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                                     public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
                                         //Go to exercise page
                                     }
                                 });
+                                */
                             }
                         },
                         new Response.ErrorListener() {
@@ -264,11 +274,13 @@ public class FeedFragment extends Fragment {
                         feedView.setAdapter(adapter);
 
                         // Set the listeners on the list items
+                        /*
                         feedView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                             public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
                                 //Go to exercise page
                             }
                         });
+                        */
                     }
                 },
                 new Response.ErrorListener() {
@@ -294,19 +306,76 @@ public class FeedFragment extends Fragment {
         req_queue.addRequest(StrFeedReq);
     }
 
-    private class feedItem{
+    private Bitmap getUserImage(String user, int position){
+        Bitmap profile = profilePic.get(user);
+        final String user_key = user;
+        final int feedrowPosition = position;
+        if(profile == null){
+            String url = "https://138.68.158.127/get_user_profile_pic";
+            //Create the user profile request
+            StringRequest strProfileImgReq = new StringRequest(Request.Method.POST, url,
+                    new Response.Listener<String>() {
+                        @Override
+                        public void onResponse(String response) {
+
+                            if (response.equals("User profile image not found"))
+                                return;
+
+                            try {
+                                //JSONArray jsonArray = new JSONArray(response);
+                                JSONObject jsonObject = new JSONObject(response);
+                                String b64picture = (String) jsonObject.get("Profile");
+                                //From the response create the history array
+                                //decode base64 string to image
+                                byte[] imageBytes = Base64.decode(b64picture, Base64.DEFAULT);
+                                Bitmap user_img = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
+                                profilePic.put(user_key, user_img);
+                                Log.i("TG", user_key);
+                                ((BaseAdapter)feedView.getAdapter()).notifyDataSetChanged();
+                                //image.setImageBitmap(decodedImage);
+
+
+                            } catch (JSONException e2) {
+                                e2.printStackTrace();
+                            }
+                        }
+                    },
+                    new Response.ErrorListener() {
+                        @Override
+                        public void onErrorResponse(VolleyError error) {
+                            //Handle error response
+                            System.out.println(error.toString());
+                        }
+                    }
+            ) {
+                // use params are specified here
+                @Override
+                protected Map<String, String> getParams() {
+                    Map<String, String> params = new HashMap<>();
+                    params.put("email", user_key);
+                    return params;
+                }
+            };
+            //Queue the request
+            req_queue.addRequest(strProfileImgReq);
+
+        }
+        return profile;
+    }
+
+    private class feedItem {
         private String exercise_name;
         private String user;
         private int set_amount;
         private String datetime;
 
-        public feedItem(JSONObject jo){
+        public feedItem(JSONObject jo) {
             try {
                 exercise_name = jo.getString("Exercise_name");
                 user = jo.getString("User_email");
                 set_amount = jo.getInt("Set_amount");
-                datetime = jo.getString("Date_Time").substring(0,15);
-            }catch(JSONException je){
+                datetime = jo.getString("Date_Time").substring(0, 15);
+            } catch (JSONException je) {
                 Log.e(TAG, "Exception creating feedItem", je);
             }
         }
@@ -326,6 +395,7 @@ public class FeedFragment extends Fragment {
         public String getDatetime() {
             return datetime;
         }
+
     }
 
     public class FeedViewAdapter extends BaseAdapter {
@@ -335,8 +405,15 @@ public class FeedFragment extends Fragment {
         TextView txtExercise;
         TextView txtUser;
         TextView txtDate;
+        ImageView imgUser;
 
-        public FeedViewAdapter(Activity activity,feedItem[] list){
+        @Override
+        public void notifyDataSetChanged() {
+            super.notifyDataSetChanged();
+        }
+
+
+        public FeedViewAdapter(Activity activity, feedItem[] list){
             super();
             this.activity=activity;
             this.list=list;
@@ -375,12 +452,18 @@ public class FeedFragment extends Fragment {
                 txtDate=(TextView) convertView.findViewById(R.id.date);
                 txtUser.setTextColor(Color.LTGRAY);
                 txtDate.setTextColor(Color.LTGRAY);
+
+                imgUser=(ImageView) convertView.findViewById(R.id.user_pic);
+
             }
 
             feedItem item=list[position];
             txtExercise.setText(item.getSet_amount() + " sets of " + item.getExercise_name());
             txtUser.setText(item.getUser());
             txtDate.setText(item.getDatetime());
+            Bitmap profile = getUserImage(item.getUser(), position);
+            if (profile != null)
+                imgUser.setImageBitmap(profile);
 
             return convertView;
         }

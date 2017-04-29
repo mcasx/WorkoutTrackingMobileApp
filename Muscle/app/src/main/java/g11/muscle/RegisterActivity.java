@@ -124,7 +124,7 @@ public class RegisterActivity extends AppCompatActivity {
 
         String addUserUrl = "/add_user";
         //Create the list items through a request
-        MuscleDbHelper dbHelper= new MuscleDbHelper(getApplicationContext());
+        //MuscleDbHelper dbHelper= new MuscleDbHelper(getApplicationContext());
 
 
 
