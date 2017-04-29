@@ -871,6 +871,45 @@ def get_local_db():
     except Exception as e:
         raise
 
+
+ @app.route('/get_user_profile_pic', methods=['POST'])
+def get_user_profile_pic():
+    try:
+ 
+        email = request.form['email']
+        conn = MySQLdb.connect(host='localhost', user='muscle', password='some_pass')
+        c = conn.cursor(MySQLdb.cursors.DictCursor)
+        c.execute('USE muscle2')
+ 
+ 
+        c.execute("SELECT Profile_image FROM USER WHERE Email = %s", [email])
+ 
+        fetched = c.fetchone()['Profile_image']
+        print(fetched)
+ 
+        if(not fetched):
+            return "User profile image not found"
+       
+        img_dir = "user_profile_pics/"
+        img_path = fetched
+        #img_path = "user_{:0>{width}}_profile_pic".format(ID,width=11)
+ 
+ 
+        #get image in user_profile_pics
+        with open(img_dir + img_path, "rb") as image_file:
+            string_img = base64.b64encode(image_file.read()).decode()
+
+        res = make_response(json.dumps({"Profile" : string_img}))       
+        res.mimetype = 'application/json'
+        return res       
+ 
+        c.close()
+        conn.close()
+ 
+    except Exception as e:
+        return str(e)
+       
+
 @app.route('/get_users_like', methods=['POST'])
 def get_users_like():
 	try:
