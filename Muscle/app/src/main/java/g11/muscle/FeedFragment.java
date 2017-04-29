@@ -16,6 +16,7 @@ import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
 import android.widget.GridView;
 import android.widget.ListView;
+import android.widget.SearchView;
 import android.widget.TextView;
 
 import com.android.volley.Request;
@@ -51,11 +52,13 @@ public class FeedFragment extends Fragment {
     private OnFragmentInteractionListener mListener;
 
     private VolleyProvider req_queue;
+    private VolleyProvider search_queue;
+    private ArrayAdapter<String> people_list_adapter;
 
     //GUI
     private GridView feedView;
-    private TextView followingTitleView;
-    private ListView followingView;
+    private ListView people_listView;
+    private SearchView search_barView;
 
     public FeedFragment() {
         // Required empty public constructor
@@ -93,8 +96,90 @@ public class FeedFragment extends Fragment {
         View fView = inflater.inflate(R.layout.fragment_feed, container, false);
         //GUI elements
         feedView = (GridView) fView.findViewById(R.id.feed);
-        followingTitleView = (TextView) fView.findViewById(R.id.following_title);
-        followingView = (ListView) fView.findViewById(R.id.following);
+        people_listView = (ListView) fView.findViewById(R.id.people_list);
+
+        people_list_adapter = new ArrayAdapter<>(getActivity(), android.R.layout.simple_list_item_1);
+        people_listView.setAdapter(people_list_adapter);
+
+        search_barView = (SearchView) fView.findViewById(R.id.search_bar);
+        search_queue = VolleyProvider.getInstance(getActivity());
+        search_barView.setOnQueryTextListener(new SearchView.OnQueryTextListener(){
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                search_queue.getQueue().cancelAll(getActivity());
+                searchResponse();
+                return true;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                search_queue.getQueue().cancelAll(getActivity());
+                searchResponse();
+                return true;
+            }
+
+            private void searchResponse(){
+                String url = "https://138.68.158.127/get_users_like";
+
+                //Create the exercise history request
+                StringRequest StrUsersLikeReq = new StringRequest(Request.Method.POST,url,
+                        new Response.Listener<String>() {
+                            @Override
+                            public void onResponse(String response) {
+
+                                // Initialization of history array
+                                String[] history = new String[0];
+                                try {
+                                    JSONArray jsonArray = new JSONArray(response);
+                                    //From the response create the history array
+                                    history = new String[jsonArray.length()];
+                                    try {
+                                        for (int i = 0; i < jsonArray.length(); i++) {
+                                            JSONObject jo = jsonArray.getJSONObject(i);
+                                            history[i] = jo.getString("Email");
+                                        }
+                                    } catch (JSONException je) {
+                                        Log.e(TAG, je.toString());
+                                    }
+                                }catch (JSONException e2){
+                                    e2.printStackTrace();
+                                }
+
+                                // Define the groupView adapter
+                                people_list_adapter.clear();
+                                people_list_adapter.addAll(history);
+
+                                // Set the listeners on the list items
+                                feedView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                                    public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
+                                        //Go to exercise page
+                                    }
+                                });
+                            }
+                        },
+                        new Response.ErrorListener() {
+                            @Override
+                            public void onErrorResponse(VolleyError error) {
+                                //Handle error response
+                                System.out.println(error.toString());
+                            }
+                        }
+                ){
+                    // use params are specified here
+                    @Override
+                    protected Map<String, String> getParams()
+                    {
+                        Map<String, String>  params = new HashMap<>();
+                        params.put("email", search_barView.getQuery().toString());
+                        return params;
+                    }
+                };
+
+                //Queue the request
+                search_queue.addRequest(StrUsersLikeReq);
+            }
+        });
+
         // Inflate the layout for this fragment
         return fView;
     }
@@ -103,8 +188,6 @@ public class FeedFragment extends Fragment {
     public void onStart(){
         super.onStart();
         createUserFeed();
-        createFollowingTitle();
-        createFollowingList();
     }
 
     // TODO: Rename method, update argument and hook method into UI event
@@ -207,111 +290,6 @@ public class FeedFragment extends Fragment {
 
         //Queue the request
         req_queue.addRequest(StrFeedReq);
-    }
-
-    private void createFollowingTitle(){
-        String url = "https://138.68.158.127/get_user_following_amount";
-
-        //Create the exercise history request
-        StringRequest StrAmountReq = new StringRequest(Request.Method.POST,url,
-                new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
-
-                        // Initialization of history array
-                        String title = "Following ";
-                        try {
-                            title += String.valueOf(new JSONArray(response).getJSONObject(0).getInt("Amount")) + " users:";
-                        } catch (JSONException je) {
-                            Log.e(TAG, je.toString());
-                        }
-
-                        // Define the title
-                        followingTitleView.setText(title);
-                    }
-                },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        //Handle error response
-                        System.out.println(error.toString());
-                    }
-                }
-        ){
-            // use params are specified here
-            @Override
-            protected Map<String, String> getParams()
-            {
-                Map<String, String>  params = new HashMap<>();
-                params.put("user_email", email);
-                return params;
-            }
-        };
-
-        //Queue the request
-        req_queue.addRequest(StrAmountReq);
-    }
-
-    private void createFollowingList(){
-        String url = "https://138.68.158.127/get_user_following";
-
-        //Create the exercise history request
-        StringRequest StrFollowingReq = new StringRequest(Request.Method.POST,url,
-                new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
-
-                        // Initialization of history array
-                        String[] history = new String[0];
-                        try {
-                            JSONArray jsonArray = new JSONArray(response);
-                            //From the response create the history array
-                            history = new String[jsonArray.length()];
-                            try {
-                                for (int i = 0; i < jsonArray.length(); i++) {
-                                    JSONObject jo = jsonArray.getJSONObject(i);
-                                    history[i] = jo.getString("Following");
-                                }
-                            } catch (JSONException je) {
-                                Log.e(TAG, je.toString());
-                            }
-                        }catch (JSONException e2){
-                            e2.printStackTrace();
-                        }
-
-                        // Define the groupView adapter
-
-                        ArrayAdapter<String> adapter = new ArrayAdapter<>(getActivity(), android.R.layout.simple_list_item_1, history);
-                        followingView.setAdapter(adapter);
-
-                        // Set the listeners on the list items
-                        feedView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                            public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
-                                //Go to exercise page
-                            }
-                        });
-                    }
-                },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        //Handle error response
-                        System.out.println(error.toString());
-                    }
-                }
-        ){
-            // use params are specified here
-            @Override
-            protected Map<String, String> getParams()
-            {
-                Map<String, String>  params = new HashMap<>();
-                params.put("user_email", email);
-                return params;
-            }
-        };
-
-        //Queue the request
-        req_queue.addRequest(StrFollowingReq);
     }
 
     private class feedItem{

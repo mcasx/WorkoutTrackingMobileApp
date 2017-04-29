@@ -871,6 +871,30 @@ def get_local_db():
     except Exception as e:
         raise
 
+@app.route('/get_users_like', methods=['POST'])
+def get_users_like():
+	try:
+		user_email = request.form['email']
+		
+		conn = MySQLdb.connect(host='localhost', user='muscle', password='some_pass', database='muscle')
+		c = conn.cursor(MySQLdb.cursors.DictCursor)
+		
+		c.execute('USE muscle2')
+		c.execute("""
+			SELECT Email
+			FROM USER
+			WHERE Email LIKE %s
+			LIMIT 20
+			""", ['%'+user_email+'%'])
+
+		r = c.fetchall()
+		c.close()
+		conn.close()
+		return jsonify(r)
+
+	except Exception as e:
+		return str(e)
+
 #####################
 ##   SOCIAL FEED   ##
 #####################
