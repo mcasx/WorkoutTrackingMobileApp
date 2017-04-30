@@ -36,7 +36,18 @@
 
     <!-- Profile -->
     <string name="dob_txt">Date of Birth</string>
-    <string name="date_pick">Pick Date</string>
+    <string name="profile_pic">Profile Pic</string>
+    <string name="profile_changePic">Change Photo</string>
+    <string name="profile_date">____/__/__</string>
+    <string name="profile_name">Name</string>
+    <string name="profile_height">Height (cm)</string>
+    <string name="profile_weight">Weight (Kg)</string>
+    <string name="profile_skip">Skip</string>
+    <string name="profile_save">Save</string>
+    <string name="profile_male">Male</string>
+    <string name="profile_female">Female</string>
+
+
 
     <!-- Feed -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
