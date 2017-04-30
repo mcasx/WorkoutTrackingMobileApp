@@ -37,6 +37,7 @@ import java.util.Map;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
+import android.widget.TextView;
 
 public class DetailedExerciseHistoryActivity extends AppCompatActivity {
 
@@ -49,7 +50,6 @@ public class DetailedExerciseHistoryActivity extends AppCompatActivity {
     private TabLayout tabLayout;
     private ViewPager viewPager;
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -58,17 +58,22 @@ public class DetailedExerciseHistoryActivity extends AppCompatActivity {
         //setSupportActionBar(toolbar);
 
         TabLayout tabLayout = (TabLayout) findViewById(R.id.tab_layout);
-        tabLayout.addTab(tabLayout.newTab().setText("Tab 1"));
-        tabLayout.addTab(tabLayout.newTab().setText("Tab 2"));
-        tabLayout.addTab(tabLayout.newTab().setText("Tab 3"));
+        tabLayout.addTab(tabLayout.newTab().setText("Exercise"));
+        tabLayout.addTab(tabLayout.newTab().setText("Details"));
         tabLayout.setTabGravity(TabLayout.GRAVITY_FILL);
 
-        final ViewPager viewPager = (ViewPager) findViewById(R.id.pager);
+        try {
+            setTitle(exerciseHistoryItem.getString("Exercise_name"));
+        }catch (JSONException je) {
+            Log.e(TAG, je.toString());
+        }
+
+            final ViewPager viewPager = (ViewPager) findViewById(R.id.pager);
         final PagerAdapter adapter = new PagerAdapter
                 (getSupportFragmentManager(), tabLayout.getTabCount());
         viewPager.setAdapter(adapter);
         viewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
-        tabLayout.setOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+        tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
                 viewPager.setCurrentItem(tab.getPosition());
@@ -83,7 +88,10 @@ public class DetailedExerciseHistoryActivity extends AppCompatActivity {
             public void onTabReselected(TabLayout.Tab tab) {
 
             }
+
         });
+
+
     }
 
 

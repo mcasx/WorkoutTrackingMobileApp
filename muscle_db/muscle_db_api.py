@@ -6,6 +6,7 @@ from datetime import datetime
 import sys
 import base64 
 import json
+import os.path
 
 
 app = Flask(__name__)
@@ -191,27 +192,6 @@ def rm_training():
     except Exception as e:
         return str(e)
 
-#FIELDS REQUIRED: user_email
-@app.route('/get_training',methods = ['POST'])
-def get_training():
-    try:
-        email = request.form['email']
-        conn = MySQLdb.connect(host='localhost', user='muscle', password='some_pass')
-        c = conn.cursor()
-
-        c.execute('USE muscle2')
-        c.execute("""SELECT ID,Name FROM TRAINING
-				 	 WHERE Plan_id IN (SELECT Plan FROM USER
-									   WHERE Email = %s);""",[email])
-		
-        fetched = c.fetchall()
-        c.close()
-        conn.close()
-        return jsonify(fetched)
-    except Exception as e:
-        return str(e)
-
-
 #FIELDS REQUIRED: name, kind, description, image 
 @app.route('/add_exercise', methods = ['POST'])
 def add_exercise():
@@ -300,6 +280,28 @@ def rm_training_exercise(training_id, exercise_name):
     except Exception as e:
         return str(e)
 
+#FIELDS REQUIRED: user_email
+@app.route('/get_training_exercises',methods = ['POST'])
+def get_training_exercises():
+    try:
+        training = request.form['training']
+        conn = MySQLdb.connect(host='localhost', user='muscle', password='some_pass')
+        c = conn.cursor(MySQLdb.cursors.DictCursor)
+        c.execute('USE muscle2')
+
+        c.execute("""SELECT Exercise_name,Sets,Repetitions,Weight,Resting_Time
+                     FROM TRAINING_EXERCISE
+                     WHERE Training_id = %s;""",[training])
+	
+        fetched = c.fetchall()
+        #Date time in string
+        for i in range(len(fetched)):
+            fetched[i]['Resting_Time'] = str(fetched[i]['Resting_Time'])
+        c.close()
+        conn.close()
+        return jsonify(fetched)
+    except Exception as e:
+        return str(e)
 
 #FIELDS REQUIRED: name, image
 @app.route('/add_muscle_group', methods = ['POST'])
@@ -539,7 +541,7 @@ def update_user_char():
             profile_pic_substring = "Profile_image = %s, "
 
             img_dir = "user_profile_pics/"
-            img_path = "user_{0}_profile_pic.jpeg".format(email)
+            img_path = "{0}.jpg".format(email)
             #img_path = "user_{:0>{width}}_profile_pic".format(ID,width=11)
             var_insert_tuple += (img_path,)
             print(request.form['profile_pic'])
@@ -614,6 +616,27 @@ def get_user_plan():
     except Exception as e:
         return str(e)
 
+#FIELDS REQUIRED: training_id
+@app.route('/get_user_plan_trainings',methods = ['POST'])
+def get_user_plan_trainings():
+    try:
+        email = request.form['email']
+        conn = MySQLdb.connect(host='localhost', user='muscle', password='some_pass')
+        c = conn.cursor(MySQLdb.cursors.DictCursor)
+        c.execute('USE muscle2')
+
+        c.execute("""SELECT ID,Name
+                     FROM (SELECT * FROM TRAINING) AS T
+                           JOIN (SELECT Plan,Email FROM USER) AS U
+                           ON T.Plan_id = U.Plan AND U.Email = %s;""",[email])
+		
+        fetched = c.fetchall()
+        tmp = c.fetchall()
+        c.close()
+        conn.close()
+        return jsonify(fetched)
+    except Exception as e:
+        return str(e)
 
 @app.route('/get_exercise', methods=['POST'])
 def get_exercise():
@@ -871,8 +894,7 @@ def get_local_db():
     except Exception as e:
         raise
 
-
- @app.route('/get_user_profile_pic', methods=['POST'])
+@app.route('/get_user_profile_pic', methods=['POST'])
 def get_user_profile_pic():
     try:
  
@@ -901,14 +923,50 @@ def get_user_profile_pic():
 
         res = make_response(json.dumps({"Profile" : string_img}))       
         res.mimetype = 'application/json'
-        return res       
- 
+        
         c.close()
         conn.close()
  
+        return res       
+ 
     except Exception as e:
         return str(e)
-       
+
+@app.route('/get_user_profile', methods=['POST'])
+def get_user_profile():
+    try:
+ 
+        email = request.form['email']
+        conn = MySQLdb.connect(host='localhost', user='muscle', password='some_pass')
+        c = conn.cursor(MySQLdb.cursors.DictCursor)
+        c.execute('USE muscle2')
+
+        c.execute("""SELECT Email, Name, Height, Weight, Profile_image, Plan FROM USER WHERE Email = %s""", [email])
+
+        fetched = c.fetchone()
+        
+        img_dir = "user_profile_pics/"
+        img_path = fetched['Profile_image']
+        
+        string_img = None
+
+        if img_path != None and os.path.isfile(img_dir + img_path):
+            with open(img_dir + img_path, "rb") as image_file:
+                string_img = base64.b64encode(image_file.read()).decode()
+        
+
+        fetched['Profile_image'] = string_img
+
+        c.close()
+        conn.close()
+        
+        return jsonify(fetched)
+
+ 
+    except Exception as e:
+        return str(e)
+
+
 
 @app.route('/get_users_like', methods=['POST'])
 def get_users_like():
@@ -967,45 +1025,45 @@ def get_user_feed():
 
 @app.route('/get_user_feed_and_pictures', methods=['POST'])
 def get_user_feed_and_pictures():
-    try:
-        user_email = request.form['user_email']
-        amount = int(request.form['amount'])
+	try:
+		user_email = request.form['user_email']
+		amount = int(request.form['amount'])
 
-        conn = MySQLdb.connect(host='localhost', user='muscle', password='some_pass', database='muscle')
-        c = conn.cursor(MySQLdb.cursors.DictCursor)
-        
-        c.execute('USE muscle2')
-        c.execute("""
-            SELECT *
-            FROM EXERCISE_HISTORY
-            JOIN (SELECT Following FROM FOLLOWERS WHERE User_email = %s) AS f
-              ON EXERCISE_HISTORY.User_email = f.Following AND EXERCISE_HISTORY.Shared = 1
-            JOIN (SELECT Profile_image, Email FROM USER) AS p
-              ON f.Following = p.Email
-            ORDER BY Date_Time DESC
-            LIMIT %s
-            """, [user_email, amount])
+		conn = MySQLdb.connect(host='localhost', user='muscle', password='some_pass', database='muscle')
+		c = conn.cursor(MySQLdb.cursors.DictCursor)
+		
+		c.execute('USE muscle2')
+		c.execute("""
+			SELECT *
+			FROM EXERCISE_HISTORY
+			JOIN (SELECT Following FROM FOLLOWERS WHERE User_email = %s) AS f
+			  ON EXERCISE_HISTORY.User_email = f.Following AND EXERCISE_HISTORY.Shared = 1
+			JOIN (SELECT Profile_image, Email FROM USER) AS p
+			  ON f.Following = p.Email
+			ORDER BY Date_Time DESC
+			LIMIT %s
+			""", [user_email, amount])
 
-        r = c.fetchall()
+		r = c.fetchall()
 
-        #get image in user_profile_pics
-        profile_dict = {row['Email']:row['Profile_image'] for row in r}
-        
-        img_dir = "user_profile_pics/"
-        
-        for email, img_path in profile_dict.items():
-            if img_path != None and os.path.isfile(img_dir + img_path):
-                with open(img_dir + img_path, "rb") as image_file:
-                    profile_dict[email] = base64.b64encode(image_file.read()).decode()
-            else:
-                profile_dict[email] = None
+		#get image in user_profile_pics
+		profile_dict = {row['Email']:row['Profile_image'] for row in r}
+		
+		img_dir = "user_profile_pics/"
+		
+		for email, img_path in profile_dict.items():
+			if img_path != None and os.path.isfile(img_dir + img_path):
+				with open(img_dir + img_path, "rb") as image_file:
+					profile_dict[email] = base64.b64encode(image_file.read()).decode()
+			else:
+				profile_dict[email] = None
 
-        c.close()
-        conn.close()
-        return jsonify(feed = r, pictures = profile_dict)
+		c.close()
+		conn.close()
+		return jsonify(feed = r, pictures = profile_dict)
 
-    except Exception as e:
-        return str(e)
+	except Exception as e:
+		return str(e)
 
 	
 @app.route('/get_comments_exercise', methods=['POST'])
@@ -1243,6 +1301,30 @@ def get_recommended_plans():
 
 	except Exception as e:
 		return str(e)
+    
+    
+@app.route('/get_sets_of_exercise_history', methods=['POST'])
+def get_sets_of_exercise_history():
+	#try:
+    id = int(request.form['id'])
+    conn = MySQLdb.connect(host='localhost', user='muscle', password='some_pass', database='muscle')
+    c = conn.cursor(MySQLdb.cursors.DictCursor)
+    
+    c.execute('USE muscle2')
+    c.execute("SELECT * from SETS WHERE Exercise_history_id=%s", [id])
+
+    r = c.fetchall()
+    
+    for x in r:
+        x['Resting_Time'] = str(x['Resting_Time'])
+    c.close()
+    conn.close()
+    return jsonify(r) 
+
+	#except Exception as e:
+	#	return str(e)
+    
+    
 
 if __name__ == '__main__':
     context = ssl.SSLContext(ssl.PROTOCOL_TLSv1_2)

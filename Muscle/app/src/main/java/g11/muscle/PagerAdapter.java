@@ -21,11 +21,12 @@ public class PagerAdapter extends FragmentStatePagerAdapter {
 
         switch (position) {
             case 0:
-                OneFragment tab1 = new OneFragment();
+                DetailedExerciseHistoryFragment tab1 = new DetailedExerciseHistoryFragment();
                 return tab1;
             case 1:
                 TwoFragment tab2 = new TwoFragment();
                 return tab2;
+
             default:
                 return null;
         }

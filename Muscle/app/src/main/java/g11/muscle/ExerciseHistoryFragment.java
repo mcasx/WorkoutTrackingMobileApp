@@ -182,7 +182,7 @@ public class ExerciseHistoryFragment extends Fragment {
                     }
                 }
         ){
-            // use params are specified here
+            // use params are specified herere
             @Override
             protected Map<String, String> getParams()
             {
