@@ -964,6 +964,49 @@ def get_user_feed():
 
 	except Exception as e:
 		return str(e)
+
+@app.route('/get_user_feed_and_pictures', methods=['POST'])
+def get_user_feed_and_pictures():
+    try:
+        user_email = request.form['user_email']
+        amount = int(request.form['amount'])
+
+        conn = MySQLdb.connect(host='localhost', user='muscle', password='some_pass', database='muscle')
+        c = conn.cursor(MySQLdb.cursors.DictCursor)
+        
+        c.execute('USE muscle2')
+        c.execute("""
+            SELECT *
+            FROM EXERCISE_HISTORY
+            JOIN (SELECT Following FROM FOLLOWERS WHERE User_email = %s) AS f
+              ON EXERCISE_HISTORY.User_email = f.Following AND EXERCISE_HISTORY.Shared = 1
+            JOIN (SELECT Profile_image, Email FROM USER) AS p
+              ON f.Following = p.Email
+            ORDER BY Date_Time DESC
+            LIMIT %s
+            """, [user_email, amount])
+
+        r = c.fetchall()
+
+        #get image in user_profile_pics
+        profile_dict = {row['Email']:row['Profile_image'] for row in r}
+        
+        img_dir = "user_profile_pics/"
+        
+        for email, img_path in profile_dict.items():
+            if img_path != None and os.path.isfile(img_dir + img_path):
+                with open(img_dir + img_path, "rb") as image_file:
+                    profile_dict[email] = base64.b64encode(image_file.read()).decode()
+            else:
+                profile_dict[email] = None
+
+        c.close()
+        conn.close()
+        return jsonify(feed = r, pictures = profile_dict)
+
+    except Exception as e:
+        return str(e)
+
 	
 @app.route('/get_comments_exercise', methods=['POST'])
 def get_comments_exercise():

@@ -36,6 +36,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 /**
@@ -61,7 +62,7 @@ public class FeedFragment extends Fragment {
     private VolleyProvider req_queue;
     private VolleyProvider search_queue;
     private ArrayAdapter<String> people_list_adapter;
-    private HashMap<String,Bitmap> profilePic = new HashMap<>();
+    private HashMap<String,Bitmap> userProfilePicture = new HashMap<>();
 
     //GUI
     private ListView feedView;
@@ -242,7 +243,7 @@ public class FeedFragment extends Fragment {
     }
 
     private void createUserFeed(){
-        String url = "https://138.68.158.127/get_user_feed";
+        String url = "https://138.68.158.127/get_user_feed_and_pictures";
 
         //Create the exercise history request
         StringRequest StrFeedReq = new StringRequest(Request.Method.POST,url,
@@ -253,7 +254,27 @@ public class FeedFragment extends Fragment {
                         // Initialization of history array
                         feedItem[] history = new feedItem[0];
                         try {
-                            JSONArray jsonArray = new JSONArray(response);
+                            JSONObject jsonObject = new JSONObject(response);
+                            JSONArray jsonArray = (JSONArray) jsonObject.get("feed");
+                            JSONObject jsonProfile = (JSONObject) jsonObject.getJSONObject("pictures");
+
+                            // put necessary profile pictures in dict
+                            try{
+                                for(Iterator keys = jsonProfile.keys();keys.hasNext();) {
+
+                                    String user_key = (String) keys.next();
+                                    Log.i("TG", user_key);
+                                    String b64Pic = (String) jsonProfile.getString(user_key);
+                                    if(b64Pic == null || b64Pic.equals("null"))
+                                        continue;
+                                    byte[] imageBytes = Base64.decode(b64Pic, Base64.DEFAULT);
+                                    Bitmap user_img = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
+                                    userProfilePicture.put(user_key, user_img);
+                                }
+                            } catch (JSONException je) {
+                                Log.e(TAG, je.toString());
+                            }
+
                             //From the response create the history array
                             history = new feedItem[jsonArray.length()];
                             try {
@@ -274,13 +295,13 @@ public class FeedFragment extends Fragment {
                         feedView.setAdapter(adapter);
 
                         // Set the listeners on the list items
-                        /*
+
                         feedView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                             public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
                                 //Go to exercise page
                             }
                         });
-                        */
+
                     }
                 },
                 new Response.ErrorListener() {
@@ -304,63 +325,6 @@ public class FeedFragment extends Fragment {
 
         //Queue the request
         req_queue.addRequest(StrFeedReq);
-    }
-
-    private Bitmap getUserImage(String user, int position){
-        Bitmap profile = profilePic.get(user);
-        final String user_key = user;
-        final int feedrowPosition = position;
-        if(profile == null){
-            String url = "https://138.68.158.127/get_user_profile_pic";
-            //Create the user profile request
-            StringRequest strProfileImgReq = new StringRequest(Request.Method.POST, url,
-                    new Response.Listener<String>() {
-                        @Override
-                        public void onResponse(String response) {
-
-                            if (response.equals("User profile image not found"))
-                                return;
-
-                            try {
-                                //JSONArray jsonArray = new JSONArray(response);
-                                JSONObject jsonObject = new JSONObject(response);
-                                String b64picture = (String) jsonObject.get("Profile");
-                                //From the response create the history array
-                                //decode base64 string to image
-                                byte[] imageBytes = Base64.decode(b64picture, Base64.DEFAULT);
-                                Bitmap user_img = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
-                                profilePic.put(user_key, user_img);
-                                Log.i("TG", user_key);
-                                ((BaseAdapter)feedView.getAdapter()).notifyDataSetChanged();
-                                //image.setImageBitmap(decodedImage);
-
-
-                            } catch (JSONException e2) {
-                                e2.printStackTrace();
-                            }
-                        }
-                    },
-                    new Response.ErrorListener() {
-                        @Override
-                        public void onErrorResponse(VolleyError error) {
-                            //Handle error response
-                            System.out.println(error.toString());
-                        }
-                    }
-            ) {
-                // use params are specified here
-                @Override
-                protected Map<String, String> getParams() {
-                    Map<String, String> params = new HashMap<>();
-                    params.put("email", user_key);
-                    return params;
-                }
-            };
-            //Queue the request
-            req_queue.addRequest(strProfileImgReq);
-
-        }
-        return profile;
     }
 
     private class feedItem {
@@ -396,6 +360,10 @@ public class FeedFragment extends Fragment {
             return datetime;
         }
 
+        public Bitmap getUserImage() {
+            return userProfilePicture.get(getUser());
+        }
+
     }
 
     public class FeedViewAdapter extends BaseAdapter {
@@ -406,12 +374,6 @@ public class FeedFragment extends Fragment {
         TextView txtUser;
         TextView txtDate;
         ImageView imgUser;
-
-        @Override
-        public void notifyDataSetChanged() {
-            super.notifyDataSetChanged();
-        }
-
 
         public FeedViewAdapter(Activity activity, feedItem[] list){
             super();
@@ -441,6 +403,10 @@ public class FeedFragment extends Fragment {
 
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
+
+            // used to prevent updates when scrolling, could be desirable so feel free to remove it
+            if (convertView != null) return convertView;
+
             LayoutInflater inflater=activity.getLayoutInflater();
 
             if(convertView == null){
@@ -461,10 +427,9 @@ public class FeedFragment extends Fragment {
             txtExercise.setText(item.getSet_amount() + " sets of " + item.getExercise_name());
             txtUser.setText(item.getUser());
             txtDate.setText(item.getDatetime());
-            Bitmap profile = getUserImage(item.getUser(), position);
-            if (profile != null)
+            Bitmap profile = item.getUserImage();
+            if(profile != null)
                 imgUser.setImageBitmap(profile);
-
             return convertView;
         }
     }
