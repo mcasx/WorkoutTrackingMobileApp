@@ -4,7 +4,24 @@
     android:layout_height="match_parent"
     tools:context="g11.muscle.MyPlanFragment">
 
-    <!-- TODO: Update blank fragment layout -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:weightSum="1">
 
+        <Spinner
+            android:id="@+id/spinner"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:spinnerMode="dropdown" />
+
+        <android.support.v7.widget.RecyclerView
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            android:id="@+id/PE_recyclerview"
+            android:layout_width="match_parent"
+            android:layout_height="284dp"
+            android:layout_weight="0.31" />
+    </LinearLayout>
 
 </FrameLayout>
