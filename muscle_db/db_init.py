@@ -155,10 +155,11 @@ c.execute('''CREATE TABLE BUMPS(
 )
 
 c.execute('''CREATE TABLE COMMENTS(
+	ID Integer AUTO_INCREMENT,
 	User_email VARCHAR(255) NOT NULL,
 	Exercise Integer NOT NULL,
 	Comment VARCHAR(255) NOT NULL,
-	PRIMARY KEY(User_email, Exercise),
+	PRIMARY KEY(ID),
 	FOREIGN KEY(User_email) REFERENCES USER(Email),
 	FOREIGN KEY(Exercise) REFERENCES EXERCISE_HISTORY(ID)
 	)'''
