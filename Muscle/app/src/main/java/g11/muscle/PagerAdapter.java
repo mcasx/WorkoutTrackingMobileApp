@@ -26,7 +26,9 @@ public class PagerAdapter extends FragmentStatePagerAdapter {
             case 1:
                 TwoFragment tab2 = new TwoFragment();
                 return tab2;
-
+            case 2:
+                DetailedExerciseHistoryComments tab3 = new DetailedExerciseHistoryComments();
+                return tab3;
             default:
                 return null;
         }

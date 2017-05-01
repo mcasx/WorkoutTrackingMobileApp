@@ -16,7 +16,8 @@
             android:id="@+id/baseLayout"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:weightSum="1">
 
             <ImageView
                 android:id="@+id/imageView2"
@@ -41,40 +42,65 @@
                 android:layout_marginRight="8dp"
                 android:layout_marginStart="8dp"
                 android:layout_marginTop="25dp"
+                android:layout_marginBottom="12.5dp"
                 app:layout_constraintHorizontal_bias="0.0"
                 app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintRight_toRightOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/imageView2">
+                app:layout_constraintTop_toBottomOf="@+id/imageView2"
+                android:layout_weight="0.50">
 
                 <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
                     xmlns:app="http://schemas.android.com/apk/res-auto"
                     xmlns:tools="http://schemas.android.com/tools"
-                    android:id="@+id/Card1"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
+                    android:layout_height="wrap_content"
                     android:orientation="vertical">
 
                     <TextView
-                        android:id="@+id/numberOfSetsText"
+                        android:id="@+id/timeText"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="24dp"
+                        android:layout_marginRight="25dp"
+                        android:layout_marginTop="13dp"
+                        android:text="TextView"
+                        android:textAppearance="@android:style/TextAppearance.Material.Medium"
+                        app:layout_constraintRight_toRightOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/numOfSets" />
+
+                    <TextView
+                        android:id="@+id/numOfSets"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginEnd="24dp"
                         android:layout_marginRight="24dp"
                         android:layout_marginTop="13dp"
-                        android:text="TextView  "
+                        android:text="TextView"
                         android:textAppearance="@android:style/TextAppearance.Material.Medium"
                         app:layout_constraintRight_toRightOf="parent"
-                        app:layout_constraintTop_toBottomOf="@+id/averageIntensityText" />
+                        app:layout_constraintTop_toBottomOf="@+id/repetitionsText" />
 
                     <TextView
                         android:id="@+id/textView11"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginBottom="24dp"
                         android:layout_marginLeft="25dp"
                         android:layout_marginStart="25dp"
                         android:layout_marginTop="13dp"
-                        android:text="  Number of Sets:"
+                        android:text="Time:"
+                        android:textAppearance="@android:style/TextAppearance.Material.Medium"
+                        app:layout_constraintLeft_toLeftOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/textView8" />
+
+                    <TextView
+                        android:id="@+id/textView8"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="16dp"
+                        android:layout_marginLeft="25dp"
+                        android:layout_marginStart="25dp"
+                        android:layout_marginTop="13dp"
+                        android:text="Number of Sets:"
                         android:textAppearance="@android:style/TextAppearance.Material.Medium"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintLeft_toLeftOf="parent"
@@ -82,25 +108,25 @@
                         app:layout_constraintVertical_bias="0.0" />
 
                     <TextView
-                        android:id="@+id/averageIntensityText"
+                        android:id="@+id/repetitionsText"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginEnd="24dp"
                         android:layout_marginRight="24dp"
                         android:layout_marginTop="13dp"
-                        android:text="TextView  "
+                        android:text="TextView"
                         android:textAppearance="@android:style/TextAppearance.Material.Medium"
                         app:layout_constraintRight_toRightOf="parent"
-                        app:layout_constraintTop_toBottomOf="@+id/textView8" />
+                        app:layout_constraintTop_toBottomOf="@+id/setText" />
 
                     <TextView
-                        android:id="@+id/textView8"
+                        android:id="@+id/setText"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginEnd="8dp"
-                        android:layout_marginLeft="24dp"
-                        android:layout_marginStart="24dp"
-                        android:layout_marginTop="24dp"
+                        android:layout_marginLeft="16dp"
+                        android:layout_marginStart="16dp"
+                        android:layout_marginTop="16dp"
                         android:text="Whole Exercise"
                         android:textAppearance="@style/TextAppearance.AppCompat.Large"
                         android:textColor="#EE7147"
@@ -111,13 +137,13 @@
                         android:id="@+id/textView9"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginLeft="24dp"
+                        android:layout_marginLeft="16dp"
                         android:layout_marginStart="24dp"
                         android:layout_marginTop="13dp"
-                        android:text="  Average Intensity:"
+                        android:text="Average Intensity:"
                         android:textAppearance="@android:style/TextAppearance.Material.Medium"
                         app:layout_constraintLeft_toLeftOf="parent"
-                        app:layout_constraintTop_toBottomOf="@+id/textView8" />
+                        app:layout_constraintTop_toBottomOf="@+id/setText" />
 
                 </android.support.constraint.ConstraintLayout>
             </android.support.v7.widget.CardView>

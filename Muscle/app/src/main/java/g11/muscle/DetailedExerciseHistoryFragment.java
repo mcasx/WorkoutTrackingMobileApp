@@ -4,21 +4,15 @@ import android.content.Context;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.constraint.ConstraintLayout;
-import android.support.constraint.ConstraintSet;
+import android.support.annotation.RequiresApi;
 import android.support.v4.app.Fragment;
-import android.support.v7.widget.CardView;
 import android.util.Log;
-import android.util.TypedValue;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toolbar;
 
 import com.android.volley.Request;
 import com.android.volley.Response;
@@ -32,9 +26,6 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import android.widget.LinearLayout.LayoutParams;
-
-import static android.webkit.ConsoleMessage.MessageLevel.LOG;
 
 
 public class DetailedExerciseHistoryFragment extends Fragment{
@@ -46,6 +37,7 @@ public class DetailedExerciseHistoryFragment extends Fragment{
     private Context context;
     private LinearLayout baseLayout;
     private View fView;
+    private LayoutInflater inflater;
     final ArrayList<JSONObject> sets = new ArrayList<>();
     private final String TAG = "DetExerHistoryFragment";
     public DetailedExerciseHistoryFragment() {
@@ -62,11 +54,13 @@ public class DetailedExerciseHistoryFragment extends Fragment{
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // Inflate the layout for this fragment
 
+        this.inflater = inflater;
+
         fView = inflater.inflate(R.layout.fragment_detailed_exercise_history, container, false);
 
         try {
-            averageIntensityText = (TextView) fView.findViewById(R.id.averageIntensityText);
-            numberOfSetsText = (TextView) fView.findViewById(R.id.numberOfSetsText);
+            averageIntensityText = (TextView) fView.findViewById(R.id.repetitionsText);
+            numberOfSetsText = (TextView) fView.findViewById(R.id.numOfSets);
         }catch (NullPointerException ne){
             Log.e(TAG, ne.toString());
         }
@@ -82,6 +76,16 @@ public class DetailedExerciseHistoryFragment extends Fragment{
 
         baseLayout = (LinearLayout) fView.findViewById(R.id.baseLayout);
 
+        TextView timeText = (TextView)fView.findViewById(R.id.timeText);
+
+
+        try {
+            String str = DetailedExerciseHistoryActivity.exerciseHistoryItem.getString("Date_Time");
+            timeText.setText(str.substring(0, str.length() - 4));
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
         getSetCards();
 
         return fView;
@@ -95,6 +99,7 @@ public class DetailedExerciseHistoryFragment extends Fragment{
         //Create the exercise history request
         StringRequest StrHistReq = new StringRequest(Request.Method.POST,url,
                 new Response.Listener<String>() {
+                    @RequiresApi(api = Build.VERSION_CODES.M)
                     @Override
                     public void onResponse(String response) {
 
@@ -105,7 +110,7 @@ public class DetailedExerciseHistoryFragment extends Fragment{
                             //From the response create the sets array
                                 for (int i = 0; i < jsonArray.length(); i++) {
                                     createCardViewProgrammatically(new JSONObject(jsonArray.getString(i)));
-                                    break;
+
                                 }
                         }catch (JSONException e2){
                             e2.printStackTrace();
@@ -166,55 +171,33 @@ public class DetailedExerciseHistoryFragment extends Fragment{
     }
 
 
+    @RequiresApi(api = Build.VERSION_CODES.M)
     public void createCardViewProgrammatically(JSONObject set){
 
-        CardView cardview;
 
-        cardview = new CardView(context);
+        View child = inflater.inflate(R.layout.card_view_detailed_exercise_activity_model, null);
 
-        LayoutParams layoutparams = new LayoutParams(
-
-                LayoutParams.MATCH_PARENT,
-                LayoutParams.WRAP_CONTENT
-
-        );
-
-        float d = context.getResources().getDisplayMetrics().density;
-        int margin = (int)(8 * d);
-        layoutparams.setMargins(margin ,(int) (25 * d) , margin, 0);
-        cardview.setLayoutParams(layoutparams);
-        TextView textview = new TextView(context);
-
-        //textview.setLayoutParams(layoutparams);
+        TextView setText = (TextView) child.findViewById(R.id.setText);
+        TextView repetitionsText = (TextView) child.findViewById(R.id.repetitionsText);
+        TextView weightText = (TextView) child.findViewById(R.id.timeText);
+        TextView intensityText = (TextView) child.findViewById(R.id.intensityText);
+        TextView restingTimeText = (TextView) child.findViewById(R.id.restingTimeText);
 
         try {
-            textview.setText("Set " + set.getString("Set_number"));
+            setText.setText("Set " + set.getString("Set_number"));
+            repetitionsText.setText(set.getString("Repetitions"));
+            weightText.setText(set.getString("Weight"));
+            intensityText.setText(set.getString("Intensity"));
+            restingTimeText.setText(set.getString("Resting_Time"));
         }catch (JSONException je){ Log.e(TAG, "Set_number");}
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            //textview.setTextAppearance(android.R.style.TextAppearance_Material);
-        }
-
-        textview.setPadding(25,25,25,25);
-
-        textview.setGravity(Gravity.CENTER);
 
 
-        cardview.setBackgroundColor(Color.parseColor("#424242"));
 
 
-        ConstraintLayout cardConstrainLayout = new ConstraintLayout(context);
-        cardConstrainLayout.addView(textview);
 
-        ConstraintSet cset = new ConstraintSet();
-        cset.clone(cardConstrainLayout);
-        cset.connect(textview.getId(), ConstraintSet.LEFT, cardConstrainLayout.getId(), ConstraintSet.LEFT, (int)(8*d));
-        cset.connect(textview.getId(), ConstraintSet.TOP, cardConstrainLayout.getId(), ConstraintSet.TOP, (int)(8*d));
-        cset.applyTo(cardConstrainLayout);
 
-        cardview.addView(cardConstrainLayout);
-
-        //baseLayout.addView(cardConstrainLayout);
+        baseLayout.addView(child);
 
     }
 
