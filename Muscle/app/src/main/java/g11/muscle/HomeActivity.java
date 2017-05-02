@@ -79,15 +79,7 @@ public class HomeActivity extends AppCompatActivity implements PickExerciseFragm
         BottomNavigationView navigation = (BottomNavigationView) findViewById(R.id.navigation);
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
     }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-
-        // Start in Home Fragment
-        switchToFragmentHome();
-    }
-
+    
     @Override
     public void onBackPressed() {
         new AlertDialog.Builder(this)

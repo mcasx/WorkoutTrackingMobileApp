@@ -54,6 +54,9 @@
             android:theme="@style/Theme.AppCompat.NoActionBar" />
         <activity
             android:name=".DetailedExerciseHistoryActivity"
+            android:theme="@style/Theme.AppCompat" />
+        <activity
+            android:name=".ProfileActivity"
             android:theme="@style/Theme.AppCompat"/>
     </application>
 

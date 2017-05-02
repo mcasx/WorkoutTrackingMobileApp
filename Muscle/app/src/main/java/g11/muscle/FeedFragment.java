@@ -113,19 +113,21 @@ public class FeedFragment extends Fragment {
 
         search_barView = (SearchView) fView.findViewById(R.id.search_bar);
         search_queue = VolleyProvider.getInstance(getActivity());
+        recommendedFollows();
         search_barView.setOnQueryTextListener(new SearchView.OnQueryTextListener(){
             @Override
             public boolean onQueryTextSubmit(String query) {
-                search_queue.getQueue().cancelAll(getActivity());
-                searchResponse();
                 search_barView.onActionViewCollapsed();
                 return true;
             }
 
             @Override
             public boolean onQueryTextChange(String newText) {
-                search_queue.getQueue().cancelAll(getActivity());
-                searchResponse();
+                if(newText == "") recommendedFollows();
+                else{
+                    search_queue.getQueue().cancelAll(getActivity());
+                    searchResponse();
+                }
                 return true;
             }
 
@@ -161,13 +163,17 @@ public class FeedFragment extends Fragment {
                                 people_list_adapter.addAll(history);
 
                                 // Set the listeners on the list items
-                                /*
+
                                 feedView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                                     public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
-                                        //Go to exercise page
+                                        String profile_email = (String) parent.getAdapter().getItem(position);
+                                        Intent intent = new Intent(getActivity(), ProfileActivity.class);
+                                        intent.putExtra("user_email", email);
+                                        intent.putExtra("profile_email", profile_email);
+                                        startActivity(intent);
                                     }
                                 });
-                                */
+
                             }
                         },
                         new Response.ErrorListener() {
@@ -195,6 +201,73 @@ public class FeedFragment extends Fragment {
 
         // Inflate the layout for this fragment
         return fView;
+    }
+
+    private void recommendedFollows(){
+        String url = "https://138.68.158.127/get_recommended_follows";
+
+        //Create the exercise history request
+        StringRequest StrUsersLikeReq = new StringRequest(Request.Method.POST,url,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+
+                        // Initialization of history array
+                        String[] history = new String[0];
+                        try {
+                            JSONArray jsonArray = new JSONArray(response);
+                            //From the response create the history array
+                            history = new String[jsonArray.length()];
+                            try {
+                                for (int i = 0; i < jsonArray.length(); i++) {
+                                    JSONObject jo = jsonArray.getJSONObject(i);
+                                    history[i] = jo.getString("Following");
+                                }
+                            } catch (JSONException je) {
+                                Log.e(TAG, je.toString());
+                            }
+                        }catch (JSONException e2){
+                            e2.printStackTrace();
+                        }
+
+                        // Define the groupView adapter
+                        people_list_adapter.clear();
+                        people_list_adapter.addAll(history);
+
+                        // Set the listeners on the list items
+
+                        feedView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                            public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
+                                String profile_email = (String) parent.getAdapter().getItem(position);
+                                Intent intent = new Intent(getActivity(), ProfileActivity.class);
+                                intent.putExtra("user_email", email);
+                                intent.putExtra("profile_email", profile_email);
+                                startActivity(intent);
+                            }
+                        });
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        //Handle error response
+                        System.out.println(error.toString());
+                    }
+                }
+        ){
+            // use params are specified here
+            @Override
+            protected Map<String, String> getParams()
+            {
+                Map<String, String>  params = new HashMap<>();
+                params.put("email", search_barView.getQuery().toString());
+                params.put("limit", "20");
+                return params;
+            }
+        };
+
+        //Queue the request
+        search_queue.addRequest(StrUsersLikeReq);
     }
 
     @Override
