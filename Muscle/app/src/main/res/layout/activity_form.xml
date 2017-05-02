@@ -14,7 +14,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    app:layout_constraintLeft_toRightOf="@+id/imageView">
+    app:layout_constraintLeft_toRightOf="@+id/userCommentImage">
 
 
 

@@ -188,6 +188,7 @@ public class ExerciseHistoryFragment extends Fragment {
             {
                 Map<String, String>  params = new HashMap<>();
                 params.put("email", email);
+                params.put("limit", "100");
                 return params;
             }
         };

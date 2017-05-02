@@ -20,7 +20,7 @@
             android:layout_height="match_parent">
 
             <ImageView
-                android:id="@+id/imageView"
+                android:id="@+id/userCommentImage"
                 android:layout_width="100dp"
                 android:layout_height="100dp"
                 app:srcCompat="@mipmap/add_user"
@@ -32,7 +32,7 @@
                 android:layout_marginBottom="8dp" />
 
             <TextView
-                android:id="@+id/userName"
+                android:id="@+id/commentsUserName"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="8dp"
@@ -43,22 +43,23 @@
                 android:editable="false"
                 android:text="TextView"
                 android:textAppearance="@style/TextAppearance.AppCompat.Light.SearchResult.Title"
+                android:textColor="#B7B327"
                 app:layout_constraintHorizontal_bias="0.501"
-                app:layout_constraintLeft_toRightOf="@+id/imageView"
+                app:layout_constraintLeft_toRightOf="@+id/userCommentImage"
                 app:layout_constraintRight_toRightOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
             <EditText
-                android:id="@+id/comentText"
+                android:id="@+id/commentText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="8dp"
-                android:layout_marginTop="8dp"
+                android:layout_marginLeft="15dp"
+                android:layout_marginTop="28dp"
                 android:ems="10"
                 android:inputType="none"
                 android:text="fesdfssdffssdfdsdfdsfdvusdfgaujagifduia"
-                app:layout_constraintLeft_toRightOf="@+id/imageView"
-                app:layout_constraintTop_toBottomOf="@+id/userName" />
+                app:layout_constraintLeft_toRightOf="@+id/userCommentImage"
+                app:layout_constraintTop_toBottomOf="@+id/commentsUserName" />
 
         </android.support.constraint.ConstraintLayout>
     </android.support.v7.widget.CardView>

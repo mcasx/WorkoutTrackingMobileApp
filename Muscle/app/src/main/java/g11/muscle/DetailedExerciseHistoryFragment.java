@@ -116,28 +116,6 @@ public class DetailedExerciseHistoryFragment extends Fragment{
                             e2.printStackTrace();
                         }
 
-
-                        // Define the groupView adapter
-
-                        ArrayAdapter<JSONObject> adapter = new ArrayAdapter<JSONObject>(getActivity(), android.R.layout.simple_list_item_2, android.R.id.text1, sets) {
-                            @Override
-                            public View getView(int position, View convertView, ViewGroup parent) {
-                                View view = super.getView(position, convertView, parent);
-                                TextView text1 = (TextView) view.findViewById(android.R.id.text1);
-                                TextView text2 = (TextView) view.findViewById(android.R.id.text2);
-                                text2.setTextColor(Color.LTGRAY);
-
-                                try {
-                                    text1.setText(sets.get(position).getString("Exercise_name"));
-                                    text2.setText(sets.get(position).getString("Date_Time"));
-                                } catch (JSONException je) {
-                                    Log.e(TAG, je.toString());
-                                }
-
-
-                                return view;
-                            }
-                        };
                     }
                 },
                 new Response.ErrorListener() {
@@ -186,12 +164,6 @@ public class DetailedExerciseHistoryFragment extends Fragment{
             intensityText.setText(set.getString("Intensity"));
             restingTimeText.setText(set.getString("Resting_Time"));
         }catch (JSONException je){ Log.e(TAG, "Set_number");}
-
-
-
-
-
-
 
         baseLayout.addView(child);
 
