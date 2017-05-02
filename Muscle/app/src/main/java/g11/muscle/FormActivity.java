@@ -1,6 +1,5 @@
 package g11.muscle;
 
-import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
 
@@ -19,12 +18,7 @@ import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.Base64;
-import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
-import android.view.Window;
-import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.ImageView;
@@ -32,7 +26,6 @@ import android.widget.ProgressBar;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.android.volley.Request;
 import com.android.volley.Response;
@@ -41,8 +34,6 @@ import com.android.volley.toolbox.StringRequest;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.text.Normalizer;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
@@ -85,7 +76,7 @@ public class FormActivity extends AppCompatActivity {
         skipButton = ((TextView) findViewById(R.id.skip_button));
         saveButton = ((Button) findViewById(R.id.save_button));
         pickImage = ((ImageView) findViewById(R.id.pick_profile_img_btn));
-        imgView = ((ImageView)findViewById(R.id.imageView));
+        imgView = ((ImageView)findViewById(R.id.userCommentImage));
         pickDoB = ((Button) findViewById(R.id.button_bod_picker));
         dobInput = ((TextView) findViewById(R.id.textView));
         viewDob = ((TextView) findViewById(R.id.textViewDob));
@@ -260,7 +251,7 @@ public class FormActivity extends AppCompatActivity {
             try {
                 Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), uri);
                 Bitmap resized = Bitmap.createScaledBitmap(bitmap, 100, 100, true);
-                ImageView imageView = (ImageView) findViewById(R.id.imageView);
+                ImageView imageView = (ImageView) findViewById(R.id.userCommentImage);
                 imageView.setImageBitmap(resized);
 
                 ByteArrayOutputStream stream = new ByteArrayOutputStream();

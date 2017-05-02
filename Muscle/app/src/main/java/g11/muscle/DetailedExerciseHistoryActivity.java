@@ -60,7 +60,7 @@ public class DetailedExerciseHistoryActivity extends AppCompatActivity {
         TabLayout tabLayout = (TabLayout) findViewById(R.id.tab_layout);
         tabLayout.addTab(tabLayout.newTab().setText("Exercise"));
         tabLayout.addTab(tabLayout.newTab().setText("Stats"));
-        tabLayout.addTab(tabLayout.newTab().setText("Comments"));
+        tabLayout.addTab(tabLayout.newTab().setText("Social"));
         tabLayout.setTabGravity(TabLayout.GRAVITY_FILL);
 
         try {
