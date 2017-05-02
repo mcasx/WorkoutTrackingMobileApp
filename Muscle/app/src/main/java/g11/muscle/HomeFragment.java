@@ -1,12 +1,29 @@
 package g11.muscle;
 
 import android.content.Context;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ListView;
+import android.widget.Button;
+import android.widget.ArrayAdapter;
+
+import com.android.volley.Request;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+
+import java.util.HashMap;
+import java.util.Map;
 
 
 /**
@@ -14,64 +31,43 @@ import android.view.ViewGroup;
  * Activities that contain this fragment must implement the
  * {@link HomeFragment.OnFragmentInteractionListener} interface
  * to handle interaction events.
- * Use the {@link HomeFragment#newInstance} factory method to
+ * Use the {@link HomeFragment# newInstance} factory method to
  * create an instance of this fragment.
  */
 public class HomeFragment extends Fragment {
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
-
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
+    private static final String TAG = "HomeFragment";
 
     private OnFragmentInteractionListener mListener;
+
+    private String email;
+
+    //GUI
+    private ListView recExView;
+    private ListView recPlanView;
 
     public HomeFragment() {
         // Required empty public constructor
     }
 
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment HomeFragment.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static HomeFragment newInstance(String param1, String param2) {
-        HomeFragment fragment = new HomeFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
-        return fragment;
-    }
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
+
+        email = getActivity().getIntent().getStringExtra("email");
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_home, container, false);
-    }
+                             Bundle savedInstanceState){
+        // Fragment View
+        View fView = inflater.inflate(R.layout.fragment_home, container, false);
+        recExView = (ListView) fView.findViewById(R.id.rec_ex);
+        recPlanView = (ListView) fView.findViewById(R.id.rec_plan);
 
-    // TODO: Rename method, update argument and hook method into UI event
-    public void onButtonPressed(Uri uri) {
-        if (mListener != null) {
-            mListener.onFragmentInteraction(uri);
-        }
+        getRecommendedExercises();
+        getRecommendedPlans();
+        // Inflate the layout for this fragment
+        return fView;
     }
 
     @Override
@@ -104,5 +100,144 @@ public class HomeFragment extends Fragment {
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
         void onFragmentInteraction(Uri uri);
+    }
+
+    // Get Recommended Exercises ( ID + Name )
+    private void getRecommendedExercises() {
+        String url = "https://138.68.158.127/get_recommended_exercises";
+
+
+        //Create the exercise plan_group request
+        StringRequest StrHistReq = new StringRequest(Request.Method.POST, url,
+                new Response.Listener<String>() {
+
+                    String[] rE;
+
+                    @Override
+                    public void onResponse(String response) {
+                        try {
+                            Log.e(TAG, response);
+                            JSONArray jsonArray = new JSONArray(response);
+                            Log.e(TAG, jsonArray.toString());
+                            rE = new String[jsonArray.length()];
+                            try {
+                                for (int i = 0; i < jsonArray.length(); i++) {
+                                    String tmp = jsonArray.getJSONObject(i).getString("Exercise_name");
+                                    // TODO Needs a way to list exercises by count
+                                    rE[i] = tmp;
+                                }
+                            } catch (JSONException je) {
+                                Log.e(TAG, je.toString());
+                            }
+                        } catch (JSONException e2) {
+                            e2.printStackTrace();
+                        }
+
+                        // Define the groupView adapter
+                        ArrayAdapter<String> adapter = new ArrayAdapter<>(getActivity(), android.R.layout.simple_list_item_1, rE);
+                        recExView.setAdapter(adapter);
+                        recExView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                            public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
+                                //Go to Exercise Activity
+                                Intent intent = new Intent(getActivity(), ExerciseActivity.class);
+                                intent.putExtra("exercise_name", rE[position]);
+                                intent.putExtra("email", email);
+                                startActivity(intent);
+                            }
+                        });
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        //Handle error response
+                        System.out.println(error.toString());
+                    }
+                }
+        ) {
+            // use params are specified here
+            @Override
+            protected Map<String, String> getParams() {
+                Map<String, String> params = new HashMap<>();
+                params.put("user_email", email);
+                return params;
+            }
+        };
+
+        // Add the request to the RequestQueue
+        VolleyProvider.getInstance(getActivity()).addRequest(StrHistReq);
+    }
+
+    // Get Recommended Plans
+    private void getRecommendedPlans() {
+        String url = "https://138.68.158.127/get_recommended_plans";
+
+
+        //Create the exercise plan_group request
+        StringRequest StrHistReq = new StringRequest(Request.Method.POST, url,
+                new Response.Listener<String>() {
+
+                    String[] rP;
+                    String[] cola;
+
+                    @Override
+                    public void onResponse(String response) {
+                        try {
+                            Log.e(TAG, response);
+                            JSONArray jsonArray = new JSONArray(response);
+                            Log.e(TAG, jsonArray.toString());
+                            rP = new String[jsonArray.length()];
+                            try {
+                                for (int i = 0; i < jsonArray.length(); i++) {
+                                    String tmp = jsonArray.getJSONObject(i).getString("ID");
+                                    // TODO Needs a way to list plans by count
+                                    rP[i] = tmp;
+                                }
+                            } catch (JSONException je) {
+                                Log.e(TAG, je.toString());
+                            }
+                        } catch (JSONException e2) {
+                            e2.printStackTrace();
+                        }
+
+                        //TODO REMOVE THIS
+                        cola = new String[rP.length];
+                        for(int i = 0; i < rP.length;i++){
+                            cola[i] = "Plan "+ rP[i];
+                        }
+
+                        // Define the groupView adapter
+                        ArrayAdapter<String> adapter = new ArrayAdapter<>(getActivity(), android.R.layout.simple_list_item_1, cola);
+                        recPlanView.setAdapter(adapter);
+                        recPlanView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                            public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
+                                //Go to
+                                Intent intent = new Intent(getActivity(), PlanActivity.class);
+                                intent.putExtra("plan_id", rP[position]);
+                                intent.putExtra("email", email);
+                                startActivity(intent);
+                            }
+                        });
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        //Handle error response
+                        System.out.println(error.toString());
+                    }
+                }
+        ) {
+            // use params are specified here
+            @Override
+            protected Map<String, String> getParams() {
+                Map<String, String> params = new HashMap<>();
+                params.put("user_email", email);
+                return params;
+            }
+        };
+
+        // Add the request to the RequestQueue
+        VolleyProvider.getInstance(getActivity()).addRequest(StrHistReq);
     }
 }

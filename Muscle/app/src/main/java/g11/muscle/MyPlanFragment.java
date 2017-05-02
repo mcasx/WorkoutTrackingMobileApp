@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.IntegerRes;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -133,6 +134,7 @@ public class MyPlanFragment extends Fragment {
                     public void onResponse(String response) {
                         try {
                             JSONArray jsonArray = new JSONArray(response);
+                            plan_trainings.clear(); // check the list is empty before adding items
                             try {
                                 for (int i = 0; i < jsonArray.length(); i++) {
                                     String tmp_name = new JSONObject(jsonArray.getString(i)).getString("Name");
@@ -200,8 +202,9 @@ public class MyPlanFragment extends Fragment {
                                     int tmp_reps = Integer.parseInt(new JSONObject(jsonArray.getString(i)).getString("Repetitions"));
                                     int tmp_sets = Integer.parseInt(new JSONObject(jsonArray.getString(i)).getString("Sets"));
                                     String tmp_rest = new JSONObject(jsonArray.getString(i)).getString("Resting_Time");
+                                    int tmp_weight = Integer.parseInt(new JSONObject(jsonArray.getString(i)).getString("Weight"));
                                     // TODO NEEDS IMAGE
-                                    training_data.add(new PlanExerciseItem(tmp_name,tmp_reps,tmp_sets,tmp_rest,R.mipmap.default_avatar));
+                                    training_data.add(new PlanExerciseItem(tmp_name,tmp_reps,tmp_sets,tmp_rest,tmp_weight,R.mipmap.default_avatar));
                                 }
                             } catch (JSONException je){
                                 Log.e(TAG, je.toString());
@@ -268,12 +271,14 @@ public class MyPlanFragment extends Fragment {
         private int exercise_sets;
         private String exercise_rest;
         private int exercise_image;
+        private int exercise_weight;
 
-        private PlanExerciseItem(String name, int reps, int sets, String rest, int image){
+        private PlanExerciseItem(String name, int reps, int sets, String rest,int weight, int image){
             exercise_name = name;
             exercise_reps = reps;
             exercise_sets = sets;
             exercise_rest = rest;
+            exercise_weight = weight;
             exercise_image = image;
         }
 
@@ -297,6 +302,8 @@ public class MyPlanFragment extends Fragment {
             return exercise_image;
         }
 
+        private int getExercise_weight() {return exercise_weight; }
+
         @Override
         public String toString(){
             return "\n###################\nPLAN EXERCISE ITEM\nName: " + exercise_name + "\nSets: " + exercise_sets + "\nReps: " + exercise_reps + "\nRest: " + exercise_rest;
@@ -312,6 +319,7 @@ public class MyPlanFragment extends Fragment {
         TextView plan_sets;
         TextView plan_reps;
         TextView plan_rest;
+        TextView plan_weight;
 
         View_Holder(View itemView) {
             super(itemView);
@@ -320,6 +328,7 @@ public class MyPlanFragment extends Fragment {
             plan_sets = (TextView) itemView.findViewById(R.id.plan_sets);
             plan_reps = (TextView) itemView.findViewById(R.id.plan_reps);
             plan_rest = (TextView) itemView.findViewById(R.id.plan_rest);
+            plan_weight = (TextView) itemView.findViewById(R.id.plan_weight);
             plan_image = (ImageView) itemView.findViewById(R.id.plan_image);
         }
     }
@@ -349,6 +358,7 @@ public class MyPlanFragment extends Fragment {
             holder.plan_sets.setText(Integer.toString(list.get(position).exercise_sets));
             holder.plan_reps.setText(Integer.toString(list.get(position).exercise_reps));
             holder.plan_rest.setText(list.get(position).exercise_rest);
+            holder.plan_weight.setText(Integer.toString(list.get(position).exercise_weight));
             holder.plan_image.setImageResource(list.get(position).exercise_image);
             //animate(holder);
         }

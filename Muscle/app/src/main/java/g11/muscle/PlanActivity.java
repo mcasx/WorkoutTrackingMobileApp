@@ -1,5 +1,8 @@
 package g11.muscle;
 
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.CardView;
@@ -11,6 +14,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -44,6 +48,7 @@ public class PlanActivity extends AppCompatActivity {
     //GUI
     private RecyclerView recyclerView;
     private Spinner dropdown;
+    private Button setPlan;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,7 +67,27 @@ public class PlanActivity extends AppCompatActivity {
         getTrainings();
 
         recyclerView = (RecyclerView) findViewById(R.id.PE_recyclerview);
+        setPlan = (Button) findViewById(R.id.setPlanButton);
 
+    }
+
+    public void onClickSetPlan(View view){
+        //TODO
+        new AlertDialog.Builder(this)
+                .setIcon(android.R.drawable.ic_dialog_alert)
+                .setTitle("Set Plan")
+                .setMessage("You still have an unfinished plan, are you sure you want to set a new plan?")
+                .setPositiveButton("Yes", new DialogInterface.OnClickListener()
+                {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        Intent it = new Intent(PlanActivity.this,HomeActivity.class);
+                        it.putExtra("email",email);
+                        startActivity(it);
+                    }
+                })
+                .setNegativeButton("No", null)
+                .show();
     }
 
     // Get User Plan Trainings ( ID + Name )
@@ -203,8 +228,7 @@ public class PlanActivity extends AppCompatActivity {
             return "\n#############\nID: " + id + "\nName: " + name;
         }
     }
-    
-    
+
     // It defined a Exercise ( Used in training exercises list view )
     private class PlanExerciseItem {
         private String exercise_name;

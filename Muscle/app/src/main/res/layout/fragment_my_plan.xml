@@ -20,8 +20,7 @@
             xmlns:android="http://schemas.android.com/apk/res/android"
             android:id="@+id/PE_recyclerview"
             android:layout_width="match_parent"
-            android:layout_height="284dp"
-            android:layout_weight="0.31" />
+            android:layout_height="match_parent" />
     </LinearLayout>
 
 </FrameLayout>

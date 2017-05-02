@@ -59,6 +59,9 @@
         <activity
             android:name=".ProfileActivity"
             android:theme="@style/Theme.AppCompat"/>
+        <activity
+            android:name=".PlanActivity"
+            android:theme="@style/Theme.AppCompat"/>
     </application>
 
 </manifest>

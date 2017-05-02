@@ -1,4 +1,4 @@
-package g11.muscle;
+package g11.muscle.MPChartJava;
 
 import android.content.Context;
 import android.graphics.Typeface;
@@ -10,6 +10,8 @@ import com.github.mikephil.charting.highlight.Highlight;
 import com.github.mikephil.charting.utils.MPPointF;
 
 import java.text.DecimalFormat;
+
+import g11.muscle.R;
 
 /**
  * Created by Xdye on 26/04/2017.

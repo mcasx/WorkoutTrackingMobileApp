@@ -168,6 +168,7 @@ public class ExerciseHistoryFragment extends Fragment {
                                 DetailedExerciseHistoryActivity.exerciseHistoryItem = (JSONObject) parent.getAdapter().getItem(position);
                                 Intent intent = new Intent(getActivity(), DetailedExerciseHistoryActivity.class);
                                 intent.putExtra("email", email);
+                                intent.putExtra("exercise_name",exercise_name);
 
                                 startActivity(intent);
                             }
