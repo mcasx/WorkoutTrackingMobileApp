@@ -138,10 +138,6 @@ public class DetailedExerciseHistoryFragment extends Fragment{
                                 return view;
                             }
                         };
-
-
-
-
                     }
                 },
                 new Response.ErrorListener() {
