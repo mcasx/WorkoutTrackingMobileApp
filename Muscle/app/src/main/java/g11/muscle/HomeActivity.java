@@ -79,7 +79,7 @@ public class HomeActivity extends AppCompatActivity implements PickExerciseFragm
         BottomNavigationView navigation = (BottomNavigationView) findViewById(R.id.navigation);
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
     }
-    
+
     @Override
     public void onBackPressed() {
         new AlertDialog.Builder(this)

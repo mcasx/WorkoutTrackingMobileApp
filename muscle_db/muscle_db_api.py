@@ -1445,13 +1445,13 @@ def get_recommended_follows():
 		
 		c.execute('USE muscle2')
 		c.execute("""
-				SELECT Following, count(Following) AS count
+				SELECT FOLLOWERS.Following, count(FOLLOWERS.Following) AS count
 				FROM FOLLOWERS
 				JOIN (SELECT Following
 					FROM FOLLOWERS
 					WHERE User_email = %s) AS t
 				ON FOLLOWERS.User_email = t.Following
-				GROUP BY Following
+				GROUP BY FOLLOWERS.Following
 				ORDER BY count DESC
 				LIMIT %s
 				""", [email, limit])
