@@ -135,6 +135,7 @@ public class FeedFragment extends Fragment {
 
             @Override
             public boolean onQueryTextChange(String newText) {
+                if(newText == "") return true;
                 search_queue.getQueue().cancelAll(getActivity());
                 searchResponse();
                 return true;
