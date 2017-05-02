@@ -123,25 +123,24 @@ public class FeedFragment extends Fragment {
 
         search_barView = (SearchView) fView.findViewById(R.id.search_bar);
         search_queue = VolleyProvider.getInstance(getActivity());
-        recommendedFollows();
         search_barView.setOnQueryTextListener(new SearchView.OnQueryTextListener(){
             @Override
             public boolean onQueryTextSubmit(String query) {
-                search_queue.getQueue().cancelAll(getActivity());
-                searchResponse();
                 search_barView.onActionViewCollapsed();
                 return true;
             }
 
             @Override
             public boolean onQueryTextChange(String newText) {
-                if(newText == "") return true;
-                search_queue.getQueue().cancelAll(getActivity());
-                searchResponse();
+                if(newText == "") recommendedFollows();
+                else {
+                    search_queue.getQueue().cancelAll(getActivity());
+                    searchResponse(newText);
+                }
                 return true;
             }
 
-            private void searchResponse(){
+            private void searchResponse(final String query){
                 String url = "https://138.68.158.127/get_users_like";
 
                 //Create the exercise history request
@@ -186,7 +185,7 @@ public class FeedFragment extends Fragment {
                     protected Map<String, String> getParams()
                     {
                         Map<String, String>  params = new HashMap<>();
-                        params.put("email", search_barView.getQuery().toString());
+                        params.put("email", query);
                         return params;
                     }
                 };
@@ -259,6 +258,7 @@ public class FeedFragment extends Fragment {
     public void onStart(){
         super.onStart();
         createUserFeed();
+        recommendedFollows();
     }
 
     // TODO: Rename method, update argument and hook method into UI event
