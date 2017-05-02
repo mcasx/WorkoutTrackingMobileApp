@@ -941,7 +941,10 @@ def get_user_profile():
         c = conn.cursor(MySQLdb.cursors.DictCursor)
         c.execute('USE muscle2')
 
-        c.execute("""SELECT Email, Name, Height, Weight, Profile_image, Plan FROM USER WHERE Email = %s""", [email])
+        c.execute("""SELECT Email, Name, Height, 
+            Weight, Profile_image, Gender, Plan, 
+            Date_of_birth, TIMESTAMPDIFF(YEAR,Date_of_birth,CURDATE()) AS Age 
+            FROM USER WHERE Email = %s""", [email])
 
         fetched = c.fetchone()
         
@@ -991,6 +994,45 @@ def get_users_like():
 
 	except Exception as e:
 		return str(e)
+
+#####################
+##  HISTORY STATS  ##
+#####################
+
+@app.route('/get_user_avg_stats_ex', methods=['POST'])
+def get_user_avg_stats_ex():
+    try:
+        user_email = request.form['user_email']
+        exercise = request.form['exercise']
+
+        conn = MySQLdb.connect(host='localhost', user='muscle', password='some_pass', database='muscle')
+        c = conn.cursor(MySQLdb.cursors.DictCursor)
+        
+        c.execute('USE muscle2')
+        c.execute("""
+            SELECT AVG(Set_amount) AS avg_sets,AVG(Repetitions) AS avg_reps, AVG(Weight) AS avg_weight, AVG(Intensity) AS avg_int, SEC_TO_TIME(AVG(TIME_TO_SEC(Resting_Time))) AS avg_rest
+			FROM (SELECT ID,Exercise_name, Set_amount
+                  FROM EXERCISE_HISTORY
+                  WHERE User_email = %s AND Exercise_name = %s) AS EH
+            JOIN (SELECT * FROM SETS) AS S
+            ON S.Exercise_history_id = EH.ID
+            GROUP BY Exercise_name;
+			""", [user_email, exercise])
+
+        fetched = c.fetchall()
+        #Parse value to  string
+        print(fetched)
+        for i in range(len(fetched)):
+            fetched[i]['avg_sets'] = str(fetched[i]['avg_sets'])
+            fetched[i]['avg_rest'] = str(fetched[i]['avg_rest'])
+            fetched[i]['avg_weight'] = str(fetched[i]['avg_weight'])
+            fetched[i]['avg_reps'] = str(fetched[i]['avg_reps'])
+        c.close()
+        conn.close()
+        return jsonify(fetched)
+
+    except Exception as e:
+        return str(e)
 
 #####################
 ##   SOCIAL FEED   ##
@@ -1076,8 +1118,8 @@ def get_comments_exercise():
 		
 		c.execute('USE muscle2')
 		c.execute("""
-			SELECT User_email, Comment
-			FROM COMMENTS
+			SELECT User_email, Comment, Name, Profile_image
+			FROM COMMENTS JOIN USER on COMMENTS.User_email = USER.Email
 			WHERE Exercise = %s
 			""", [exercise_id])
 
@@ -1180,6 +1222,74 @@ def get_user_following():
 
 	except Exception as e:
 		return str(e)
+
+@app.route('/get_follow_info', methods=['POST'])
+def get_follow_info():
+    try:
+        user_email = request.form['user_email']
+
+        conn = MySQLdb.connect(host='localhost', user='muscle', password='some_pass', database='muscle')
+        c = conn.cursor(MySQLdb.cursors.DictCursor)
+        
+        c.execute('USE muscle2')
+        c.execute("""SELECT Following FROM FOLLOWERS WHERE User_email = %s""", [user_email])
+
+        fetched_following = [ email['Following'] for email in c.fetchall() ]
+        
+        c.execute("""SELECT User_email FROM FOLLOWERS WHERE Following = %s""", [user_email])
+
+        fetched_followers = [ email['User_email'] for email in c.fetchall() ]
+
+        c.close()
+        conn.close()
+        return jsonify(following = fetched_following,followers = fetched_followers)
+
+    except Exception as e:
+        raise
+
+
+@app.route('/add_to_following', methods=['POST'])
+def add_to_following():
+    try:
+        follower = request.form['follower_email']
+        following = request.form['following_email']
+
+        conn = MySQLdb.connect(host='localhost', user='muscle', password='some_pass', database='muscle')
+        c = conn.cursor(MySQLdb.cursors.DictCursor)
+        
+        c.execute('USE muscle2')
+        c.execute('''INSERT INTO FOLLOWERS (User_email, Following) VALUES (%s, %s)''', [follower, following])
+        conn.commit()
+
+        c.close()
+        conn.close()
+
+
+        return "Following " + following 
+
+    except Exception as e:
+        return str(e)
+
+@app.route('/rm_from_following', methods=['POST'])
+def rm_from_following():
+    try:
+        unfollower = request.form['unfollower']
+        unfollowed = request.form['unfollowed']
+
+        conn = MySQLdb.connect(host='localhost', user='muscle', password='some_pass', database='muscle')
+        c = conn.cursor(MySQLdb.cursors.DictCursor)
+        
+        c.execute('USE muscle2')
+        c.execute('''DELETE FROM FOLLOWERS WHERE User_email = %s AND Following = %s''', [unfollower, unfollowed])
+        conn.commit()
+
+        c.close()
+        conn.close()
+
+
+        return "Unfollowed " + unfollowed
+    except Exception as e:
+        return str(e)
 
 #####################
 ## DATA PROCESSING ##
