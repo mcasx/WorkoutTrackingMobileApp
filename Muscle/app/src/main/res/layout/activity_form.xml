@@ -13,7 +13,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
     app:layout_constraintLeft_toRightOf="@+id/userCommentImage">
 
 
@@ -68,9 +68,8 @@
         app:layout_constraintLeft_toLeftOf="parent"
         android:layout_marginRight="8dp"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintHorizontal_bias="0.493"
-        android:layout_marginTop="8dp"
-        app:layout_constraintTop_toBottomOf="@+id/textView5">
+        android:layout_marginTop="16dp"
+        app:layout_constraintTop_toBottomOf="@+id/pick_profile_img">
 
         <android.support.design.widget.TextInputEditText
             android:id="@+id/name_input"
@@ -157,15 +156,18 @@
     </RadioGroup>
 
     <ImageView
-        android:id="@+id/pick_profile_img_btn"
+        android:id="@+id/pick_profile_img"
         android:contentDescription="@string/profile_pic"
         android:onClick="onClickPickImage"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="128dp"
+        android:layout_height="128dp"
         app:srcCompat="@drawable/ic_profile"
+        android:adjustViewBounds="true"
+        android:cropToPadding="false"
+        android:scaleType="centerCrop"
         android:layout_marginLeft="8dp"
-        app:layout_constraintLeft_toLeftOf="parent"
         android:layout_marginRight="8dp"
+        app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         android:layout_marginTop="35dp"/>
@@ -183,19 +185,8 @@
         app:layout_constraintRight_toRightOf="parent"
         android:layout_marginLeft="8dp"
         app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintHorizontal_bias="0.501" />
-
-    <TextView
-        android:id="@+id/textView5"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/profile_changePic"
-        android:layout_marginTop="0dp"
-        app:layout_constraintTop_toBottomOf="@+id/pick_profile_img_btn"
-        android:layout_marginRight="8dp"
-        app:layout_constraintRight_toRightOf="parent"
-        android:layout_marginLeft="8dp"
-        app:layout_constraintLeft_toLeftOf="parent" />
+        app:layout_constraintHorizontal_bias="0.501"
+        android:visibility="gone"/>
 
     <android.support.design.widget.TextInputLayout
         android:id="@+id/weight_input_layout"

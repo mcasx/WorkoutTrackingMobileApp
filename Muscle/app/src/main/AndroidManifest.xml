@@ -36,7 +36,6 @@
             android:theme="@style/Theme.AppCompat.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
@@ -45,10 +44,12 @@
             android:theme="@style/Theme.AppCompat" />
         <activity
             android:name=".RegisterActivity"
-            android:theme="@style/Theme.AppCompat.NoActionBar" />
+            android:theme="@style/Theme.AppCompat.NoActionBar"
+            android:noHistory="true"/>
         <activity
             android:name=".FeedBackActivity"
-            android:theme="@style/Theme.AppCompat.NoActionBar" />
+            android:theme="@style/Theme.AppCompat.NoActionBar"
+            android:noHistory="true"/>
         <activity
             android:name=".FormActivity"
             android:theme="@style/Theme.AppCompat.NoActionBar" />

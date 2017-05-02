@@ -54,10 +54,6 @@ public class RegisterActivity extends AppCompatActivity {
     Button signUpButton;
     View note;
 
-    @Override
-    public void onBackPressed(){
-        finish();
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -141,7 +137,9 @@ public class RegisterActivity extends AppCompatActivity {
                             //intent.putExtra("id", id);
                             // email is kept for now
                             intent.putExtra("email", email);
+                            intent.putExtra("context", "register");
                             startActivity(intent);
+                            finish();
                         }
                         else if(response.equals("User already Registered")){
                             email_layout.setError("Email already in use");
@@ -300,5 +298,7 @@ public class RegisterActivity extends AppCompatActivity {
         intent.putExtra("email", "ola@ua.pt");
         startActivity(intent);
     }
+
+
 
     }
