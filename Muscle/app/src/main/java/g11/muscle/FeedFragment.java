@@ -127,17 +127,16 @@ public class FeedFragment extends Fragment {
         search_barView.setOnQueryTextListener(new SearchView.OnQueryTextListener(){
             @Override
             public boolean onQueryTextSubmit(String query) {
+                search_queue.getQueue().cancelAll(getActivity());
+                searchResponse();
                 search_barView.onActionViewCollapsed();
                 return true;
             }
 
             @Override
             public boolean onQueryTextChange(String newText) {
-                if(newText == "") recommendedFollows();
-                else{
-                    search_queue.getQueue().cancelAll(getActivity());
-                    searchResponse();
-                }
+                search_queue.getQueue().cancelAll(getActivity());
+                searchResponse();
                 return true;
             }
 
