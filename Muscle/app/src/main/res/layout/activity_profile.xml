@@ -113,7 +113,8 @@
             android:layout_alignParentStart="true"
             android:layout_below="@+id/info"
             android:orientation="horizontal"
-            android:layout_marginTop="@dimen/activity_vertical_margin">
+            android:layout_marginTop="@dimen/activity_vertical_margin"
+            android:id="@+id/follow">
 
             <TextView
                 android:id="@+id/following"
@@ -134,6 +135,24 @@
                 android:layout_weight="1"/>
 
         </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_below="@+id/follow"
+            android:orientation="horizontal"
+            android:layout_marginTop="@dimen/activity_vertical_margin">
+
+            <com.github.mikephil.charting.charts.RadarChart
+                android:id="@+id/rChart"
+                android:layout_width="match_parent"
+                android:layout_height="265dp" />
+
+        </LinearLayout>
+
+
 
 
     </RelativeLayout>

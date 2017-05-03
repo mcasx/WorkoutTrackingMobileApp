@@ -37,6 +37,7 @@ import com.android.volley.toolbox.StringRequest;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -134,7 +135,7 @@ public class FormActivity extends AppCompatActivity {
     public void onClickSkip(View view) {
         Intent intent = new Intent(FormActivity.this, HomeActivity.class);
         intent.putExtra("email", email);
-        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         startActivity(intent);
         finish();
     }
@@ -173,7 +174,7 @@ public class FormActivity extends AppCompatActivity {
                             if(context.equals("register")) {
                                 Intent intent = new Intent(FormActivity.this, HomeActivity.class);
                                 intent.putExtra("email", email);
-                                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                                 startActivity(intent);
                                 finish();
                             }
@@ -324,11 +325,13 @@ public class FormActivity extends AppCompatActivity {
             int year = c.get(Calendar.YEAR);
             int month = c.get(Calendar.MONTH);
             int day = c.get(Calendar.DAY_OF_MONTH);
-
+            DatePickerDialog dobForm = new DatePickerDialog(getActivity(), this, year, month, day);
+            dobForm.getDatePicker().setMaxDate(new Date().getTime());
 
             // Create a new instance of DatePickerDialog and return it
-            return new DatePickerDialog(getActivity(), this, year, month, day);
+            return dobForm;
         }
+
         public void onDateSet(DatePicker view, int year, int month, int day) {
             // Do something with the date chosen by the user
             TextView tv= (TextView) getActivity().findViewById(R.id.button_bod_picker);

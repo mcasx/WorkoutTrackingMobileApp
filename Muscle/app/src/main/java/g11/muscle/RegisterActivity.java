@@ -99,8 +99,6 @@ public class RegisterActivity extends AppCompatActivity {
                 });
     }
 
-
-
     public void onClickSignUp(View view){
 
         TextInputEditText email_input, password_input, repPass_input;
@@ -121,8 +119,6 @@ public class RegisterActivity extends AppCompatActivity {
         String addUserUrl = "/add_user";
         //Create the list items through a request
         //MuscleDbHelper dbHelper= new MuscleDbHelper(getApplicationContext());
-
-
 
         StringRequest stringRequest = new StringRequest(Request.Method.POST, baseUrl + addUserUrl,
                 new Response.Listener<String>() {
@@ -158,7 +154,6 @@ public class RegisterActivity extends AppCompatActivity {
                             alertDialog.show();
                             set_progressBar_visibility(View.GONE);
                         }
-
                     }
                 },
                 new Response.ErrorListener() {
@@ -299,6 +294,13 @@ public class RegisterActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
+    @Override
+    public void onBackPressed()
+    {
+        Intent intent = new Intent(RegisterActivity.this, LoginActivity.class);
+        startActivity(intent);
+        finish();
+    }
 
 
     }

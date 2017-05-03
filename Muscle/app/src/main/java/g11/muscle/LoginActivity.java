@@ -178,6 +178,8 @@ public class LoginActivity extends AppCompatActivity {
         Intent signUpInt = new Intent(LoginActivity.this, RegisterActivity.class);
 
         LoginActivity.this.startActivity(signUpInt);
+
+        finish();
     }
 
     public void onClickForgotPass(View view){
