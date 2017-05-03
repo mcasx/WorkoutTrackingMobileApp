@@ -6,13 +6,14 @@
     android:layout_height="match_parent"
     tools:context="g11.muscle.ProfileActivity">
 
-    <android.support.design.widget.FloatingActionButton
+    <Button
         android:id="@+id/fab"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
-        app:srcCompat="@android:drawable/ic_input_add"
-        app:useCompatPadding="true"
+        android:layout_marginRight="@dimen/activity_horizontal_margin"
+        android:layout_marginEnd="@dimen/activity_horizontal_margin"
+        android:layout_marginBottom="@dimen/activity_vertical_margin"
         android:visibility="invisible"/>
 
 
@@ -136,6 +137,8 @@
 
         </LinearLayout>
 
+        <!--
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -145,12 +148,17 @@
             android:orientation="horizontal"
             android:layout_marginTop="@dimen/activity_vertical_margin">
 
+
+
             <com.github.mikephil.charting.charts.RadarChart
                 android:id="@+id/rChart"
                 android:layout_width="match_parent"
                 android:layout_height="265dp" />
 
+
         </LinearLayout>
+
+        -->
 
 
 

@@ -23,6 +23,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -53,6 +54,8 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+
+import g11.muscle.MPChartJava.RadarMarkerView;
 
 import static g11.muscle.R.id.container;
 
@@ -89,11 +92,11 @@ public class ProfileActivity extends AppCompatActivity {
         createUserInfo();
         createFollowerInfo();
 
-        rChart = (RadarChart) findViewById(R.id.rChart);
+        //rChart = (RadarChart) findViewById(R.id.rChart);
 
         // Font for charts text
-        mTfLight = Typeface.createFromAsset(this.getAssets(), "fonts/OpenSans-Light.ttf");
-        RadarSetup();
+        //mTfLight = Typeface.createFromAsset(this.getAssets(), "fonts/OpenSans-Light.ttf");
+       // RadarSetup();
 
     }
 
@@ -206,12 +209,14 @@ public class ProfileActivity extends AppCompatActivity {
 
                             following.setText("Following (" + Integer.toString(jsonFollowingArray.length()) + ")");
                             followers.setText("Followers (" + Integer.toString(jsonFollowersArray.length()) + ")");
+                            Log.i("TG", String.valueOf(friendFlag));
 
-                            FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+                            Button fab = (Button) findViewById(R.id.fab);
                             if(friendFlag){
-                                fab.setImageResource(R.drawable.ic_remove_black_24dp);
-                                fab.setBackgroundTintList(getApplicationContext().getResources().getColorStateList(R.color.colorPrimary));
+                                //fab.setImageResource(R.drawable.ic_remove_black_24dp);
+                                //fab.setBackgroundTintList(getApplicationContext().getResources().getColorStateList(R.color.colorPrimary));
                                 fab.setVisibility(View.VISIBLE);
+                                fab.setText("Unfollow");
                                 fab.setOnClickListener(new View.OnClickListener() {
                                     @Override
                                     public void onClick(View v) {
@@ -224,9 +229,10 @@ public class ProfileActivity extends AppCompatActivity {
                                 fab.setVisibility(View.INVISIBLE);
                             }
                             else{
-                                fab.setImageResource(android.R.drawable.ic_input_add);
-                                fab.setBackgroundTintList(getApplicationContext().getResources().getColorStateList(R.color.bright_foreground_holo_dark));
+                                //fab.setImageResource(android.R.drawable.ic_input_add);
+                                //fab.setBackgroundTintList(getApplicationContext().getResources().getColorStateList(R.color.bright_foreground_holo_dark));
                                 fab.setVisibility(View.VISIBLE);
+                                fab.setText("Follow");
                                 fab.setOnClickListener(new View.OnClickListener() {
                                     @Override
                                     public void onClick(View v) {
