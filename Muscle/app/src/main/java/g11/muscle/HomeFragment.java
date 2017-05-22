@@ -116,9 +116,7 @@ public class HomeFragment extends Fragment {
                     @Override
                     public void onResponse(String response) {
                         try {
-                            Log.e(TAG, response);
                             JSONArray jsonArray = new JSONArray(response);
-                            Log.e(TAG, jsonArray.toString());
                             rE = new String[jsonArray.length()];
                             try {
                                 for (int i = 0; i < jsonArray.length(); i++) {
@@ -183,9 +181,7 @@ public class HomeFragment extends Fragment {
                     @Override
                     public void onResponse(String response) {
                         try {
-                            Log.e(TAG, response);
                             JSONArray jsonArray = new JSONArray(response);
-                            Log.e(TAG, jsonArray.toString());
                             rP = new String[jsonArray.length()];
                             try {
                                 for (int i = 0; i < jsonArray.length(); i++) {

@@ -5,19 +5,14 @@ import android.content.Intent;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
-import android.widget.ImageView;
 import android.widget.Spinner;
-import android.widget.TextView;
+import android.widget.Toast;
 
 import com.android.volley.Request;
 import com.android.volley.Response;
@@ -28,18 +23,22 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.Console;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static g11.muscle.R.id.container;
+import g11.muscle.Classes.TrainingsItem;
+import g11.muscle.Classes.PlanExerciseItem;
+import g11.muscle.Classes.Plan_Exercise_View;
 
 public class PlanActivity extends AppCompatActivity {
 
     private static final String TAG = "PlanActivity";
 
     private String email;
+    private String plan_id;
 
     // Initialization of plan_group array
     private List<TrainingsItem> plan_trainings;
@@ -48,7 +47,6 @@ public class PlanActivity extends AppCompatActivity {
     //GUI
     private RecyclerView recyclerView;
     private Spinner dropdown;
-    private Button setPlan;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,17 +56,16 @@ public class PlanActivity extends AppCompatActivity {
         plan_trainings = new ArrayList<>();
         training_data = new ArrayList<>();
 
-        // get user email
+        // get intent info
         email = getIntent().getStringExtra("email");
-        // Fragment View
+        plan_id = getIntent().getStringExtra("plan_id");
+
 
         //GUI elements
         dropdown = (Spinner)findViewById(R.id.spinner);
         getTrainings();
 
         recyclerView = (RecyclerView) findViewById(R.id.PE_recyclerview);
-        setPlan = (Button) findViewById(R.id.setPlanButton);
-
     }
 
     public void onClickSetPlan(View view){
@@ -76,11 +73,14 @@ public class PlanActivity extends AppCompatActivity {
         new AlertDialog.Builder(this)
                 .setIcon(android.R.drawable.ic_dialog_alert)
                 .setTitle("Set Plan")
-                .setMessage("You still have an unfinished plan, are you sure you want to set a new plan?")
+                .setMessage("\n    You still have an unfinished plan.\n\n    Are you sure you want to set a new plan?")
                 .setPositiveButton("Yes", new DialogInterface.OnClickListener()
                 {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
+
+                        setNewPlan();
+
                         Intent it = new Intent(PlanActivity.this,HomeActivity.class);
                         it.putExtra("email",email);
                         startActivity(it);
@@ -90,9 +90,44 @@ public class PlanActivity extends AppCompatActivity {
                 .show();
     }
 
+    // sets user new plan
+    private void setNewPlan() {
+        String url = "https://138.68.158.127/set_user_plan";
+
+        //Create the exercise plan_group request
+        StringRequest StrHistReq = new StringRequest(Request.Method.POST,url,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        Toast.makeText(PlanActivity.this, "New plan set successfully", Toast.LENGTH_LONG).show();
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        //Handle error response
+                        Toast.makeText(PlanActivity.this, "Couldn't set new plan", Toast.LENGTH_LONG).show();
+                    }
+                }
+        ){
+            // use params are specified here
+            @Override
+            protected Map<String, String> getParams()
+            {
+                Map<String, String>  params = new HashMap<>();
+                params.put("plan_id",plan_id);
+                params.put("email",email);
+                return params;
+            }
+        };
+
+        // Add the request to the RequestQueue
+        VolleyProvider.getInstance(PlanActivity.this).addRequest(StrHistReq);
+    }
+
     // Get User Plan Trainings ( ID + Name )
     private void getTrainings(){
-        String url = "https://138.68.158.127/get_user_plan_trainings";
+        String url = "https://138.68.158.127/get_plan_trainings";
 
         //Create the exercise plan_group request
         StringRequest StrHistReq = new StringRequest(Request.Method.POST,url,
@@ -105,7 +140,7 @@ public class PlanActivity extends AppCompatActivity {
                                 for (int i = 0; i < jsonArray.length(); i++) {
                                     String tmp_name = new JSONObject(jsonArray.getString(i)).getString("Name");
                                     int tmp_id = Integer.parseInt(new JSONObject(jsonArray.getString(i)).getString("ID"));
-                                    plan_trainings.add(new PlanActivity.TrainingsItem(tmp_id,tmp_name));
+                                    plan_trainings.add(new TrainingsItem(tmp_id,tmp_name));
                                 }
                             } catch (JSONException je){
                                 Log.e(TAG, je.toString());
@@ -142,7 +177,7 @@ public class PlanActivity extends AppCompatActivity {
             protected Map<String, String> getParams()
             {
                 Map<String, String>  params = new HashMap<>();
-                params.put("email", email);
+                    params.put("plan_id", plan_id);
                 return params;
             }
         };
@@ -151,6 +186,7 @@ public class PlanActivity extends AppCompatActivity {
         VolleyProvider.getInstance(PlanActivity.this).addRequest(StrHistReq);
     }
 
+    // Gets plan training exercises
     private void getTrainingExercises(final String training) {
         String url = "https://138.68.158.127/get_training_exercises";
 
@@ -168,8 +204,9 @@ public class PlanActivity extends AppCompatActivity {
                                     int tmp_reps = Integer.parseInt(new JSONObject(jsonArray.getString(i)).getString("Repetitions"));
                                     int tmp_sets = Integer.parseInt(new JSONObject(jsonArray.getString(i)).getString("Sets"));
                                     String tmp_rest = new JSONObject(jsonArray.getString(i)).getString("Resting_Time");
+                                    int tmp_weight = Integer.parseInt(new JSONObject(jsonArray.getString(i)).getString("Weight"));
                                     // TODO NEEDS IMAGE
-                                    training_data.add(new PlanActivity.PlanExerciseItem(tmp_name,tmp_reps,tmp_sets,tmp_rest,R.mipmap.default_avatar));
+                                    training_data.add(new PlanExerciseItem(tmp_name,tmp_reps,tmp_sets,tmp_rest,tmp_weight,R.mipmap.default_avatar));
                                 }
                             } catch (JSONException je){
                                 Log.e(TAG, je.toString());
@@ -178,7 +215,7 @@ public class PlanActivity extends AppCompatActivity {
                             e2.printStackTrace();
                         }
 
-                        PlanActivity.Plan_Exercise_View_Adapter adapter = new PlanActivity.Plan_Exercise_View_Adapter(training_data);
+                        Plan_Exercise_View adapter = new Plan_Exercise_View(training_data);
                         recyclerView.setAdapter(adapter);
                         recyclerView.setLayoutManager(new LinearLayoutManager(PlanActivity.this));
                     }
@@ -203,146 +240,5 @@ public class PlanActivity extends AppCompatActivity {
 
         // Add the request to the RequestQueue
         VolleyProvider.getInstance(PlanActivity.this).addRequest(StrHistReq);
-    }
-
-    //
-    private class TrainingsItem {
-        private int id;
-        private String name;
-
-        private TrainingsItem (int id, String name){
-            this.id = id;
-            this.name = name;
-        }
-
-        private String getIdStr(){
-            return String.valueOf(id);
-        }
-
-        private String getName() {
-            return name;
-        }
-
-        @Override
-        public String toString(){
-            return "\n#############\nID: " + id + "\nName: " + name;
-        }
-    }
-
-    // It defined a Exercise ( Used in training exercises list view )
-    private class PlanExerciseItem {
-        private String exercise_name;
-        private int exercise_reps;
-        private int exercise_sets;
-        private String exercise_rest;
-        private int exercise_image;
-
-        private PlanExerciseItem(String name, int reps, int sets, String rest, int image) {
-            exercise_name = name;
-            exercise_reps = reps;
-            exercise_sets = sets;
-            exercise_rest = rest;
-            exercise_image = image;
-        }
-
-        private String getExercise_name() {
-            return exercise_name;
-        }
-
-        private int getExercise_reps() {
-            return exercise_reps;
-        }
-
-        private int getExercise_sets() {
-            return exercise_sets;
-        }
-
-        private String getExercise_rest() {
-            return exercise_rest;
-        }
-
-        private int getExercise_image() {
-            return exercise_image;
-        }
-
-        @Override
-        public String toString() {
-            return "\n###################\nPLAN EXERCISE ITEM\nName: " + exercise_name + "\nSets: " + exercise_sets + "\nReps: " + exercise_reps + "\nRest: " + exercise_rest;
-        }
-    }
-
-    // used in training exercises list view
-    private class View_Holder extends RecyclerView.ViewHolder {
-
-        CardView cv;
-        ImageView plan_image;
-        TextView plan_exercise;
-        TextView plan_sets;
-        TextView plan_reps;
-        TextView plan_rest;
-
-        View_Holder(View itemView) {
-            super(itemView);
-            cv = (CardView) itemView.findViewById(R.id.PE_cardView);
-            plan_exercise = (TextView) itemView.findViewById(R.id.plan_exercise);
-            plan_sets = (TextView) itemView.findViewById(R.id.plan_sets);
-            plan_reps = (TextView) itemView.findViewById(R.id.plan_reps);
-            plan_rest = (TextView) itemView.findViewById(R.id.plan_rest);
-            plan_image = (ImageView) itemView.findViewById(R.id.plan_image);
-        }
-    }
-    
-    //adapter of recycler view used in training exercises list view
-    private class Plan_Exercise_View_Adapter extends RecyclerView.Adapter<PlanActivity.View_Holder>{
-
-        List<PlanActivity.PlanExerciseItem> list;
-
-        private Plan_Exercise_View_Adapter(List<PlanActivity.PlanExerciseItem> list){
-            this.list = list;
-        }
-
-        @Override
-        public PlanActivity.View_Holder onCreateViewHolder(ViewGroup parent, int viewType) {
-            //Inflate the layout, initialize the View Holder
-            View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.costum_plan_exercise, parent, false);
-            PlanActivity.View_Holder holder = new PlanActivity.View_Holder(v);
-            return holder;
-        }
-
-        @Override
-        public void onBindViewHolder(PlanActivity.View_Holder holder, int position) {
-
-            //Use the provided View Holder on the onCreateViewHolder method to populate the current row on the RecyclerView
-            holder.plan_exercise.setText(list.get(position).exercise_name);
-            holder.plan_sets.setText(Integer.toString(list.get(position).exercise_sets));
-            holder.plan_reps.setText(Integer.toString(list.get(position).exercise_reps));
-            holder.plan_rest.setText(list.get(position).exercise_rest);
-            holder.plan_image.setImageResource(list.get(position).exercise_image);
-            //animate(holder);
-        }
-
-        @Override
-        public int getItemCount() {
-            //returns the number of elements the RecyclerView will display
-            return list.size();
-        }
-
-        @Override
-        public void onAttachedToRecyclerView(RecyclerView recyclerView) {
-            super.onAttachedToRecyclerView(recyclerView);
-        }
-
-        // Insert a new item to the RecyclerView on a predefined position
-        public void insert(int position,PlanActivity.PlanExerciseItem data) {
-            list.add(position, data);
-            notifyItemInserted(position);
-        }
-
-        // Remove a RecyclerView item containing a specified Data object
-        public void remove(PlanActivity.PlanExerciseItem data) {
-            int position = list.indexOf(data);
-            list.remove(position);
-            notifyItemRemoved(position);
-        }
     }
 }
