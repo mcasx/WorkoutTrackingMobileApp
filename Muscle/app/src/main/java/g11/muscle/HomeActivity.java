@@ -77,11 +77,16 @@ public class HomeActivity extends AppCompatActivity implements PickExerciseFragm
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setTitle("Home");
+
         setContentView(R.layout.activity_home);
         manager = getSupportFragmentManager();
         BottomNavigationView navigation = (BottomNavigationView) findViewById(R.id.navigation);
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
+
+
+        // Start app in home fragment
+        setTitle("Home");
+        switchToFragmentHome();
     }
 
     @Override

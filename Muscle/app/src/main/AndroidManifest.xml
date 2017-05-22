@@ -62,7 +62,7 @@
             android:theme="@style/Theme.AppCompat"/>
         <activity
             android:name=".PlanActivity"
-            android:theme="@style/Theme.AppCompat"/>
+            android:theme="@style/Theme.AppCompat.NoActionBar"/>
     </application>
 
 </manifest>
