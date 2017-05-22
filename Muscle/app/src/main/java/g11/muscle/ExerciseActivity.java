@@ -5,6 +5,8 @@ import android.os.Bundle;
 import android.content.Intent;
 import android.util.Log;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.ImageView;
@@ -58,6 +60,14 @@ public class ExerciseActivity extends AppCompatActivity {
         exercise = intent.getStringExtra("exercise_name");
         email = intent.getStringExtra("email");
 
+        //button animation
+        Button button = (Button)findViewById(R.id.button);
+        final Animation myAnim = AnimationUtils.loadAnimation(this, R.anim.bounce);
+
+        // Use bounce interpolator with amplitude 0.2 and frequency 20
+        BounceInterpolator interpolator = new BounceInterpolator(0.4, 20);
+        myAnim.setInterpolator(interpolator);
+            button.startAnimation(myAnim);
 
         //GUI elements
         exerciseView  = (TextView)findViewById(R.id.exercise);
