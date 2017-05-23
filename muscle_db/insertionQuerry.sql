@@ -1,6 +1,6 @@
 USE muscle2;
 
-/*INSERT INTO EXERCISE (Name, Description, Image, Kind) Values ('Chest Press', 'Instructions:\n 1. Sit upright with your back supported by the back pad.\n 2. Hold the fixed handles at chest height; adjust the seat, if needed\n 3. Press the handles forward until your arms are fully extended.\n 4. Slowly return to the starting position.', 'chest_press.png', 'Strenght');
+INSERT INTO EXERCISE (Name, Description, Image, Kind) Values ('Chest Press', 'Instructions:\n 1. Sit upright with your back supported by the back pad.\n 2. Hold the fixed handles at chest height; adjust the seat, if needed\n 3. Press the handles forward until your arms are fully extended.\n 4. Slowly return to the starting position.', 'chest_press.png', 'Strenght');
 INSERT INTO EXERCISE (Name, Description, Image, Kind) Values ('Front Lat Pulldowns', 'Instructions:\n 1. Sit facing away from machine with your knees locked under the roller pads.\n 2. Grip the lat bar with your hands slightly wider than shoulder width, with your palms facing forward.\n 3. Lean back slightly, and pull the bar down slowly until it touches your upper chest area.\n 4. Slowly return to the starting position.', 'front_lat_pulldowns.png', 'Strenght');
 INSERT INTO EXERCISE (Name, Description, Image, Kind) Values ('Leg extension', 'Instructions:\n 1. Adjust the seat so that the pivot of the left extension/leg curl arms lines up with the pivot point of your knees.\n 2. Adjust back pad angle, if needed\n 3. Hook your legs over the upper roller pads and your feet under the lowest roller pads.\n 4. Extend your legs forward, and hold your position momentarily.\n 5. Slowly return to starting position.\n', 'leg_extension.png', 'Strenght');
 INSERT INTO EXERCISE (Name, Description, Image, Kind) Values ('Triceps pushdown', 'Instructions:\n 1. Attach the easy curl bar to the high pulley.\n 2. Stand facing towards the machine.\n 3. Grip the bar with your hands 4 to 6 inch apart, palms facing forward.\n 4. Bring the bar to chest height. Keep your arms tight against your body, and push the bar down slowly.\n 5. Slowly return to the starting position.', 'triceps_pushdown.png', 'Strenght');
@@ -16248,5 +16248,3 @@ INSERT INTO TRAINING_EXERCISE (Training_id, Exercise_name, Sets, Repetitions, Re
 INSERT INTO TRAINING_EXERCISE (Training_id, Exercise_name, Sets, Repetitions, Resting_Time, Weight) VALUES (33, 'Leg curl', 2, 13, '00:00:30', 35);
 INSERT INTO TRAINING_EXERCISE (Training_id, Exercise_name, Sets, Repetitions, Resting_Time, Weight) VALUES (34, 'External Rotation', 2, 6, '00:00:45', 20);
 INSERT INTO TRAINING_EXERCISE (Training_id, Exercise_name, Sets, Repetitions, Resting_Time, Weight) VALUES (34, 'External Rotation', 5, 8, '00:00:15', 25);
-
-*/

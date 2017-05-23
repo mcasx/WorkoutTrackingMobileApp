@@ -36,6 +36,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import g11.muscle.DB.DBConnect;
 import g11.muscle.ProfileActivity;
 import g11.muscle.R;
 import g11.muscle.DB.VolleyProvider;
@@ -142,7 +143,7 @@ public class FeedFragment extends Fragment {
             }
 
             private void searchResponse(final String query){
-                String url = "https://138.68.158.127/get_users_like";
+                String url = DBConnect.serverURL + "/get_users_like";
 
                 //Create the exercise history request
                 StringRequest StrUsersLikeReq = new StringRequest(Request.Method.POST,url,
@@ -201,7 +202,7 @@ public class FeedFragment extends Fragment {
     }
 
     private void recommendedFollows(){
-        String url = "https://138.68.158.127/get_recommended_follows";
+        String url = DBConnect.serverURL + "/get_recommended_follows";
 
         //Create the exercise history request
         StringRequest StrUsersLikeReq = new StringRequest(Request.Method.POST,url,
@@ -302,7 +303,7 @@ public class FeedFragment extends Fragment {
     }
 
     private void createUserFeed(){
-        String url = "https://138.68.158.127/get_user_feed_and_pictures";
+        String url = DBConnect.serverURL + "/get_user_feed_and_pictures";
 
         //Create the exercise history request
         StringRequest StrFeedReq = new StringRequest(Request.Method.POST,url,

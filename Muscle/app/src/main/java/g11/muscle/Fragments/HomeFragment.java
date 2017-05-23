@@ -111,7 +111,6 @@ public class HomeFragment extends Fragment {
     private void getRecommendedExercises() {
         String url = DBConnect.serverURL + "/get_recommended_exercises";
 
-
         //Create the exercise plan_group request
         StringRequest StrHistReq = new StringRequest(Request.Method.POST, url,
                 new Response.Listener<String>() {
@@ -175,7 +174,6 @@ public class HomeFragment extends Fragment {
     private void getRecommendedPlans() {
         String url = DBConnect.serverURL + "/get_recommended_plans";
 
-
         //Create the exercise plan_group request
         StringRequest StrHistReq = new StringRequest(Request.Method.POST, url,
                 new Response.Listener<String>() {
@@ -186,6 +184,7 @@ public class HomeFragment extends Fragment {
                     @Override
                     public void onResponse(String response) {
                         try {
+                            Log.e("Response", response);
                             JSONArray jsonArray = new JSONArray(response);
                             rP = new String[jsonArray.length()];
                             try {

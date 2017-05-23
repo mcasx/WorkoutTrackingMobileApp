@@ -22,6 +22,8 @@ import java.util.Map;
 import g11.muscle.DB.DBConnect;
 import g11.muscle.DB.VolleyProvider;
 
+import android.util.Log;
+
 public class LoginActivity extends AppCompatActivity {
 
     private String             email;
@@ -118,6 +120,7 @@ public class LoginActivity extends AppCompatActivity {
                             finish();
                         }
                         else{
+                            Log.e("DB CONNECT ERROR",String.valueOf(response));
 
                             AlertDialog alertDialog = new AlertDialog.Builder(LoginActivity.this).create();
                             alertDialog.setTitle("Wrong Credentials");
