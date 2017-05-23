@@ -12,7 +12,6 @@ import android.content.Intent;
 import android.os.Handler;
 import android.util.Log;
 import android.view.View;
-import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -20,7 +19,6 @@ import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 
@@ -37,7 +35,6 @@ import com.github.mikephil.charting.listener.OnChartValueSelectedListener;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.w3c.dom.Text;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -49,6 +46,9 @@ import java.util.HashMap;
 import java.util.UUID;
 
 import android.graphics.Typeface;
+
+import g11.muscle.DB.DBConnect;
+import g11.muscle.DB.VolleyProvider;
 
 public class FeedBackActivity extends AppCompatActivity implements
         OnChartValueSelectedListener {
@@ -361,7 +361,7 @@ public class FeedBackActivity extends AppCompatActivity implements
         final java.sql.Timestamp date = new java.sql.Timestamp(new java.util.Date().getTime());
 
         // add exercise to user history
-        StringRequest Add_Req = new StringRequest(Request.Method.POST, "http://138.68.158.127/add_exercise_history",
+        StringRequest Add_Req = new StringRequest(Request.Method.POST, DBConnect.serverURL + "/add_exercise_history",
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response){

@@ -1,7 +1,5 @@
-package g11.muscle;
+package g11.muscle.Fragments;
 
-
-import android.content.DialogInterface;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.RequiresApi;
@@ -17,7 +15,6 @@ import android.widget.TextView;
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.StringRequest;
 
 import org.json.JSONArray;
@@ -26,6 +23,11 @@ import org.json.JSONObject;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import g11.muscle.DB.DBConnect;
+import g11.muscle.DetailedExerciseHistoryActivity;
+import g11.muscle.R;
+import g11.muscle.DB.VolleyProvider;
 
 
 /**
@@ -63,7 +65,7 @@ public class DetailedExerciseHistoryComments extends Fragment {
 
 
     private void setCommentCards(){
-        String url = "https://138.68.158.127/get_comments_exercise";
+        String url = DBConnect.serverURL + "/get_comments_exercise";
 
         //Create the exercise history request
         StringRequest StrHistReq = new StringRequest(Request.Method.POST,url,

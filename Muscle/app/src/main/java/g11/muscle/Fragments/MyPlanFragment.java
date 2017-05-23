@@ -1,4 +1,4 @@
-package g11.muscle;
+package g11.muscle.Fragments;
 
 import android.content.Context;
 import android.net.Uri;
@@ -32,6 +32,10 @@ import android.widget.Spinner;
 import g11.muscle.Classes.PlanExerciseItem;
 import g11.muscle.Classes.TrainingsItem;
 import g11.muscle.Classes.Plan_Exercise_View;
+
+import g11.muscle.DB.DBConnect;
+import g11.muscle.R;
+import g11.muscle.DB.VolleyProvider;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -124,7 +128,7 @@ public class MyPlanFragment extends Fragment {
 
     // Get User Plan Trainings ( ID + Name )
     private void getTrainings(){
-        String url = "https://138.68.158.127/get_user_plan_trainings";
+        String url = DBConnect.serverURL + "/get_user_plan_trainings";
 
         //Create the exercise plan_group request
         StringRequest StrHistReq = new StringRequest(Request.Method.POST,url,
@@ -185,7 +189,7 @@ public class MyPlanFragment extends Fragment {
     }
 
     private void getTrainingExercises(final String training) {
-        String url = "https://138.68.158.127/get_training_exercises";
+        String url = DBConnect.serverURL + "/get_training_exercises";
 
         //Create the exercise plan_group request
         StringRequest StrHistReq = new StringRequest(Request.Method.POST,url,

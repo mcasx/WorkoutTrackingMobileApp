@@ -23,7 +23,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.Console;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -32,6 +31,8 @@ import java.util.Map;
 import g11.muscle.Classes.TrainingsItem;
 import g11.muscle.Classes.PlanExerciseItem;
 import g11.muscle.Classes.Plan_Exercise_View;
+import g11.muscle.DB.DBConnect;
+import g11.muscle.DB.VolleyProvider;
 
 public class PlanActivity extends AppCompatActivity {
 
@@ -92,7 +93,7 @@ public class PlanActivity extends AppCompatActivity {
 
     // sets user new plan
     private void setNewPlan() {
-        String url = "https://138.68.158.127/set_user_plan";
+        String url = DBConnect.serverURL + "/set_user_plan";
 
         //Create the exercise plan_group request
         StringRequest StrHistReq = new StringRequest(Request.Method.POST,url,
@@ -127,7 +128,7 @@ public class PlanActivity extends AppCompatActivity {
 
     // Get User Plan Trainings ( ID + Name )
     private void getTrainings(){
-        String url = "https://138.68.158.127/get_plan_trainings";
+        String url = DBConnect.serverURL + "/get_plan_trainings";
 
         //Create the exercise plan_group request
         StringRequest StrHistReq = new StringRequest(Request.Method.POST,url,
@@ -188,7 +189,7 @@ public class PlanActivity extends AppCompatActivity {
 
     // Gets plan training exercises
     private void getTrainingExercises(final String training) {
-        String url = "https://138.68.158.127/get_training_exercises";
+        String url = DBConnect.serverURL  + "/get_training_exercises";
 
         //Create the exercise plan_group request
         StringRequest StrHistReq = new StringRequest(Request.Method.POST,url,

@@ -6,7 +6,6 @@ import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.provider.MediaStore;
 import android.support.design.widget.TextInputEditText;
@@ -41,6 +40,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+import g11.muscle.DB.DBConnect;
+import g11.muscle.DB.VolleyProvider;
 
 
 public class FormActivity extends AppCompatActivity {
@@ -157,11 +158,9 @@ public class FormActivity extends AppCompatActivity {
         int selectedId = radioGenderGroup.getCheckedRadioButtonId();
         gender = Integer.toString(((RadioButton) findViewById(selectedId)).getText().equals("Female") ? 1:0 );
 
-        String baseUrl = "https://138.68.158.127";
+        String addUserUrl = DBConnect.serverURL + "/update_user_char";
 
-        String addUserUrl = "/update_user_char";
-
-        StringRequest stringRequest = new StringRequest(Request.Method.POST, baseUrl + addUserUrl,
+        StringRequest stringRequest = new StringRequest(Request.Method.POST, addUserUrl,
                 new Response.Listener<String>() {
                     public void onResponse(String response){
 

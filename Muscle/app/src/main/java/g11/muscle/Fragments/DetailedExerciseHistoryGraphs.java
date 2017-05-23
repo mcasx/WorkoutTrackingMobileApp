@@ -1,4 +1,4 @@
-package g11.muscle;
+package g11.muscle.Fragments;
 
 import android.graphics.Color;
 import android.graphics.Typeface;
@@ -8,14 +8,11 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
-import com.github.mikephil.charting.animation.Easing;
 import com.github.mikephil.charting.charts.BarChart;
 import com.github.mikephil.charting.components.AxisBase;
 import com.github.mikephil.charting.components.Legend;
@@ -39,9 +36,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import g11.muscle.DB.DBConnect;
 import g11.muscle.MPChartJava.HistRadarMarkerView;
+import g11.muscle.R;
+import g11.muscle.DB.VolleyProvider;
 
-public class TwoFragment extends Fragment implements OnChartValueSelectedListener {
+public class DetailedExerciseHistoryGraphs extends Fragment implements OnChartValueSelectedListener {
 
     private static final String TAG = "MyPlanFragment";
 
@@ -63,7 +63,7 @@ public class TwoFragment extends Fragment implements OnChartValueSelectedListene
     private BarDataSet globalAvgSet;
     private BarDataSet set;
 
-    public TwoFragment() {
+    public DetailedExerciseHistoryGraphs() {
         // Required empty public constructor
     }
 
@@ -148,7 +148,7 @@ public class TwoFragment extends Fragment implements OnChartValueSelectedListene
     }
 
     private void getUserAverage(){
-        String url = "https://138.68.158.127/get_user_avg_stats_ex";
+        String url = DBConnect.serverURL + "/get_user_avg_stats_ex";
 
         //Create the exercise plan_group request
         StringRequest StrHistReq = new StringRequest(Request.Method.POST,url,
@@ -217,7 +217,7 @@ public class TwoFragment extends Fragment implements OnChartValueSelectedListene
     }
 
     private void getGlobalAverage(){
-        String url = "https://138.68.158.127/get_avg_stats_ex";
+        String url = DBConnect.serverURL + "/get_avg_stats_ex";
 
         //Create the exercise plan_group request
         StringRequest StrHistReq = new StringRequest(Request.Method.POST,url,

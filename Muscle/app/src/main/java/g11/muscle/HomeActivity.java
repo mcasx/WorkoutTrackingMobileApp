@@ -15,13 +15,16 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import android.widget.TextView;
-
 import android.support.v4.app.FragmentManager;
 
 import android.net.Uri;
 
-import java.text.Normalizer;
+import g11.muscle.DB.VolleyProvider;
+import g11.muscle.Fragments.ExerciseHistoryFragment;
+import g11.muscle.Fragments.FeedFragment;
+import g11.muscle.Fragments.HomeFragment;
+import g11.muscle.Fragments.MyPlanFragment;
+import g11.muscle.Fragments.PickExerciseFragment;
 
 public class HomeActivity extends AppCompatActivity implements PickExerciseFragment.OnFragmentInteractionListener,
         ExerciseHistoryFragment.OnFragmentInteractionListener, HomeFragment.OnFragmentInteractionListener

@@ -4,15 +4,12 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
-import android.graphics.PorterDuff;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.ColorRes;
-import android.support.design.widget.FloatingActionButton;
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -31,10 +28,8 @@ import android.widget.Toast;
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
-import com.android.volley.VolleyLog;
 import com.android.volley.toolbox.StringRequest;
 import com.github.mikephil.charting.animation.Easing;
-import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.charts.RadarChart;
 import com.github.mikephil.charting.components.AxisBase;
 import com.github.mikephil.charting.components.Legend;
@@ -55,9 +50,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import g11.muscle.DB.VolleyProvider;
 import g11.muscle.MPChartJava.RadarMarkerView;
 
-import static g11.muscle.R.id.container;
+import g11.muscle.DB.DBConnect;
 
 public class ProfileActivity extends AppCompatActivity {
 
@@ -101,7 +97,7 @@ public class ProfileActivity extends AppCompatActivity {
     }
 
     private void createUserInfo() {
-        String url = "https://138.68.158.127/get_user_profile";
+        String url = DBConnect.serverURL + "/get_user_profile";
 
         //Create the exercise history request
         StringRequest StrProfileReq = new StringRequest(Request.Method.POST, url,
@@ -170,7 +166,7 @@ public class ProfileActivity extends AppCompatActivity {
     }
 
     private void createFollowerInfo(){
-        String url = "https://138.68.158.127/get_follow_info";
+        String url = DBConnect.serverURL + "/get_follow_info";
 
         //Create the exercise history request
         StringRequest StrProfileReq = new StringRequest(Request.Method.POST,url,
@@ -270,7 +266,7 @@ public class ProfileActivity extends AppCompatActivity {
     }
 
     private void addToFollowers() {
-        String url = "https://138.68.158.127/add_to_following";
+        String url = DBConnect.serverURL + "/add_to_following";
 
         //Create the exercise history request
         StringRequest StrFollowReq = new StringRequest(Request.Method.POST, url,
@@ -312,7 +308,7 @@ public class ProfileActivity extends AppCompatActivity {
     }
 
     private void removeFromFollowers(){
-        String url = "https://138.68.158.127/rm_from_following";
+        String url = DBConnect.serverURL + "/rm_from_following";
 
         //Create the exercise history request
         StringRequest StrUnfollowReq = new StringRequest(Request.Method.POST, url,
@@ -464,7 +460,7 @@ public class ProfileActivity extends AppCompatActivity {
         mv.setChartView(rChart); // For bounds control
         rChart.setMarker(mv); // Set the marker to the chart
 
-        String url = "https://138.68.158.127/get_exercise_muscle_stats_of_user";
+        String url = DBConnect.serverURL + "/get_exercise_muscle_stats_of_user";
 
         //Create the exercise history request
         StringRequest StrHistReq = new StringRequest(Request.Method.POST,url,

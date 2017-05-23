@@ -8,6 +8,10 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 
+import g11.muscle.Fragments.DetailedExerciseHistoryComments;
+import g11.muscle.Fragments.DetailedExerciseHistoryFragment;
+import g11.muscle.Fragments.DetailedExerciseHistoryGraphs;
+
 public class PagerAdapter extends FragmentStatePagerAdapter {
     int mNumOfTabs;
 
@@ -24,7 +28,7 @@ public class PagerAdapter extends FragmentStatePagerAdapter {
                 DetailedExerciseHistoryFragment tab1 = new DetailedExerciseHistoryFragment();
                 return tab1;
             case 1:
-                TwoFragment tab2 = new TwoFragment();
+                DetailedExerciseHistoryGraphs tab2 = new DetailedExerciseHistoryGraphs();
                 return tab2;
             case 2:
                 DetailedExerciseHistoryComments tab3 = new DetailedExerciseHistoryComments();

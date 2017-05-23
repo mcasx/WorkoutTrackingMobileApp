@@ -1,4 +1,4 @@
-package g11.muscle;
+package g11.muscle.DB;
 
 import android.app.Activity;
 import android.content.Context;
@@ -25,11 +25,9 @@ import javax.net.ssl.TrustManagerFactory;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
 import com.google.android.gms.common.GooglePlayServicesRepairableException;
-import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.security.ProviderInstaller;
-import com.google.android.gms.security.ProviderInstaller.ProviderInstallListener;
 
-
+import g11.muscle.R;
 
 
 public class VolleyProvider {

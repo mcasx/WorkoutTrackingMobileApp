@@ -1,10 +1,10 @@
-package g11.muscle;
+package g11.muscle.Classes;
 
-class BounceInterpolator implements android.view.animation.Interpolator {
+public class BounceInterpolator implements android.view.animation.Interpolator {
     double mAmplitude = 1;
     double mFrequency = 10;
 
-    BounceInterpolator(double amplitude, double frequency) {
+    public BounceInterpolator(double amplitude, double frequency) {
         mAmplitude = amplitude;
         mFrequency = frequency;
     }

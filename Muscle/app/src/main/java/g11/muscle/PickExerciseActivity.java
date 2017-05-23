@@ -20,6 +20,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import g11.muscle.DB.DBConnect;
+
 public class PickExerciseActivity extends AppCompatActivity {
 
     private static final String TAG = "PickExerciseActivity";
@@ -64,7 +66,7 @@ public class PickExerciseActivity extends AppCompatActivity {
     }
 
     private void createMuscleGroupGrid() {
-        String url = "http://138.68.158.127/get_muscle_groups";
+        String url = DBConnect.serverURL + "/get_muscle_groups";
 
         //Create the request
         JsonArrayRequest jsonarrayRequest = new JsonArrayRequest(url,
@@ -110,7 +112,7 @@ public class PickExerciseActivity extends AppCompatActivity {
 
     private void createExerciseHistoryList(){
         //Create the exercise history request
-        String url = "http://138.68.158.127/get_exercise_history_of_user/" + email;
+        String url = DBConnect.serverURL + "/get_exercise_history_of_user/" + email;
         JsonArrayRequest jsonarrayRequest = new JsonArrayRequest(url,
                 new Response.Listener<JSONArray>() {
                     @Override

@@ -1,4 +1,4 @@
-package g11.muscle;
+package g11.muscle.Fragments;
 
 import android.content.Context;
 import android.content.Intent;
@@ -10,9 +10,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.ListView;
-import android.widget.Button;
 import android.widget.ArrayAdapter;
+import android.widget.GridView;
+import android.widget.ListView;
 
 import com.android.volley.Request;
 import com.android.volley.Response;
@@ -21,31 +21,41 @@ import com.android.volley.toolbox.StringRequest;
 
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.HashMap;
 import java.util.Map;
 
+import g11.muscle.DB.DBConnect;
+import g11.muscle.ExerciseActivity;
+import g11.muscle.GroupExercisesActivity;
+import g11.muscle.R;
+import g11.muscle.DB.VolleyProvider;
 
 /**
  * A simple {@link Fragment} subclass.
  * Activities that contain this fragment must implement the
- * {@link HomeFragment.OnFragmentInteractionListener} interface
+ * {@link PickExerciseFragment.OnFragmentInteractionListener} interface
  * to handle interaction events.
- * Use the {@link HomeFragment# newInstance} factory method to
+ * Use the {@link PickExerciseFragment# newInstance} factory method to
  * create an instance of this fragment.
  */
-public class HomeFragment extends Fragment {
-    private static final String TAG = "HomeFragment";
+public class PickExerciseFragment extends Fragment {
+    private static final String TAG = "PickExerciseFragment";
 
-    private OnFragmentInteractionListener mListener;
-
+    //
     private String email;
 
-    //GUI
-    private ListView recExView;
-    private ListView recPlanView;
+    private String[] groups;
 
-    public HomeFragment() {
+    //GUI
+    private GridView groupsView;
+    private ListView recent_historyView;
+
+    // Used by Main Activity
+    private OnFragmentInteractionListener mListener;
+
+    public PickExerciseFragment() {
         // Required empty public constructor
     }
 
@@ -53,21 +63,30 @@ public class HomeFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        // get email
         email = getActivity().getIntent().getStringExtra("email");
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState){
+                             Bundle savedInstanceState) {
         // Fragment View
-        View fView = inflater.inflate(R.layout.fragment_home, container, false);
-        recExView = (ListView) fView.findViewById(R.id.rec_ex);
-        recPlanView = (ListView) fView.findViewById(R.id.rec_plan);
-
-        getRecommendedExercises();
-        getRecommendedPlans();
+        View fView = inflater.inflate(R.layout.fragment_pick_exercise, container, false);
+        //GUI elements
+        groupsView  = (GridView) fView.findViewById(R.id.groups);
+        recent_historyView = (ListView) fView.findViewById(R.id.recent_history);
+        //UI Static elements
+        createMuscleGroupGrid();
+        createExerciseHistoryList();
         // Inflate the layout for this fragment
         return fView;
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        //UI Dynamic elements
+
     }
 
     @Override
@@ -97,48 +116,44 @@ public class HomeFragment extends Fragment {
      * "http://developer.android.com/training/basics/fragments/communicating.html"
      * >Communicating with Other Fragments</a> for more information.
      */
+
     public interface OnFragmentInteractionListener {
-        // TODO: Update argument type and name
+        // Needed to compile
         void onFragmentInteraction(Uri uri);
     }
 
-    // Get Recommended Exercises ( ID + Name )
-    private void getRecommendedExercises() {
-        String url = "https://138.68.158.127/get_recommended_exercises";
+    private void createMuscleGroupGrid() {
+        String url = DBConnect.serverURL + "/get_muscle_groups";
 
-
-        //Create the exercise plan_group request
-        StringRequest StrHistReq = new StringRequest(Request.Method.POST, url,
+        //Create the request
+        StringRequest StrPickExReq = new StringRequest(Request.Method.POST,url,
                 new Response.Listener<String>() {
-
-                    String[] rE;
-
                     @Override
                     public void onResponse(String response) {
+
                         try {
                             JSONArray jsonArray = new JSONArray(response);
-                            rE = new String[jsonArray.length()];
+                            //From the response create the history array
+                            groups = new String[jsonArray.length()];
                             try {
                                 for (int i = 0; i < jsonArray.length(); i++) {
-                                    String tmp = jsonArray.getJSONObject(i).getString("Exercise_name");
-                                    // TODO Needs a way to list exercises by count
-                                    rE[i] = tmp;
+                                    groups[i] = new JSONObject(jsonArray.getString(i)).getString("Name");
                                 }
-                            } catch (JSONException je) {
+                            } catch (JSONException je){
                                 Log.e(TAG, je.toString());
                             }
-                        } catch (JSONException e2) {
+                        }catch (JSONException e2){
                             e2.printStackTrace();
                         }
 
-                        // Define the groupView adapter
-                        ArrayAdapter<String> adapter = new ArrayAdapter<>(getActivity(), android.R.layout.simple_list_item_1, rE);
-                        recExView.setAdapter(adapter);
-                        recExView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                        // Set the listeners on the groups items
+                        ArrayAdapter<String> adapter = new ArrayAdapter<>(getActivity(), android.R.layout.simple_list_item_1, groups);
+                        groupsView.setAdapter(adapter);
+                        groupsView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                             public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
-                                //Go to Exercise Activity
-                                Intent intent = new Intent(getActivity(), ExerciseActivity.class);
-                                intent.putExtra("exercise_name", rE[position]);
+                                //Go to exercise page
+                                Intent intent = new Intent(getActivity(), GroupExercisesActivity.class);
+                                intent.putExtra("group", groups[position]);
                                 intent.putExtra("email", email);
                                 startActivity(intent);
                             }
@@ -152,64 +167,50 @@ public class HomeFragment extends Fragment {
                         System.out.println(error.toString());
                     }
                 }
-        ) {
-            // use params are specified here
-            @Override
-            protected Map<String, String> getParams() {
-                Map<String, String> params = new HashMap<>();
-                params.put("user_email", email);
-                return params;
-            }
-        };
+        );
 
         // Add the request to the RequestQueue
-        VolleyProvider.getInstance(getActivity()).addRequest(StrHistReq);
+        VolleyProvider.getInstance(getActivity()).addRequest(StrPickExReq);
     }
 
-    // Get Recommended Plans
-    private void getRecommendedPlans() {
-        String url = "https://138.68.158.127/get_recommended_plans";
+    private void createExerciseHistoryList(){
+        String url = DBConnect.serverURL + "/get_exercise_history_of_user";
 
-
-        //Create the exercise plan_group request
-        StringRequest StrHistReq = new StringRequest(Request.Method.POST, url,
+        //Create the exercise history request
+        StringRequest StrHistReq = new StringRequest(Request.Method.POST,url,
                 new Response.Listener<String>() {
-
-                    String[] rP;
-                    String[] cola;
-
                     @Override
                     public void onResponse(String response) {
+
+                        // Initialization of history array
+                        String[] history = new String[0];
+
                         try {
                             JSONArray jsonArray = new JSONArray(response);
-                            rP = new String[jsonArray.length()];
+                            //From the response create the history array
+                            history = new String[jsonArray.length()];
                             try {
                                 for (int i = 0; i < jsonArray.length(); i++) {
-                                    String tmp = jsonArray.getJSONObject(i).getString("ID");
-                                    // TODO Needs a way to list plans by count
-                                    rP[i] = tmp;
+                                    history[i] = new JSONObject(jsonArray.getString(i)).getString("Exercise_name");
                                 }
                             } catch (JSONException je) {
                                 Log.e(TAG, je.toString());
                             }
-                        } catch (JSONException e2) {
+                        }catch (JSONException e2){
                             e2.printStackTrace();
                         }
 
-                        //TODO REMOVE THIS
-                        cola = new String[rP.length];
-                        for(int i = 0; i < rP.length;i++){
-                            cola[i] = "Plan "+ rP[i];
-                        }
 
                         // Define the groupView adapter
-                        ArrayAdapter<String> adapter = new ArrayAdapter<>(getActivity(), android.R.layout.simple_list_item_1, cola);
-                        recPlanView.setAdapter(adapter);
-                        recPlanView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                        ArrayAdapter<String> adapter = new ArrayAdapter<>(getActivity(), android.R.layout.simple_list_item_1, history);
+                        recent_historyView.setAdapter(adapter);
+                        // Set the listeners on the list items
+                        recent_historyView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                             public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
-                                //Go to
-                                Intent intent = new Intent(getActivity(), PlanActivity.class);
-                                intent.putExtra("plan_id", rP[position]);
+                                //Go to exercise page
+                                String exercise_name = (String) parent.getAdapter().getItem(position);
+                                Intent intent = new Intent(getActivity(), ExerciseActivity.class);
+                                intent.putExtra("exercise_name", exercise_name);
                                 intent.putExtra("email", email);
                                 startActivity(intent);
                             }
@@ -223,12 +224,13 @@ public class HomeFragment extends Fragment {
                         System.out.println(error.toString());
                     }
                 }
-        ) {
+        ){
             // use params are specified here
             @Override
-            protected Map<String, String> getParams() {
-                Map<String, String> params = new HashMap<>();
-                params.put("user_email", email);
+            protected Map<String, String> getParams()
+            {
+                Map<String, String>  params = new HashMap<>();
+                params.put("email", email);
                 return params;
             }
         };

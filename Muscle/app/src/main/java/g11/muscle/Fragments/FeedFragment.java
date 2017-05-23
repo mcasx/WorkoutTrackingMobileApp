@@ -1,4 +1,4 @@
-package g11.muscle;
+package g11.muscle.Fragments;
 
 import android.app.Activity;
 import android.content.Context;
@@ -10,8 +10,6 @@ import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v7.widget.RecyclerView;
 import android.util.Base64;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -20,7 +18,6 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
-import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.SearchView;
@@ -38,6 +35,10 @@ import org.json.JSONObject;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+
+import g11.muscle.ProfileActivity;
+import g11.muscle.R;
+import g11.muscle.DB.VolleyProvider;
 
 /**
  * A simple {@link Fragment} subclass.
