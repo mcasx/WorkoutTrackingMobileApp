@@ -1,4 +1,4 @@
-package g11.muscle;
+package g11.muscle.Fragments;
 
 import android.app.Activity;
 import android.content.Context;
@@ -10,8 +10,6 @@ import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v7.widget.RecyclerView;
 import android.util.Base64;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -20,7 +18,6 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
-import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.SearchView;
@@ -38,6 +35,11 @@ import org.json.JSONObject;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+
+import g11.muscle.DB.DBConnect;
+import g11.muscle.ProfileActivity;
+import g11.muscle.R;
+import g11.muscle.DB.VolleyProvider;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -111,9 +113,18 @@ public class FeedFragment extends Fragment {
         people_list_adapter = new ArrayAdapter<>(getActivity(), android.R.layout.simple_list_item_1);
         people_listView.setAdapter(people_list_adapter);
 
+        people_listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
+                String profile_email = (String) parent.getAdapter().getItem(position);
+                Intent intent = new Intent(getActivity(), ProfileActivity.class);
+                intent.putExtra("user_email", email);
+                intent.putExtra("profile_email", profile_email);
+                startActivity(intent);
+            }
+        });
+
         search_barView = (SearchView) fView.findViewById(R.id.search_bar);
         search_queue = VolleyProvider.getInstance(getActivity());
-        recommendedFollows();
         search_barView.setOnQueryTextListener(new SearchView.OnQueryTextListener(){
             @Override
             public boolean onQueryTextSubmit(String query) {
@@ -124,15 +135,15 @@ public class FeedFragment extends Fragment {
             @Override
             public boolean onQueryTextChange(String newText) {
                 if(newText == "") recommendedFollows();
-                else{
+                else {
                     search_queue.getQueue().cancelAll(getActivity());
-                    searchResponse();
+                    searchResponse(newText);
                 }
                 return true;
             }
 
-            private void searchResponse(){
-                String url = "https://138.68.158.127/get_users_like";
+            private void searchResponse(final String query){
+                String url = DBConnect.serverURL + "/get_users_like";
 
                 //Create the exercise history request
                 StringRequest StrUsersLikeReq = new StringRequest(Request.Method.POST,url,
@@ -161,19 +172,6 @@ public class FeedFragment extends Fragment {
                                 // Define the groupView adapter
                                 people_list_adapter.clear();
                                 people_list_adapter.addAll(history);
-
-                                // Set the listeners on the list items
-
-                                feedView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                                    public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
-                                        String profile_email = (String) parent.getAdapter().getItem(position);
-                                        Intent intent = new Intent(getActivity(), ProfileActivity.class);
-                                        intent.putExtra("user_email", email);
-                                        intent.putExtra("profile_email", profile_email);
-                                        startActivity(intent);
-                                    }
-                                });
-
                             }
                         },
                         new Response.ErrorListener() {
@@ -189,7 +187,7 @@ public class FeedFragment extends Fragment {
                     protected Map<String, String> getParams()
                     {
                         Map<String, String>  params = new HashMap<>();
-                        params.put("email", search_barView.getQuery().toString());
+                        params.put("email", query);
                         return params;
                     }
                 };
@@ -204,7 +202,7 @@ public class FeedFragment extends Fragment {
     }
 
     private void recommendedFollows(){
-        String url = "https://138.68.158.127/get_recommended_follows";
+        String url = DBConnect.serverURL + "/get_recommended_follows";
 
         //Create the exercise history request
         StringRequest StrUsersLikeReq = new StringRequest(Request.Method.POST,url,
@@ -233,18 +231,6 @@ public class FeedFragment extends Fragment {
                         // Define the groupView adapter
                         people_list_adapter.clear();
                         people_list_adapter.addAll(history);
-
-                        // Set the listeners on the list items
-
-                        feedView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                            public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
-                                String profile_email = (String) parent.getAdapter().getItem(position);
-                                Intent intent = new Intent(getActivity(), ProfileActivity.class);
-                                intent.putExtra("user_email", email);
-                                intent.putExtra("profile_email", profile_email);
-                                startActivity(intent);
-                            }
-                        });
                     }
                 },
                 new Response.ErrorListener() {
@@ -260,7 +246,7 @@ public class FeedFragment extends Fragment {
             protected Map<String, String> getParams()
             {
                 Map<String, String>  params = new HashMap<>();
-                params.put("email", search_barView.getQuery().toString());
+                params.put("email_user", search_barView.getQuery().toString());
                 params.put("limit", "20");
                 return params;
             }
@@ -274,6 +260,7 @@ public class FeedFragment extends Fragment {
     public void onStart(){
         super.onStart();
         createUserFeed();
+        recommendedFollows();
     }
 
     // TODO: Rename method, update argument and hook method into UI event
@@ -316,7 +303,7 @@ public class FeedFragment extends Fragment {
     }
 
     private void createUserFeed(){
-        String url = "https://138.68.158.127/get_user_feed_and_pictures";
+        String url = DBConnect.serverURL + "/get_user_feed_and_pictures";
 
         //Create the exercise history request
         StringRequest StrFeedReq = new StringRequest(Request.Method.POST,url,
@@ -324,20 +311,20 @@ public class FeedFragment extends Fragment {
                     @Override
                     public void onResponse(String response) {
 
+                        System.out.println(response);
                         // Initialization of history array
                         feedItem[] history = new feedItem[0];
                         try {
                             JSONObject jsonObject = new JSONObject(response);
                             JSONArray jsonArray = (JSONArray) jsonObject.get("feed");
-                            JSONObject jsonProfile = (JSONObject) jsonObject.getJSONObject("pictures");
+                            JSONObject jsonProfile = jsonObject.getJSONObject("pictures");
 
                             // put necessary profile pictures in dict
                             try{
                                 for(Iterator keys = jsonProfile.keys();keys.hasNext();) {
 
                                     String user_key = (String) keys.next();
-                                    Log.i("TG", user_key);
-                                    String b64Pic = (String) jsonProfile.getString(user_key);
+                                    String b64Pic = jsonProfile.getString(user_key);
                                     if(b64Pic == null || b64Pic.equals("null"))
                                         continue;
                                     byte[] imageBytes = Base64.decode(b64Pic, Base64.DEFAULT);

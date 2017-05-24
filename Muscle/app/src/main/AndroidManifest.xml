@@ -45,9 +45,11 @@
             android:theme="@style/Theme.AppCompat" />
         <activity
             android:name=".RegisterActivity"
+            android:noHistory="true"
             android:theme="@style/Theme.AppCompat.NoActionBar" />
         <activity
             android:name=".FeedBackActivity"
+            android:noHistory="true"
             android:theme="@style/Theme.AppCompat.NoActionBar" />
         <activity
             android:name=".FormActivity"
@@ -58,6 +60,9 @@
         <activity
             android:name=".ProfileActivity"
             android:theme="@style/Theme.AppCompat"/>
+        <activity
+            android:name=".PlanActivity"
+            android:theme="@style/Theme.AppCompat.NoActionBar"/>
     </application>
 
 </manifest>

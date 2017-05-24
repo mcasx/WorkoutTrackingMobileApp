@@ -2,9 +2,42 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="g11.muscle.HomeFragment">
-
-    <!-- TODO: Update blank fragment layout -->
+    tools:context="g11.muscle.Fragments.HomeFragment">
 
 
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="16dp">
+
+        <TextView
+            android:id="@+id/rec_ex_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:text="Recomended Exercises" />
+
+        <ListView
+            android:id="@+id/rec_ex"
+            android:layout_width="match_parent"
+            android:layout_height="200dp"
+            android:layout_marginTop="10dp"
+            android:layout_below="@+id/rec_ex_text"/>
+
+        <TextView
+            android:id="@+id/rec_plan_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_below="@+id/rec_ex"
+            android:text="Recomended Plans" />
+
+        <ListView
+            android:id="@+id/rec_plan"
+            android:layout_width="match_parent"
+            android:layout_height="200dp"
+            android:layout_marginTop="10dp"
+            android:layout_below="@+id/rec_plan_text"/>
+
+    </RelativeLayout>
 </FrameLayout>

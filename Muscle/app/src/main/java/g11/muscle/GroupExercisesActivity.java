@@ -11,12 +11,9 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.android.volley.Request;
-import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.StringRequest;
-import com.android.volley.toolbox.Volley;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -24,6 +21,9 @@ import org.json.JSONObject;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import g11.muscle.DB.DBConnect;
+import g11.muscle.DB.VolleyProvider;
 
 public class GroupExercisesActivity extends AppCompatActivity {
 
@@ -54,7 +54,7 @@ public class GroupExercisesActivity extends AppCompatActivity {
         titleView.setText(group);
 
         //Create the list items through a request
-        String url = "https://138.68.158.127/get_exercises_by_muscle_group";
+        String url = DBConnect.serverURL + "/get_exercises_by_muscle_group";
         StringRequest ExeListReq = new StringRequest(Request.Method.POST,url,
                 new Response.Listener<String>() {
                     @Override

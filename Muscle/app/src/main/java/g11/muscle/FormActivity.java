@@ -18,6 +18,7 @@ import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.Base64;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.DatePicker;
@@ -35,9 +36,12 @@ import com.android.volley.toolbox.StringRequest;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+import g11.muscle.DB.DBConnect;
+import g11.muscle.DB.VolleyProvider;
 
 
 public class FormActivity extends AppCompatActivity {
@@ -54,6 +58,7 @@ public class FormActivity extends AppCompatActivity {
     String gender;
     String email;
     String profile_pic;
+    String context;
     //Boolean imageChosen = false;
     TextView skipButton;
     Button saveButton;
@@ -62,8 +67,9 @@ public class FormActivity extends AppCompatActivity {
     RadioGroup radioGenderGroup;
     TextView dobInput;
     TextView viewDob;
-    ImageView imgView;
+    //ImageView imgView;
     ProgressBar progressBar;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -75,8 +81,8 @@ public class FormActivity extends AppCompatActivity {
 
         skipButton = ((TextView) findViewById(R.id.skip_button));
         saveButton = ((Button) findViewById(R.id.save_button));
-        pickImage = ((ImageView) findViewById(R.id.pick_profile_img_btn));
-        imgView = ((ImageView)findViewById(R.id.userCommentImage));
+        pickImage = ((ImageView) findViewById(R.id.pick_profile_img));
+        //imgView = ((ImageView)findViewById(R.id.userCommentImage));
         pickDoB = ((Button) findViewById(R.id.button_bod_picker));
         dobInput = ((TextView) findViewById(R.id.textView));
         viewDob = ((TextView) findViewById(R.id.textViewDob));
@@ -89,6 +95,10 @@ public class FormActivity extends AppCompatActivity {
         Intent in= getIntent();
         Bundle b = in.getExtras();
         email = (String) b.get("email");
+        context = (String) b.get("context");
+
+        if(context != null && context.equals("register"))
+            skipButton.setVisibility(View.VISIBLE);
 
         //get_gender(email);
 
@@ -126,7 +136,9 @@ public class FormActivity extends AppCompatActivity {
     public void onClickSkip(View view) {
         Intent intent = new Intent(FormActivity.this, HomeActivity.class);
         intent.putExtra("email", email);
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         startActivity(intent);
+        finish();
     }
 
     public void onClickSave(View view) {
@@ -146,11 +158,9 @@ public class FormActivity extends AppCompatActivity {
         int selectedId = radioGenderGroup.getCheckedRadioButtonId();
         gender = Integer.toString(((RadioButton) findViewById(selectedId)).getText().equals("Female") ? 1:0 );
 
-        String baseUrl = "https://138.68.158.127";
+        String addUserUrl = DBConnect.serverURL + "/update_user_char";
 
-        String addUserUrl = "/update_user_char";
-
-        StringRequest stringRequest = new StringRequest(Request.Method.POST, baseUrl + addUserUrl,
+        StringRequest stringRequest = new StringRequest(Request.Method.POST, addUserUrl,
                 new Response.Listener<String>() {
                     public void onResponse(String response){
 
@@ -160,9 +170,13 @@ public class FormActivity extends AppCompatActivity {
                             // Later in development (like tomorrow <- xD lol nope)
                             // it will redirect to a page where user specifies more parameters
                             // For now it takes the user to the PickExerciseActivity
-                            Intent intent = new Intent(FormActivity.this, HomeActivity.class);
-                            intent.putExtra("email", email);
-                            startActivity(intent);
+                            if(context.equals("register")) {
+                                Intent intent = new Intent(FormActivity.this, HomeActivity.class);
+                                intent.putExtra("email", email);
+                                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                                startActivity(intent);
+                                finish();
+                            }
                         }
 
                         else{
@@ -246,19 +260,27 @@ public class FormActivity extends AppCompatActivity {
 
         if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK && data != null && data.getData() != null) {
 
+                //Bitmap user_img = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
+                //ImageView profile_pic = ((ImageView) findViewById(R.id.pick_profile_img));
+                //profile_pic.setScaleType(ImageView.ScaleType.FIT_XY);
+                //profile_pic.setImageBitmap(user_img);
+
+            Log.i("TG","getting uri");
+
             Uri uri = data.getData();
 
             try {
-                Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), uri);
-                Bitmap resized = Bitmap.createScaledBitmap(bitmap, 100, 100, true);
-                ImageView imageView = (ImageView) findViewById(R.id.userCommentImage);
-                imageView.setImageBitmap(resized);
+                Log.i("TG","getting image");
+
+
+                Bitmap user_img = MediaStore.Images.Media.getBitmap(getContentResolver(), uri);
+                Bitmap resized = Bitmap.createScaledBitmap(user_img, 100, 100, true);
+                pickImage.setImageBitmap(resized);
 
                 ByteArrayOutputStream stream = new ByteArrayOutputStream();
                 resized.compress(Bitmap.CompressFormat.JPEG, 80, stream);
                 byte [] byte_arr = stream.toByteArray();
                 profile_pic = Base64.encodeToString(byte_arr, Base64.DEFAULT);
-
 
             } catch (IOException e) {
                 e.printStackTrace();
@@ -302,11 +324,13 @@ public class FormActivity extends AppCompatActivity {
             int year = c.get(Calendar.YEAR);
             int month = c.get(Calendar.MONTH);
             int day = c.get(Calendar.DAY_OF_MONTH);
-
+            DatePickerDialog dobForm = new DatePickerDialog(getActivity(), this, year, month, day);
+            dobForm.getDatePicker().setMaxDate(new Date().getTime());
 
             // Create a new instance of DatePickerDialog and return it
-            return new DatePickerDialog(getActivity(), this, year, month, day);
+            return dobForm;
         }
+
         public void onDateSet(DatePicker view, int year, int month, int day) {
             // Do something with the date chosen by the user
             TextView tv= (TextView) getActivity().findViewById(R.id.button_bod_picker);
@@ -324,7 +348,7 @@ public class FormActivity extends AppCompatActivity {
             skipButton.setVisibility(View.VISIBLE);
             saveButton.setVisibility(View.VISIBLE);
             pickImage.setVisibility(View.VISIBLE);
-            imgView.setVisibility(View.VISIBLE);
+            //imgView.setVisibility(View.VISIBLE);
             pickDoB.setVisibility(View.VISIBLE);
             viewDob.setVisibility(View.VISIBLE);
             dobInput.setVisibility(View.VISIBLE);
@@ -339,7 +363,7 @@ public class FormActivity extends AppCompatActivity {
             skipButton.setVisibility(View.GONE);
             saveButton.setVisibility(View.GONE);
             pickImage.setVisibility(View.GONE);
-            imgView.setVisibility(View.GONE);
+            //imgView.setVisibility(View.GONE);
             pickDoB.setVisibility(View.GONE);
             viewDob.setVisibility(View.GONE);
             dobInput.setVisibility(View.GONE);

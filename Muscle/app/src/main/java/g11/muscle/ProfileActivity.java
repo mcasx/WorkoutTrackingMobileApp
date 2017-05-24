@@ -4,14 +4,12 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
-import android.graphics.PorterDuff;
+import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.ColorRes;
-import android.support.design.widget.FloatingActionButton;
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -22,6 +20,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -29,8 +28,19 @@ import android.widget.Toast;
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
-import com.android.volley.VolleyLog;
 import com.android.volley.toolbox.StringRequest;
+import com.github.mikephil.charting.animation.Easing;
+import com.github.mikephil.charting.charts.RadarChart;
+import com.github.mikephil.charting.components.AxisBase;
+import com.github.mikephil.charting.components.Legend;
+import com.github.mikephil.charting.components.MarkerView;
+import com.github.mikephil.charting.components.XAxis;
+import com.github.mikephil.charting.components.YAxis;
+import com.github.mikephil.charting.data.RadarData;
+import com.github.mikephil.charting.data.RadarDataSet;
+import com.github.mikephil.charting.data.RadarEntry;
+import com.github.mikephil.charting.formatter.IAxisValueFormatter;
+import com.github.mikephil.charting.interfaces.datasets.IRadarDataSet;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -39,6 +49,11 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+
+import g11.muscle.DB.VolleyProvider;
+import g11.muscle.MPChartJava.RadarMarkerView;
+
+import g11.muscle.DB.DBConnect;
 
 public class ProfileActivity extends AppCompatActivity {
 
@@ -49,6 +64,10 @@ public class ProfileActivity extends AppCompatActivity {
     private ArrayAdapter<String> followingAdapter;
     private ArrayAdapter<String> followersAdapter;
     private boolean friendFlag;
+    private RadarChart rChart;
+
+    // Chart font
+    private Typeface mTfLight;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,6 +76,8 @@ public class ProfileActivity extends AppCompatActivity {
 
         user_email = getIntent().getStringExtra("user_email");
         profile_email = getIntent().getStringExtra("profile_email");
+
+        Log.i("TG",user_email + ", " + profile_email);
 
         req_queue = VolleyProvider.getInstance(this);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -67,10 +88,16 @@ public class ProfileActivity extends AppCompatActivity {
         createUserInfo();
         createFollowerInfo();
 
+        //rChart = (RadarChart) findViewById(R.id.rChart);
+
+        // Font for charts text
+        //mTfLight = Typeface.createFromAsset(this.getAssets(), "fonts/OpenSans-Light.ttf");
+       // RadarSetup();
+
     }
 
     private void createUserInfo() {
-        String url = "https://138.68.158.127/get_user_profile";
+        String url = DBConnect.serverURL + "/get_user_profile";
 
         //Create the exercise history request
         StringRequest StrProfileReq = new StringRequest(Request.Method.POST, url,
@@ -139,7 +166,7 @@ public class ProfileActivity extends AppCompatActivity {
     }
 
     private void createFollowerInfo(){
-        String url = "https://138.68.158.127/get_follow_info";
+        String url = DBConnect.serverURL + "/get_follow_info";
 
         //Create the exercise history request
         StringRequest StrProfileReq = new StringRequest(Request.Method.POST,url,
@@ -178,13 +205,14 @@ public class ProfileActivity extends AppCompatActivity {
 
                             following.setText("Following (" + Integer.toString(jsonFollowingArray.length()) + ")");
                             followers.setText("Followers (" + Integer.toString(jsonFollowersArray.length()) + ")");
+                            Log.i("TG", String.valueOf(friendFlag));
 
-                            FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+                            Button fab = (Button) findViewById(R.id.fab);
                             if(friendFlag){
-                                Log.i("TG", "friends :D ");
-                                fab.setImageResource(R.drawable.ic_remove_black_24dp);
-                                fab.setBackgroundTintList(getApplicationContext().getResources().getColorStateList(R.color.colorPrimary));
+                                //fab.setImageResource(R.drawable.ic_remove_black_24dp);
+                                //fab.setBackgroundTintList(getApplicationContext().getResources().getColorStateList(R.color.colorPrimary));
                                 fab.setVisibility(View.VISIBLE);
+                                fab.setText("Unfollow");
                                 fab.setOnClickListener(new View.OnClickListener() {
                                     @Override
                                     public void onClick(View v) {
@@ -197,9 +225,10 @@ public class ProfileActivity extends AppCompatActivity {
                                 fab.setVisibility(View.INVISIBLE);
                             }
                             else{
-                                fab.setImageResource(android.R.drawable.ic_input_add);
-                                fab.setBackgroundTintList(getApplicationContext().getResources().getColorStateList(R.color.bright_foreground_holo_dark));
+                                //fab.setImageResource(android.R.drawable.ic_input_add);
+                                //fab.setBackgroundTintList(getApplicationContext().getResources().getColorStateList(R.color.bright_foreground_holo_dark));
                                 fab.setVisibility(View.VISIBLE);
+                                fab.setText("Follow");
                                 fab.setOnClickListener(new View.OnClickListener() {
                                     @Override
                                     public void onClick(View v) {
@@ -237,7 +266,7 @@ public class ProfileActivity extends AppCompatActivity {
     }
 
     private void addToFollowers() {
-        String url = "https://138.68.158.127/add_to_following";
+        String url = DBConnect.serverURL + "/add_to_following";
 
         //Create the exercise history request
         StringRequest StrFollowReq = new StringRequest(Request.Method.POST, url,
@@ -279,7 +308,7 @@ public class ProfileActivity extends AppCompatActivity {
     }
 
     private void removeFromFollowers(){
-        String url = "https://138.68.158.127/rm_from_following";
+        String url = DBConnect.serverURL + "/rm_from_following";
 
         //Create the exercise history request
         StringRequest StrUnfollowReq = new StringRequest(Request.Method.POST, url,
@@ -391,24 +420,157 @@ public class ProfileActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home:
-                this.finish();
+                finish();
                 return true;
             case R.id.nav_home:
                 Intent intent = new Intent(ProfileActivity.this, HomeActivity.class);
                 intent.putExtra("email", user_email);
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 startActivity(intent);
+                finish();
 
             default:
                 return super.onOptionsItemSelected(item);
 
         }
     }
+
     public static void tintMenuIcon(Context context, MenuItem item, @ColorRes int color) {
         Drawable normalDrawable = item.getIcon();
         Drawable wrapDrawable = DrawableCompat.wrap(normalDrawable);
         DrawableCompat.setTint(wrapDrawable, context.getResources().getColor(color));
 
         item.setIcon(wrapDrawable);
+    }
+
+    private void RadarSetup(){
+        rChart.setBackgroundColor(Color.rgb(60, 65, 82));
+
+        rChart.getDescription().setEnabled(false);
+
+        rChart.setWebLineWidth(1f);
+        rChart.setWebColor(Color.LTGRAY);
+        rChart.setWebLineWidthInner(1f);
+        rChart.setWebColorInner(Color.LTGRAY);
+        rChart.setWebAlpha(100);
+
+        // create a custom MarkerView (extend MarkerView) and specify the layout
+        // to use for it
+        MarkerView mv = new RadarMarkerView(this, R.layout.custom_marker_view);
+        mv.setChartView(rChart); // For bounds control
+        rChart.setMarker(mv); // Set the marker to the chart
+
+        String url = DBConnect.serverURL + "/get_exercise_muscle_stats_of_user";
+
+        //Create the exercise history request
+        StringRequest StrHistReq = new StringRequest(Request.Method.POST,url,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        try {
+                            JSONArray jsonArray = new JSONArray(response);
+                            // Chart Array Values List
+                            ArrayList<RadarEntry> entries = new ArrayList<>();
+                            final String[] MuscleGroups = new String[jsonArray.length()];
+                            Float[] MuscleCnt = new Float[jsonArray.length()];
+                            Float sum = 0f;
+                            try {
+                                for (int i = 0; i < jsonArray.length(); i++) {
+                                    MuscleGroups[i] = new JSONObject(jsonArray.getString(i)).getString("Muscle_name");
+                                    MuscleCnt[i] = Float.parseFloat(new JSONObject(jsonArray.getString(i)).getString("count"));
+                                    sum += MuscleCnt[i];
+                                }
+                            } catch (JSONException je) {
+                                Log.e("TG", je.toString());
+                            }
+
+                            // normalize values
+                            for(Float x : MuscleCnt){
+                                Float tmp = x/sum;
+                                entries.add(new RadarEntry(tmp*100));
+                            }
+
+                            RadarDataSet set1 = new RadarDataSet(entries,"% Worked Group Muscles");
+                            set1.setColor(Color.rgb(121, 162, 175));
+                            set1.setFillColor(Color.rgb(121, 162, 175));
+                            set1.setDrawFilled(true);
+                            set1.setFillAlpha(180);
+                            set1.setLineWidth(2f);
+                            set1.setDrawHighlightCircleEnabled(true);
+                            set1.setDrawHighlightIndicators(false);
+
+                            ArrayList<IRadarDataSet> sets = new ArrayList<>();
+                            sets.add(set1);
+
+                            RadarData data = new RadarData(sets);
+                            data.setValueTypeface(mTfLight);
+                            data.setValueTextSize(8f);
+                            data.setDrawValues(false);
+                            data.setValueTextColor(Color.WHITE);
+
+                            rChart.setData(data);
+                            rChart.invalidate();
+
+                            rChart.animateXY(
+                                    1400, 1400,
+                                    Easing.EasingOption.EaseInOutQuad,
+                                    Easing.EasingOption.EaseInOutQuad);
+
+                            XAxis xAxis = rChart.getXAxis();
+                            xAxis.setTypeface(mTfLight);
+                            xAxis.setTextSize(9f);
+                            xAxis.setYOffset(0f);
+                            xAxis.setXOffset(0f);
+                            xAxis.setValueFormatter(new IAxisValueFormatter() {
+                                @Override
+                                public String getFormattedValue(float value, AxisBase axis) {
+                                    return MuscleGroups[(int) value % MuscleGroups.length];
+                                }
+                            });
+                            xAxis.setTextColor(Color.WHITE);
+
+                            YAxis yAxis = rChart.getYAxis();
+                            yAxis.setTypeface(mTfLight);
+                            yAxis.setLabelCount(5, false);
+                            yAxis.setTextSize(9f);
+                            yAxis.setAxisMinimum(0f);
+                            yAxis.setAxisMaximum(80f);
+                            yAxis.setDrawLabels(false);
+
+                            Legend l = rChart.getLegend();
+                            l.setVerticalAlignment(Legend.LegendVerticalAlignment.TOP);
+                            l.setHorizontalAlignment(Legend.LegendHorizontalAlignment.CENTER);
+                            l.setOrientation(Legend.LegendOrientation.HORIZONTAL);
+                            l.setDrawInside(false);
+                            l.setTypeface(mTfLight);
+                            l.setXEntrySpace(7f);
+                            l.setYEntrySpace(5f);
+                            l.setTextColor(Color.WHITE);
+                        }catch (JSONException e2){
+                            e2.printStackTrace();
+                        }
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        //Handle error response
+                        System.out.println(error.toString());
+                    }
+                }
+        ){
+            // use params are specified here
+            @Override
+            protected Map<String, String> getParams()
+            {
+                Map<String, String>  params = new HashMap<>();
+                params.put("User_email", user_email);
+                return params;
+            }
+        };
+
+        //Queue the request
+        VolleyProvider.getInstance(this).addRequest(StrHistReq);
     }
 
 }

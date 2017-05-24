@@ -1,8 +1,7 @@
-package g11.muscle;
+package g11.muscle.Fragments;
 
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -14,7 +13,6 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.GridView;
 import android.widget.ListView;
-import android.widget.TextView;
 
 import com.android.volley.Request;
 import com.android.volley.Response;
@@ -25,54 +23,70 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import g11.muscle.DB.DBConnect;
+import g11.muscle.ExerciseActivity;
+import g11.muscle.GroupExercisesActivity;
+import g11.muscle.R;
+import g11.muscle.DB.VolleyProvider;
 
 /**
  * A simple {@link Fragment} subclass.
  * Activities that contain this fragment must implement the
- * {@link ExerciseHistoryFragment.OnFragmentInteractionListener} interface
+ * {@link PickExerciseFragment.OnFragmentInteractionListener} interface
  * to handle interaction events.
- * Use the {@link ExerciseHistoryFragment# newInstance} factory method to
+ * Use the {@link PickExerciseFragment# newInstance} factory method to
  * create an instance of this fragment.
  */
-public class ExerciseHistoryFragment extends Fragment {
-
-    private static final String TAG = "ExerciseHistoryFragment";
+public class PickExerciseFragment extends Fragment {
+    private static final String TAG = "PickExerciseFragment";
 
     //
     private String email;
 
+    private String[] groups;
+
+    //GUI
+    private GridView groupsView;
+    private ListView recent_historyView;
+
     // Used by Main Activity
     private OnFragmentInteractionListener mListener;
 
-    private VolleyProvider req_queue;
-    private ListView recent_historyView;
-
-    public ExerciseHistoryFragment() {
+    public PickExerciseFragment() {
         // Required empty public constructor
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        req_queue = VolleyProvider.getInstance(getActivity());
-        email = getActivity().getIntent().getStringExtra("email");
 
+        // get email
+        email = getActivity().getIntent().getStringExtra("email");
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Fragment View
-        View fView = inflater.inflate(R.layout.fragment_exercise_history, container, false);
-
+        View fView = inflater.inflate(R.layout.fragment_pick_exercise, container, false);
+        //GUI elements
+        groupsView  = (GridView) fView.findViewById(R.id.groups);
         recent_historyView = (ListView) fView.findViewById(R.id.recent_history);
+        //UI Static elements
+        createMuscleGroupGrid();
         createExerciseHistoryList();
         // Inflate the layout for this fragment
         return fView;
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        //UI Dynamic elements
+
     }
 
     @Override
@@ -103,9 +117,64 @@ public class ExerciseHistoryFragment extends Fragment {
      * >Communicating with Other Fragments</a> for more information.
      */
 
+    public interface OnFragmentInteractionListener {
+        // Needed to compile
+        void onFragmentInteraction(Uri uri);
+    }
+
+    private void createMuscleGroupGrid() {
+        String url = DBConnect.serverURL + "/get_muscle_groups";
+
+        //Create the request
+        StringRequest StrPickExReq = new StringRequest(Request.Method.POST,url,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+
+                        try {
+                            JSONArray jsonArray = new JSONArray(response);
+                            //From the response create the history array
+                            groups = new String[jsonArray.length()];
+                            try {
+                                for (int i = 0; i < jsonArray.length(); i++) {
+                                    groups[i] = new JSONObject(jsonArray.getString(i)).getString("Name");
+                                }
+                            } catch (JSONException je){
+                                Log.e(TAG, je.toString());
+                            }
+                        }catch (JSONException e2){
+                            e2.printStackTrace();
+                        }
+
+                        // Set the listeners on the groups items
+                        ArrayAdapter<String> adapter = new ArrayAdapter<>(getActivity(), android.R.layout.simple_list_item_1, groups);
+                        groupsView.setAdapter(adapter);
+                        groupsView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                            public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
+                                //Go to exercise page
+                                Intent intent = new Intent(getActivity(), GroupExercisesActivity.class);
+                                intent.putExtra("group", groups[position]);
+                                intent.putExtra("email", email);
+                                startActivity(intent);
+                            }
+                        });
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        //Handle error response
+                        System.out.println(error.toString());
+                    }
+                }
+        );
+
+        // Add the request to the RequestQueue
+        VolleyProvider.getInstance(getActivity()).addRequest(StrPickExReq);
+    }
 
     private void createExerciseHistoryList(){
-        String url = "https://138.68.158.127/get_exercise_history_of_user";
+        String url = DBConnect.serverURL + "/get_exercise_history_of_user";
 
         //Create the exercise history request
         StringRequest StrHistReq = new StringRequest(Request.Method.POST,url,
@@ -114,14 +183,15 @@ public class ExerciseHistoryFragment extends Fragment {
                     public void onResponse(String response) {
 
                         // Initialization of history array
-                        final ArrayList<JSONObject> history = new ArrayList<>();
+                        String[] history = new String[0];
 
                         try {
                             JSONArray jsonArray = new JSONArray(response);
                             //From the response create the history array
+                            history = new String[jsonArray.length()];
                             try {
                                 for (int i = 0; i < jsonArray.length(); i++) {
-                                    history.add(new JSONObject(jsonArray.getString(i)));
+                                    history[i] = new JSONObject(jsonArray.getString(i)).getString("Exercise_name");
                                 }
                             } catch (JSONException je) {
                                 Log.e(TAG, je.toString());
@@ -132,43 +202,16 @@ public class ExerciseHistoryFragment extends Fragment {
 
 
                         // Define the groupView adapter
-
-                        ArrayAdapter<JSONObject> adapter = new ArrayAdapter<JSONObject>(getActivity(), android.R.layout.simple_list_item_2, android.R.id.text1, history) {
-                            @Override
-                            public View getView(int position, View convertView, ViewGroup parent) {
-                                View view = super.getView(position, convertView, parent);
-                                TextView text1 = (TextView) view.findViewById(android.R.id.text1);
-                                TextView text2 = (TextView) view.findViewById(android.R.id.text2);
-                                text2.setTextColor(Color.LTGRAY);
-
-                                try {
-                                    text1.setText(history.get(position).getString("Exercise_name"));
-                                    text2.setText(history.get(position).getString("Date_Time"));
-                                } catch (JSONException je) {
-                                    Log.e(TAG, je.toString());
-                                }
-
-
-                                return view;
-                            }
-                        };
-
+                        ArrayAdapter<String> adapter = new ArrayAdapter<>(getActivity(), android.R.layout.simple_list_item_1, history);
                         recent_historyView.setAdapter(adapter);
                         // Set the listeners on the list items
                         recent_historyView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                             public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
                                 //Go to exercise page
-                                String exercise_name = null;
-                                try {
-                                    exercise_name = ((JSONObject) parent.getAdapter().getItem(position)).getString("Exercise_name");
-                                } catch (JSONException je) {
-                                    Log.e(TAG, je.toString());
-                                }
-
-                                DetailedExerciseHistoryActivity.exerciseHistoryItem = (JSONObject) parent.getAdapter().getItem(position);
-                                Intent intent = new Intent(getActivity(), DetailedExerciseHistoryActivity.class);
+                                String exercise_name = (String) parent.getAdapter().getItem(position);
+                                Intent intent = new Intent(getActivity(), ExerciseActivity.class);
+                                intent.putExtra("exercise_name", exercise_name);
                                 intent.putExtra("email", email);
-
                                 startActivity(intent);
                             }
                         });
@@ -182,25 +225,17 @@ public class ExerciseHistoryFragment extends Fragment {
                     }
                 }
         ){
-            // use params are specified herere
+            // use params are specified here
             @Override
             protected Map<String, String> getParams()
             {
                 Map<String, String>  params = new HashMap<>();
                 params.put("email", email);
-                params.put("limit", "100");
                 return params;
             }
         };
 
         // Add the request to the RequestQueue
-        req_queue.addRequest(StrHistReq);
+        VolleyProvider.getInstance(getActivity()).addRequest(StrHistReq);
     }
-
-
-    public interface OnFragmentInteractionListener {
-        // Needed to compile
-        void onFragmentInteraction(Uri uri);
-    }
-
 }

@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context="g11.muscle.DetailedExerciseHistoryComments">
+    tools:context="g11.muscle.Fragments.DetailedExerciseHistoryComments">
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/fab"

@@ -2,7 +2,6 @@ package g11.muscle;
 
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.media.Image;
 import android.support.design.widget.TextInputLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -14,16 +13,16 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import com.android.volley.Request;
-import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
-import com.android.volley.toolbox.Volley;
 import java.util.HashMap;
 import java.util.Map;
 
-import android.util.Log;
+import g11.muscle.DB.DBConnect;
+import g11.muscle.DB.VolleyProvider;
 
+import android.util.Log;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -105,7 +104,7 @@ public class LoginActivity extends AppCompatActivity {
         else
             password_layout.setError(null);
 
-        String url = "https://138.68.158.127/user_login";
+        String url = DBConnect.serverURL + "/user_login";
 
         //Create the list items through a request
 
@@ -121,6 +120,7 @@ public class LoginActivity extends AppCompatActivity {
                             finish();
                         }
                         else{
+                            Log.e("DB CONNECT ERROR",String.valueOf(response));
 
                             AlertDialog alertDialog = new AlertDialog.Builder(LoginActivity.this).create();
                             alertDialog.setTitle("Wrong Credentials");
@@ -178,6 +178,8 @@ public class LoginActivity extends AppCompatActivity {
         Intent signUpInt = new Intent(LoginActivity.this, RegisterActivity.class);
 
         LoginActivity.this.startActivity(signUpInt);
+
+        finish();
     }
 
     public void onClickForgotPass(View view){

@@ -47,6 +47,10 @@
     <string name="profile_male">Male</string>
     <string name="profile_female">Female</string>
 
+    <!-- My Plan -->
+    <string name="plan_reps">Reps</string>
+    <string name="plan_sets">Sets</string>
+    <string name="plan_rest">Rest</string>
 
     <!-- Feed -->
     <string name="hello_blank_fragment">Hello blank fragment</string>

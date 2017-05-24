@@ -1,6 +1,7 @@
 package g11.muscle;
 
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 
 import android.support.annotation.NonNull;
@@ -11,13 +12,19 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 
 import android.util.Log;
+import android.view.Menu;
 import android.view.MenuItem;
-
-import android.widget.TextView;
 
 import android.support.v4.app.FragmentManager;
 
 import android.net.Uri;
+
+import g11.muscle.DB.VolleyProvider;
+import g11.muscle.Fragments.ExerciseHistoryFragment;
+import g11.muscle.Fragments.FeedFragment;
+import g11.muscle.Fragments.HomeFragment;
+import g11.muscle.Fragments.MyPlanFragment;
+import g11.muscle.Fragments.PickExerciseFragment;
 
 public class HomeActivity extends AppCompatActivity implements PickExerciseFragment.OnFragmentInteractionListener,
         ExerciseHistoryFragment.OnFragmentInteractionListener, HomeFragment.OnFragmentInteractionListener
@@ -73,13 +80,18 @@ public class HomeActivity extends AppCompatActivity implements PickExerciseFragm
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setTitle("Home");
+
         setContentView(R.layout.activity_home);
         manager = getSupportFragmentManager();
         BottomNavigationView navigation = (BottomNavigationView) findViewById(R.id.navigation);
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
+
+
+        // Start app in home fragment
+        setTitle("Home");
+        switchToFragmentHome();
     }
-    
+
     @Override
     public void onBackPressed() {
         new AlertDialog.Builder(this)
@@ -187,5 +199,38 @@ public class HomeActivity extends AppCompatActivity implements PickExerciseFragm
         else
             manager.beginTransaction().replace(R.id.content, fragment, "ExerciseHistory").commit();
         getSupportFragmentManager().executePendingTransactions();
+    }
+    // Action bar functions
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.misc, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                this.finish();
+                return true;
+
+            case R.id.profile:
+                Intent profileIntent = new Intent(HomeActivity.this, ProfileActivity.class);
+                profileIntent.putExtra("user_email", getIntent().getStringExtra("email"));
+                profileIntent.putExtra("profile_email", getIntent().getStringExtra("email"));
+                startActivity(profileIntent);
+                return true;
+
+            case R.id.settings:
+                Intent settingsIntent = new Intent(HomeActivity.this, FormActivity.class);
+                settingsIntent.putExtra("email", getIntent().getStringExtra("email"));
+                settingsIntent.putExtra("context", "home");
+                startActivity(settingsIntent);
+                return true;
+
+            default:
+                return super.onOptionsItemSelected(item);
+
+        }
     }
 }

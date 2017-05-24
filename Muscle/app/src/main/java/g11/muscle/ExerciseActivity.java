@@ -5,26 +5,27 @@ import android.os.Bundle;
 import android.content.Intent;
 import android.util.Log;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.ImageView;
 
 import com.android.volley.Request;
-import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.StringRequest;
-import com.android.volley.toolbox.Volley;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 //Used to conver url strings to valid strings
-import java.net.URL;
-import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
+
+import g11.muscle.Classes.BounceInterpolator;
+import g11.muscle.DB.DBConnect;
+import g11.muscle.DB.VolleyProvider;
 
 public class ExerciseActivity extends AppCompatActivity {
 
@@ -58,6 +59,14 @@ public class ExerciseActivity extends AppCompatActivity {
         exercise = intent.getStringExtra("exercise_name");
         email = intent.getStringExtra("email");
 
+        //button animation
+        Button button = (Button)findViewById(R.id.button);
+        final Animation myAnim = AnimationUtils.loadAnimation(this, R.anim.bounce);
+
+        // Use bounce interpolator with amplitude 0.2 and frequency 20
+        BounceInterpolator interpolator = new BounceInterpolator(0.4, 20);
+        myAnim.setInterpolator(interpolator);
+            button.startAnimation(myAnim);
 
         //GUI elements
         exerciseView  = (TextView)findViewById(R.id.exercise);
@@ -71,7 +80,7 @@ public class ExerciseActivity extends AppCompatActivity {
         req_queue = VolleyProvider.getInstance(ExerciseActivity.this);
 
         // get exercise information
-        String urlEx = "https://138.68.158.127/get_exercise";
+        String urlEx = DBConnect.serverURL + "/get_exercise";
 
         StringRequest Ex_Req = new StringRequest(StringRequest.Method.POST, urlEx,
             new Response.Listener<String>() {
@@ -123,7 +132,7 @@ public class ExerciseActivity extends AppCompatActivity {
 
     //Get last exercise info
     private void getLastExerciseInfo(){
-        String urlLast = "https://138.68.158.127/get_last_exercise_of_user";
+        String urlLast = DBConnect.serverURL + "/get_last_exercise_of_user";
 
         // get last exercise information
         StringRequest Last_Ex_Req = new StringRequest(Request.Method.POST, urlLast,

@@ -1,4 +1,4 @@
-package g11.muscle;
+package g11.muscle.Fragments;
 
 import android.content.Context;
 import android.graphics.Color;
@@ -47,6 +47,11 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+
+import g11.muscle.MPChartJava.RadarMarkerView;
+import g11.muscle.DB.DBConnect;
+import g11.muscle.R;
+import g11.muscle.DB.VolleyProvider;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -167,7 +172,7 @@ public class ProfileFragment extends Fragment implements
         lChart.setBackgroundColor(Color.WHITE);
         lChart.setViewPortOffsets(0f, 0f, 0f, 0f);
 
-        String url = "https://138.68.158.127/get_weight_history";
+        String url = DBConnect.serverURL + "/get_weight_history";
         //Create the exercise history request
         StringRequest StrHistReq = new StringRequest(Request.Method.POST,url,
                 new Response.Listener<String>() {
@@ -295,7 +300,7 @@ public class ProfileFragment extends Fragment implements
         mv.setChartView(rChart); // For bounds control
         rChart.setMarker(mv); // Set the marker to the chart
 
-        String url = "https://138.68.158.127/get_exercise_muscle_stats_of_user";
+        String url = DBConnect.serverURL + "/get_exercise_muscle_stats_of_user";
 
         //Create the exercise history request
         StringRequest StrHistReq = new StringRequest(Request.Method.POST,url,

@@ -1,4 +1,4 @@
-package g11.muscle;
+package g11.muscle.DB;
 
 import android.provider.BaseColumns;
 
