@@ -2,6 +2,7 @@
     <string name="app_name">Muscle</string>
 
     <!-- Temporary strings -->
+
     <string name="test_exercise_name">Chest Press</string>
     <string name="test_exercise_kind">Strength</string>
     <string name="test_exercise_desc">1. Sit down on the Chest Press Machine and select the weight\n2. Step on the lever provided by the machine since it will help you bring the handles forward so that you can grab the handles and fully extend forward.\n3. Grab the handles with a palm down grip&#8230;</string>
@@ -54,5 +55,9 @@
 
     <!-- Feed -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+
+    <!-- Detailed Exercise Activity-->
+    <string name="share">Share</string>
+    <string name="like">Bump</string>
 
 </resources>

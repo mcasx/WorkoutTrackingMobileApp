@@ -1,3 +1,5 @@
+
+
 <RelativeLayout
     android:id="@+id/main_layout"
     xmlns:android="http://schemas.android.com/apk/res/android"
@@ -7,6 +9,14 @@
     android:layout_height="match_parent"
     tools:context=".DetailedExerciseHistoryActivity">
 
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/my_toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="?attr/colorPrimary"
+        android:elevation="4dp"
+        android:theme="@style/Muscle"
+        app:popupTheme="@style/ThemeOverlay.AppCompat.Light"/>
 
     <android.support.design.widget.TabLayout
         android:id="@+id/tab_layout"

@@ -84,7 +84,7 @@ public class DetailedExerciseHistoryGraphs extends Fragment implements OnChartVa
         // Font for charts text
         mTfLight = Typeface.createFromAsset(getActivity().getAssets(), "fonts/OpenSans-Light.ttf");
 
-        View fView = inflater.inflate(R.layout.fragment_two, container, false);
+        View fView = inflater.inflate(R.layout.fragment_detailed_exercise_history_stats, container, false);
 
         bChart = (BarChart) fView.findViewById(R.id.bar_chart);
         bChart.setOnChartValueSelectedListener(this);
