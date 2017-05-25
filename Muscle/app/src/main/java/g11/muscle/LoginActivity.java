@@ -2,6 +2,7 @@ package g11.muscle;
 
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.support.design.widget.TextInputLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -118,6 +119,10 @@ public class LoginActivity extends AppCompatActivity {
                             intent.putExtra("email", email);
                             startActivity(intent);
                             finish();
+
+                            SharedPreferences sp = getSharedPreferences("UserData", 0);
+                            sp.edit().putString("email", email).apply();
+
                         }
                         else{
                             Log.e("DB CONNECT ERROR",String.valueOf(response));

@@ -5,6 +5,7 @@
     android:orientation="vertical">
 
     <com.github.mikephil.charting.charts.BarChart
+        android:layout_margin="10dp"
         android:id="@+id/bar_chart"
         android:layout_width="match_parent"
         android:layout_height="300dp" />

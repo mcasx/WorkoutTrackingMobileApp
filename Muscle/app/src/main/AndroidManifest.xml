@@ -64,5 +64,4 @@
             android:name=".PlanActivity"
             android:theme="@style/Theme.AppCompat.NoActionBar"/>
     </application>
-
 </manifest>
