@@ -3,6 +3,7 @@ package g11.muscle;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.support.design.widget.TextInputEditText;
 import android.support.design.widget.TextInputLayout;
 import android.support.v7.app.AlertDialog;
@@ -277,6 +278,8 @@ public class RegisterActivity extends AppCompatActivity {
         Intent intent = new Intent(RegisterActivity.this, FormActivity.class);
         intent.putExtra("id", 10);
         intent.putExtra("email", "ola@ua.pt");
+        SharedPreferences sp = getSharedPreferences("UserData", 0);
+        sp.edit().putString("email", email).apply();
         startActivity(intent);
     }
 

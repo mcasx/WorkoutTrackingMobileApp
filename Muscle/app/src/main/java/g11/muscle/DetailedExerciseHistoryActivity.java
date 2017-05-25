@@ -47,7 +47,7 @@ public class DetailedExerciseHistoryActivity extends AppCompatActivity {
         setContentView(R.layout.activity_detailed_exercise_history);
         req_queue = VolleyProvider.getInstance(this);
 
-
+        Log.e(TAG, "SHADSHKASDNSA\n\n\nasdjajosnalnda" + getSharedPreferences("UserData", 0).getString("email", null));
 
 
         TabLayout tabLayout = (TabLayout) findViewById(R.id.tab_layout);
@@ -99,8 +99,6 @@ public class DetailedExerciseHistoryActivity extends AppCompatActivity {
 
         return true;
     }
-
-
 
 
     @Override
@@ -257,4 +255,6 @@ public class DetailedExerciseHistoryActivity extends AppCompatActivity {
     private boolean hasThumbsUp(){
         return true;
     }
+
+
 }
