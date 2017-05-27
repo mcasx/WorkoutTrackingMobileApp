@@ -10,12 +10,14 @@ import android.widget.TextView;
 
 import java.util.List;
 
+import g11.muscle.PlanActivity;
 import g11.muscle.R;
 
 // adapter of recycler view used in training exercises list view
 public class Plan_Exercise_View extends RecyclerView.Adapter<Plan_Exercise_View.Plan_Exercise_View_Holder>{
 
     private List<PlanExerciseItem> list;
+    public View.OnClickListener mOnClickListener;
 
     public Plan_Exercise_View(List<PlanExerciseItem> list) {
         this.list = list;
@@ -25,6 +27,7 @@ public class Plan_Exercise_View extends RecyclerView.Adapter<Plan_Exercise_View.
     public Plan_Exercise_View_Holder onCreateViewHolder(ViewGroup parent, int viewType) {
         //Inflate the layout, initialize the View Holder
         View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.costum_plan_exercise, parent, false);
+        v.setOnClickListener(mOnClickListener);
         return new Plan_Exercise_View_Holder(v);
     }
 

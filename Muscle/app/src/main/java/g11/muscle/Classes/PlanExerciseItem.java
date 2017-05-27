@@ -22,7 +22,7 @@ public class PlanExerciseItem {
         exercise_image = image;
     }
 
-    String getExercise_name(){
+    public String getExercise_name(){
         return exercise_name;
     }
 

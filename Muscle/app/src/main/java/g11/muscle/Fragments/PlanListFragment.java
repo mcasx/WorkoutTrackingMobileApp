@@ -124,10 +124,7 @@ public class PlanListFragment extends Fragment {
                     @Override
                     public void onResponse(String response) {
 
-                        System.out.println(response);
-                        // Initialization of history array
                         final ArrayList<PlanItem> history = new ArrayList<>();
-                        PlanItem[] temp = new PlanItem[0];
                         try {
                             JSONArray jsonArray = new JSONArray(response);
                             //From the response create the history array

@@ -81,10 +81,7 @@ public class PlanActivity extends AppCompatActivity {
                     public void onClick(DialogInterface dialog, int which) {
 
                         setNewPlan();
-
-                        Intent it = new Intent(PlanActivity.this,HomeActivity.class);
-                        it.putExtra("email",email);
-                        startActivity(it);
+                        finish();
                     }
                 })
                 .setNegativeButton("No", null)
@@ -217,6 +214,7 @@ public class PlanActivity extends AppCompatActivity {
                         }
 
                         Plan_Exercise_View adapter = new Plan_Exercise_View(training_data);
+                        adapter.mOnClickListener = new MyOnClickListener();
                         recyclerView.setAdapter(adapter);
                         recyclerView.setLayoutManager(new LinearLayoutManager(PlanActivity.this));
                     }
@@ -241,5 +239,19 @@ public class PlanActivity extends AppCompatActivity {
 
         // Add the request to the RequestQueue
         VolleyProvider.getInstance(PlanActivity.this).addRequest(StrHistReq);
+    }
+
+
+    public class MyOnClickListener implements View.OnClickListener {
+        @Override
+        public void onClick(final View view) {
+            int itemPosition = recyclerView.getChildLayoutPosition(view);
+            PlanExerciseItem item = training_data.get(itemPosition);
+            String email = getSharedPreferences("UserData",0).getString("email", null);
+            Intent intent = new Intent(PlanActivity.this, ExerciseActivity.class);
+            intent.putExtra("email", email);
+            intent.putExtra("exercise_name", item.getExercise_name());
+            startActivity(intent);
+        }
     }
 }

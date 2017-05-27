@@ -1,6 +1,7 @@
 package g11.muscle.Fragments;
 
 import android.content.Context;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -34,6 +35,8 @@ import g11.muscle.Classes.TrainingsItem;
 import g11.muscle.Classes.Plan_Exercise_View;
 
 import g11.muscle.DB.DBConnect;
+import g11.muscle.ExerciseActivity;
+import g11.muscle.PlanActivity;
 import g11.muscle.R;
 import g11.muscle.DB.VolleyProvider;
 
@@ -213,6 +216,8 @@ public class MyPlanFragment extends Fragment {
                         }
 
                         Plan_Exercise_View adapter = new Plan_Exercise_View(training_data);
+                        adapter.mOnClickListener = new MyOnClickListener();
+
                         recyclerView.setAdapter(adapter);
                         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
                     }
@@ -237,5 +242,18 @@ public class MyPlanFragment extends Fragment {
 
         // Add the request to the RequestQueue
         VolleyProvider.getInstance(getActivity()).addRequest(StrHistReq);
+    }
+
+    public class MyOnClickListener implements View.OnClickListener {
+        @Override
+        public void onClick(final View view) {
+            int itemPosition = recyclerView.getChildLayoutPosition(view);
+            PlanExerciseItem item = training_data.get(itemPosition);
+            String email = getContext().getSharedPreferences("UserData",0).getString("email", null);
+            Intent intent = new Intent(getActivity(), ExerciseActivity.class);
+            intent.putExtra("email", email);
+            intent.putExtra("exercise_name", item.getExercise_name());
+            startActivity(intent);
+        }
     }
 }
