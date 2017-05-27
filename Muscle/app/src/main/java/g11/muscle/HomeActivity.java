@@ -26,10 +26,12 @@ import g11.muscle.Fragments.FeedFragment;
 import g11.muscle.Fragments.HomeFragment;
 import g11.muscle.Fragments.MyPlanFragment;
 import g11.muscle.Fragments.PickExerciseFragment;
+import g11.muscle.Fragments.PlanFragment;
+import g11.muscle.Fragments.PlanListFragment;
 
 public class HomeActivity extends AppCompatActivity implements PickExerciseFragment.OnFragmentInteractionListener,
         ExerciseHistoryFragment.OnFragmentInteractionListener, HomeFragment.OnFragmentInteractionListener
-        ,FeedFragment.OnFragmentInteractionListener,MyPlanFragment.OnFragmentInteractionListener{
+        ,FeedFragment.OnFragmentInteractionListener,PlanFragment.OnFragmentInteractionListener, MyPlanFragment.OnFragmentInteractionListener, PlanListFragment.OnFragmentInteractionListener{
 
     private VolleyProvider req_queue;
     private FragmentManager manager;
@@ -52,7 +54,7 @@ public class HomeActivity extends AppCompatActivity implements PickExerciseFragm
                     switchToFragmentHome();
                     return true;
                 case R.id.navigation_myPlan:
-                    setTitle("My Plan");
+                    setTitle("Workout plans");
                     switchToFragmentMyPlan();
                     return true;
                 case R.id.navigation_exerciseHistory:
@@ -148,19 +150,22 @@ public class HomeActivity extends AppCompatActivity implements PickExerciseFragm
 
     // Method used to switch to Exercise History Fragment
     public void switchToFragmentMyPlan() {
-
-        Fragment fragment = manager.findFragmentByTag("MyPlan");
+        Fragment fragment = manager.findFragmentByTag("Plans");
         FragmentTransaction ft = manager.beginTransaction();
 
+
         if(fragment == null) {
-            ft.replace(R.id.content, new MyPlanFragment(), "MyPlan");
-            ft.addToBackStack("MyPlan");
+            PlanFragment plan_frag = new PlanFragment();
+            ft.replace(R.id.content, plan_frag, "Plans");
+            ft.addToBackStack("Plans");
             ft.commit();
             manager.executePendingTransactions();
-            Log.e("MyPlan","Selected MyPlan Tab");
+            plan_frag.switchToFragmentMyPlan();
+            Log.e("Plans","Selected Plans Tab");
         }
         else
-            manager.beginTransaction().replace(R.id.content, fragment, "MyPlan").commit();
+            manager.beginTransaction().replace(R.id.content, fragment, "Plans").commit();
+
         getSupportFragmentManager().executePendingTransactions();
     }
 
