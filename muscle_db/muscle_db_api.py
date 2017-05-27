@@ -616,6 +616,81 @@ def update_user_char():
     except Exception as e:
         raise
 
+@app.route('/update_user_height', methods=['POST'])
+def update_user_height():
+    try:
+
+        email = request.form['email']
+        height = request.form['height']
+
+        conn = MySQLdb.connect(host='localhost', user='muscle', password='some_pass')
+        c = conn.cursor(MySQLdb.cursors.DictCursor)
+        c.execute('USE muscle2')
+        
+        c.execute("UPDATE USER SET Height= %s WHERE Email = %s", (height, email))
+
+        conn.commit()
+        c.close()
+        conn.close()
+
+        return "User " + str(email) + " height updated"
+
+    
+    except Exception as e:
+        return str(e)
+
+@app.route('/update_user_weight', methods=['POST'])
+def update_user_weight():
+    try:
+
+        email = request.form['email']
+        weight = request.form['weight']
+
+        conn = MySQLdb.connect(host='localhost', user='muscle', password='some_pass')
+        c = conn.cursor(MySQLdb.cursors.DictCursor)
+        c.execute('USE muscle2')
+        
+        c.execute("UPDATE USER SET Weight= %s WHERE Email = %s", (weight, email))
+
+        conn.commit()
+        c.close()
+        conn.close()
+
+        return "User " + str(email) + " weight updated"
+
+    
+    except Exception as e:
+        return str(e)
+
+@app.route('/update_user_profile_pic', methods=['POST'])
+def update_user_profile_pic():
+    try:
+
+        email = request.form['email']
+        profile_pic = request.form['profile_pic']
+
+        conn = MySQLdb.connect(host='localhost', user='muscle', password='some_pass')
+        c = conn.cursor(MySQLdb.cursors.DictCursor)
+        c.execute('USE muscle2')
+
+        img_dir = "user_profile_pics/"
+        img_path = "{0}.jpg".format(email)
+
+        with open(img_dir + img_path,"wb") as f:
+            f.write(base64.b64decode(request.form['profile_pic']))
+        
+        c.execute("UPDATE USER SET Profile_image= %s WHERE Email = %s", (img_path, email))
+
+        conn.commit()
+        c.close()
+        conn.close()
+
+        return "User " + str(email) + " profile_pic updated"
+
+    
+    except Exception as e:
+        return str(e)
+
 
 @app.route('/get_all_exercises', methods=['POST'])
 def get_all_exercises():

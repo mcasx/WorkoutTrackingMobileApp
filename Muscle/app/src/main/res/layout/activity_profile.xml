@@ -1,10 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent">
+
+<FrameLayout
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="g11.muscle.ProfileActivity">
+
 
     <Button
         android:id="@+id/fab"
@@ -152,7 +158,7 @@
             <com.github.mikephil.charting.charts.RadarChart
                 android:id="@+id/rChart"
                 android:layout_width="match_parent"
-                android:layout_height="232dp" />
+                android:layout_height="250dp" />
 
             <!--
             <android.support.v4.view.ViewPager
@@ -164,3 +170,4 @@
         </LinearLayout>
     </RelativeLayout>
 </FrameLayout>
+</ScrollView>

@@ -9,14 +9,23 @@ import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
+import android.provider.MediaStore;
 import android.support.annotation.ColorRes;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.graphics.drawable.DrawableCompat;
+import android.support.v7.app.ActionBar;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.InputFilter;
+import android.text.InputType;
+import android.text.TextUtils;
+import android.text.TextWatcher;
+import android.text.method.DigitsKeyListener;
 import android.util.Base64;
 import android.util.Log;
 import android.view.Menu;
@@ -25,6 +34,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -50,6 +60,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -66,10 +78,16 @@ public class ProfileActivity extends AppCompatActivity {
     private String user_email;
     private String profile_email;
     private String name;
+    private String base64profile_pic;
     private ArrayAdapter<String> followingAdapter;
     private ArrayAdapter<String> followersAdapter;
     private boolean friendFlag;
     private RadarChart rChart;
+    private ImageView profile_image;
+    private TextView height_text;
+    private TextView weight_text;
+    String baseUrl = DBConnect.serverURL;
+    private boolean userProfileFlag = false;
 
     // Chart font
     private Typeface mTfLight;
@@ -82,10 +100,23 @@ public class ProfileActivity extends AppCompatActivity {
         user_email = getIntent().getStringExtra("user_email");
         profile_email = getIntent().getStringExtra("profile_email");
 
+        //Guilherme
+        profile_image = (ImageView) findViewById(R.id.profile_img);
+        height_text = (TextView) findViewById(R.id.height);
+        weight_text = (TextView) findViewById(R.id.weight);
+
+        userProfileFlag = user_email.equals(profile_email);
+        ActionBar actionBar  = getSupportActionBar();
+        actionBar.setDisplayHomeAsUpEnabled(true);
+
+        if(userProfileFlag) {
+            actionBar.setTitle("Your Profile");
+            setUserProfileSetup();
+        }
+
         Log.i("TG",user_email + ", " + profile_email);
 
         req_queue = VolleyProvider.getInstance(this);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         followersAdapter = new ArrayAdapter<>(ProfileActivity.this, android.R.layout.simple_list_item_1);
         followingAdapter = new ArrayAdapter<>(ProfileActivity.this, android.R.layout.simple_list_item_1);
@@ -114,6 +145,7 @@ public class ProfileActivity extends AppCompatActivity {
         b.show();*/
 
         rChart = (RadarChart) findViewById(R.id.rChart);
+        rChart.setVisibility(View.GONE);
 
         // Font for charts text
         mTfLight = Typeface.createFromAsset(this.getAssets(), "fonts/OpenSans-Light.ttf");
@@ -209,7 +241,6 @@ public class ProfileActivity extends AppCompatActivity {
                             //will be usefull later
                             JSONArray jsonFollowingArray = jsonObject.getJSONArray("following");
                             JSONArray jsonFollowersArray = jsonObject.getJSONArray("followers");
-
 
 
                             if (jsonFollowingArray != null)
@@ -468,6 +499,275 @@ public class ProfileActivity extends AppCompatActivity {
         item.setIcon(wrapDrawable);
     }
 
+    public void onClickPickImage(View view) {
+        Intent pickPhotoIntent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+        startActivityForResult( pickPhotoIntent,1);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == 1 && resultCode == RESULT_OK && data != null && data.getData() != null) {
+
+            //Bitmap user_img = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
+            //ImageView profile_pic = ((ImageView) findViewById(R.id.pick_profile_img));
+            //profile_pic.setScaleType(ImageView.ScaleType.FIT_XY);
+            //profile_pic.setImageBitmap(user_img);
+
+            Log.i("TG","getting uri");
+
+            Uri uri = data.getData();
+
+            try {
+
+                Bitmap user_img = MediaStore.Images.Media.getBitmap(getContentResolver(), uri);
+                Bitmap resized = Bitmap.createScaledBitmap(user_img, 100, 100, true);
+                profile_image.setImageBitmap(resized);
+
+                ByteArrayOutputStream stream = new ByteArrayOutputStream();
+                resized.compress(Bitmap.CompressFormat.JPEG, 80, stream);
+                byte [] byte_arr = stream.toByteArray();
+                base64profile_pic = Base64.encodeToString(byte_arr, Base64.DEFAULT);
+                Map<String, String>  params = new HashMap<>();
+                params.put("profile_pic", base64profile_pic);
+                updateUser("/update_user_profile_pic", params);
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    protected void setUserProfileSetup(){
+
+        profile_image.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onClickPickImage(v);
+            }
+        });
+
+        height_text.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                final EditText edittext = new EditText(ProfileActivity.this);
+                edittext.setInputType( InputType.TYPE_CLASS_NUMBER);
+                edittext.setFilters(new InputFilter[] {new InputFilter.LengthFilter(3)});
+                AlertDialog.Builder height_dialog  = new AlertDialog.Builder(ProfileActivity.this)
+                        .setTitle("Set height")
+                        .setMessage("Height (cm)")
+                        .setView(edittext)
+                        .setPositiveButton("Set", null)
+                        .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int whichButton) {
+                            }
+                        });
+
+                final AlertDialog heightDialog =  height_dialog.create();
+                heightDialog.setOnShowListener(new DialogInterface.OnShowListener() {
+                    @Override
+                    public void onShow(DialogInterface dialog) {
+
+                        Button b = heightDialog.getButton(AlertDialog.BUTTON_POSITIVE);
+                        b.setOnClickListener(new View.OnClickListener() {
+
+                            @Override
+                            public void onClick(View view) {
+                                //What ever you want to do with the value
+                                String newHeight = edittext.getText() + "";
+                                if(validHeight(newHeight)) {
+                                    height_text.setText(edittext.getText() + " cm");
+                                    heightDialog.dismiss();
+                                    Map<String, String>  params = new HashMap<>();
+                                    params.put("height", newHeight);
+                                    updateUser("/update_user_height",params);
+                                }
+                                else
+                                    edittext.setError("Insert valid height");
+
+                            }
+                        });
+                    }
+                });
+                heightDialog.show();
+
+
+            }
+        });
+        weight_text.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                final EditText edittext = new EditText(ProfileActivity.this);
+                edittext.setInputType( InputType.TYPE_NUMBER_FLAG_DECIMAL);
+                edittext.setFilters(new InputFilter[] {new InputFilter.LengthFilter(6)});
+                edittext.setKeyListener(new CustomDigitsKeyListener(true,true));
+                edittext.addTextChangedListener(new TextWatcher() {
+                    int len = 0;
+
+                    @Override
+                    public void afterTextChanged(Editable s) {
+
+                        String weight_in = edittext.getText().toString();
+                        if (s.length() >= 3 && len < s.length() && !weight_in.contains("."))
+                            s.insert(3, ".");
+
+                    }
+
+                    @Override
+                    public void beforeTextChanged(CharSequence arg0, int arg1, int arg2, int arg3) {
+
+                        String str = edittext.getText().toString();
+                        len = str.length();
+                    }
+
+                    @Override
+                    public void onTextChanged(CharSequence s, int start, int before, int count) {
+                    }
+                });
+
+                AlertDialog.Builder weight_dialog = new AlertDialog.Builder(ProfileActivity.this)
+                        .setTitle("Set weight")
+                        .setMessage("Weight (Kg)")
+                        .setView(edittext)
+                        .setPositiveButton("Set",null)
+                        .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int whichButton) {
+                            }
+                        });
+
+                final AlertDialog weightDialog =  weight_dialog.create();
+                weightDialog.setOnShowListener(new DialogInterface.OnShowListener() {
+                    @Override
+                    public void onShow(DialogInterface dialog) {
+
+                        Button b = weightDialog.getButton(AlertDialog.BUTTON_POSITIVE);
+                        b.setOnClickListener(new View.OnClickListener() {
+
+                            @Override
+                            public void onClick(View view) {
+                                //What ever you want to do with the value
+                                String newWeight = edittext.getText() + "";
+                                if(validWeight(newWeight)) {
+                                    String displayedWeight = Integer.toString(Integer.parseInt(newWeight));
+                                    weight_text.setText(displayedWeight + " Kg");
+                                    weightDialog.dismiss();
+                                    Map<String, String>  params = new HashMap<>();
+                                    params.put("weight", newWeight);
+                                    updateUser("/update_user_weight", params);
+                                }
+                                else
+                                    edittext.setError("Insert valid weight");
+
+                            }
+                        });
+                    }
+                });
+                weightDialog.show();
+            }
+        });
+    }
+
+    private boolean validWeight(String weight){
+        if(!TextUtils.isEmpty(weight)) {
+            try {
+                Double.parseDouble(weight);
+                return true;
+            } catch (NumberFormatException e) {
+                return false;
+            }
+        }
+        return false;
+    }
+    private boolean validHeight(String height){
+        if(!TextUtils.isEmpty(height) && Integer.parseInt(height) <= 400){
+                return true;
+        }
+        return false;
+
+    }
+
+    private class CustomDigitsKeyListener extends DigitsKeyListener
+    {
+        public CustomDigitsKeyListener() {
+            super(false, false);
+        }
+
+        public CustomDigitsKeyListener(boolean sign, boolean decimal) {
+            super(sign, decimal);
+        }
+
+        public int getInputType() {
+            return InputType.TYPE_CLASS_PHONE;
+        }
+    }
+
+    private void updateUser(String reqUrl, final Map<String,String> params){
+
+        StringRequest saveRequest = new StringRequest(Request.Method.POST, baseUrl + reqUrl,
+                new Response.Listener<String>() {
+                    public void onResponse(String response){
+                        String updated_param = "";
+                        for(String param : params.keySet())
+                            if(!param.equals(user_email)) {
+                                updated_param = param;
+                            }
+
+                        Log.i("HELP","User " + user_email + " "+updated_param+" updated");
+                        Log.i("HELP","User ola@ua.pt height updated");
+
+                        if(response.equals("User " + user_email + " "+updated_param+" updated")) {
+
+                        }
+
+                        else{
+
+                            android.support.v7.app.AlertDialog alertDialog = new android.support.v7.app.AlertDialog.Builder(ProfileActivity.this).create();
+                            alertDialog.setTitle("Error");
+                            // Please connect your device to the Internet and try again
+                            alertDialog.setMessage(response.toString());
+                            alertDialog.setButton(android.support.v7.app.AlertDialog.BUTTON_NEUTRAL, "OK",
+                                    new DialogInterface.OnClickListener() {
+                                        public void onClick(DialogInterface dialog, int which) {
+                                            dialog.dismiss();
+                                        }
+                                    });
+                            alertDialog.show();
+                        }
+
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+
+                        android.support.v7.app.AlertDialog alertDialog = new android.support.v7.app.AlertDialog.Builder(ProfileActivity.this).create();
+                        alertDialog.setTitle("No Internet Connection");
+                        // Please connect your device to the Internet and try again
+                        alertDialog.setMessage(error.toString());
+                        alertDialog.setButton(android.support.v7.app.AlertDialog.BUTTON_NEUTRAL, "OK",
+                                new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        dialog.dismiss();
+                                    }
+                                });
+                        alertDialog.show();
+                    }
+                }
+        ){
+            // user params are specified here
+            @Override
+            protected Map<String, String> getParams()
+            {
+                params.put("email",user_email);
+                return params;
+            }
+        };
+
+        VolleyProvider.getInstance(this).addRequest(saveRequest);
+
+    }
+
     private void RadarSetup(){
         rChart.setBackgroundColor(Color.rgb(48,48,48));//@color/holo_primary
 
@@ -532,7 +832,7 @@ public class ProfileActivity extends AppCompatActivity {
                                 }*/
                                 entries.add(new RadarEntry(tmp));
                             }
-
+                            // Graph is explicit i think
                             RadarDataSet set1 = new RadarDataSet(entries,"% Worked Group Muscles");
                             set1.setColor(Color.rgb(121, 162, 175));
                             set1.setFillColor(Color.rgb(121, 162, 175));
@@ -541,6 +841,7 @@ public class ProfileActivity extends AppCompatActivity {
                             set1.setLineWidth(2f);
                             set1.setDrawHighlightCircleEnabled(true);
                             set1.setDrawHighlightIndicators(false);
+                            set1.setLabel("");
 
                             ArrayList<IRadarDataSet> sets = new ArrayList<>();
                             sets.add(set1);
@@ -553,6 +854,9 @@ public class ProfileActivity extends AppCompatActivity {
 
                             rChart.setData(data);
                             rChart.invalidate();
+                            rChart.setExtraLeftOffset(15);
+                            rChart.setExtraRightOffset(15);
+                            rChart.setExtraTopOffset(15);
 
                             rChart.animateXY(
                                     1400, 1400,
@@ -589,6 +893,8 @@ public class ProfileActivity extends AppCompatActivity {
                             l.setXEntrySpace(7f);
                             l.setYEntrySpace(5f);
                             l.setTextColor(Color.WHITE);
+                            l.setEnabled(false);
+                            rChart.setVisibility(View.VISIBLE);
                         }catch (JSONException e2){
                             e2.printStackTrace();
                         }
