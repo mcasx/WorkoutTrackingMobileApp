@@ -32,11 +32,13 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
 import g11.muscle.DB.DBConnect;
+import g11.muscle.DetailedExerciseHistoryActivity;
 import g11.muscle.ProfileActivity;
 import g11.muscle.R;
 import g11.muscle.DB.VolleyProvider;
@@ -313,7 +315,8 @@ public class FeedFragment extends Fragment {
 
                         System.out.println(response);
                         // Initialization of history array
-                        feedItem[] history = new feedItem[0];
+                        final ArrayList<feedItem> history = new ArrayList<>();
+                        feedItem[] temp = new feedItem[0];
                         try {
                             JSONObject jsonObject = new JSONObject(response);
                             JSONArray jsonArray = (JSONArray) jsonObject.get("feed");
@@ -336,11 +339,11 @@ public class FeedFragment extends Fragment {
                             }
 
                             //From the response create the history array
-                            history = new feedItem[jsonArray.length()];
+                            temp = new feedItem[jsonArray.length()];
                             try {
                                 for (int i = 0; i < jsonArray.length(); i++) {
                                     JSONObject jo = jsonArray.getJSONObject(i);
-                                    history[i] = new feedItem(jo);
+                                    history.add(new feedItem(jo));
                                 }
                             } catch (JSONException je) {
                                 Log.e(TAG, je.toString());
@@ -351,7 +354,8 @@ public class FeedFragment extends Fragment {
 
                         // Define the groupView adapter
 
-                        FeedViewAdapter adapter = new FeedViewAdapter(getActivity(), history);
+
+                        FeedViewAdapter adapter = new FeedViewAdapter(getActivity(), history.toArray(temp));
                         feedView.setAdapter(adapter);
 
                         // Set the listeners on the list items
@@ -359,6 +363,8 @@ public class FeedFragment extends Fragment {
                         feedView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                             public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
                                 //Go to exercise page
+                                DetailedExerciseHistoryActivity.exerciseHistoryItem = history.get(position).getJsonObj();
+                                startActivity(new Intent(getActivity(), DetailedExerciseHistoryActivity.class));
                             }
                         });
 
@@ -392,6 +398,7 @@ public class FeedFragment extends Fragment {
         private String user;
         private int set_amount;
         private String datetime;
+        private JSONObject jsonObj;
 
         public feedItem(JSONObject jo) {
             try {
@@ -399,6 +406,7 @@ public class FeedFragment extends Fragment {
                 user = jo.getString("User_email");
                 set_amount = jo.getInt("Set_amount");
                 datetime = jo.getString("Date_Time").substring(0, 15);
+                jsonObj = jo;
             } catch (JSONException je) {
                 Log.e(TAG, "Exception creating feedItem", je);
             }
@@ -422,6 +430,10 @@ public class FeedFragment extends Fragment {
 
         public Bitmap getUserImage() {
             return userProfilePicture.get(getUser());
+        }
+
+        public JSONObject getJsonObj(){
+            return jsonObj;
         }
 
     }

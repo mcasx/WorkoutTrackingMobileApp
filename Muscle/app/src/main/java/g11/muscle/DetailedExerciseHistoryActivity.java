@@ -35,8 +35,6 @@ import g11.muscle.Fragments.PagerAdapter;
 
 public class DetailedExerciseHistoryActivity extends AppCompatActivity {
 
-
-
     public static JSONObject exerciseHistoryItem = null;
     private final String TAG = "DetailedExerciseHistory";
     private VolleyProvider req_queue;
@@ -93,8 +91,17 @@ public class DetailedExerciseHistoryActivity extends AppCompatActivity {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.detailed_exercise_menu, menu);
         if(hasThumbsUp()){
-
             (menu.findItem(R.id.thumbsUp)).setIcon(R.drawable.ic_thumb_up_full_white_24dp);
+        }
+
+        try {
+            if(!getSharedPreferences("UserData", 0).getString("email", null).equals(exerciseHistoryItem.getString("User_email"))){
+                menu.findItem(R.id.share).setVisible(false);
+            }
+
+
+        } catch (JSONException e) {
+            e.printStackTrace();
         }
 
         return true;
@@ -255,6 +262,5 @@ public class DetailedExerciseHistoryActivity extends AppCompatActivity {
     private boolean hasThumbsUp(){
         return true;
     }
-
 
 }

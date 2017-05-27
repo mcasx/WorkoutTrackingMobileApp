@@ -36,6 +36,7 @@ public class LoginActivity extends AppCompatActivity {
     private TextView           signUp;
     private TextView           forgotPass;
     private ImageView          logo;
+    private SharedPreferences  sp;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,7 +50,13 @@ public class LoginActivity extends AppCompatActivity {
         signUp          =      (TextView) findViewById(R.id.sign_up);
         forgotPass      =      (TextView) findViewById(R.id.forgotPass);
         logo            =      (ImageView) findViewById(R.id.logoView);
-
+        sp = getSharedPreferences("UserData", 0);
+        if(sp.contains("email")){
+            Intent intent = new Intent(LoginActivity.this, HomeActivity.class);
+            intent.putExtra("email", sp.getString("email", null));
+            startActivity(intent);
+            finish();
+        }
         progressBar.setVisibility(View.GONE);
     }
 
@@ -120,7 +127,7 @@ public class LoginActivity extends AppCompatActivity {
                             startActivity(intent);
                             finish();
 
-                            SharedPreferences sp = getSharedPreferences("UserData", 0);
+
                             sp.edit().putString("email", email).apply();
 
                         }

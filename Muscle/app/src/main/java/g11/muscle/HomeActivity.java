@@ -2,6 +2,7 @@ package g11.muscle;
 
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 
 import android.support.annotation.NonNull;
@@ -226,6 +227,12 @@ public class HomeActivity extends AppCompatActivity implements PickExerciseFragm
                 settingsIntent.putExtra("email", getIntent().getStringExtra("email"));
                 settingsIntent.putExtra("context", "home");
                 startActivity(settingsIntent);
+                return true;
+
+            case R.id.logout:
+                SharedPreferences sp = getSharedPreferences("UserData", 0);
+                sp.edit().remove("email").apply();
+                startActivity(new Intent(HomeActivity.this, LoginActivity.class));
                 return true;
 
             default:
