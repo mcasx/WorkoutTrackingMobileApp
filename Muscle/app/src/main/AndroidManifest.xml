@@ -2,6 +2,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="g11.muscle">
 
+
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.INTERNET" />
     <!-- Bluetooth Permissions -->
     <uses-permission android:name="android.permission.BLUETOOTH" />
@@ -14,6 +17,7 @@
     <uses-feature android:name="android.hardware.sensor.stepdetector" />
     <uses-feature android:name="android.hardware.sensor.linearacelaration" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
+
 
     <application
         android:allowBackup="true"

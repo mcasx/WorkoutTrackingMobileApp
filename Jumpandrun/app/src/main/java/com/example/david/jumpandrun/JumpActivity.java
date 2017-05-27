@@ -1,15 +1,23 @@
 package com.example.david.jumpandrun;
 
+import android.Manifest;
+import android.app.Service;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.os.Build;
 import android.os.PowerManager;
 import android.support.annotation.RequiresApi;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -29,13 +37,13 @@ public class JumpActivity extends AppCompatActivity implements SensorEventListen
 
     long time;
     boolean thresholdup;
-    float minx,maxx,miny,maxy,minz,maxz = 0.0f;
+    float minx, maxx, miny, maxy, minz, maxz = 0.0f;
 
     int count;
 
     boolean stationary;
 
-    float[]  linear_acceleration = new float[3];
+    float[] linear_acceleration = new float[3];
 
     private SensorManager sensorManager;
     PowerManager.WakeLock wl;
@@ -49,6 +57,10 @@ public class JumpActivity extends AppCompatActivity implements SensorEventListen
         setContentView(R.layout.activity_jump);
         sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
 
+        private Button mainButton = null;
+        private boolean isButtonPressed = false;
+        private GpsCalculator gpsCalculator = null;
+
         PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
         wl = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "My Tag");
         wl.acquire();
@@ -59,6 +71,7 @@ public class JumpActivity extends AppCompatActivity implements SensorEventListen
         } else {
             Toast.makeText(this, "Count sensor not available!", Toast.LENGTH_LONG).show();
         }
+
 
         minX = (TextView) findViewById(R.id.minX);
         maxX = (TextView) findViewById(R.id.maxX);
@@ -108,23 +121,22 @@ public class JumpActivity extends AppCompatActivity implements SensorEventListen
         // dT is the event delivery rate.
 
 
-
         // Remove the gravity contribution with the high-pass filter.
         linear_acceleration[0] = event.values[0];
         linear_acceleration[1] = event.values[1];
         linear_acceleration[2] = event.values[2];
 
-        if(linear_acceleration[0] < minx)
+        if (linear_acceleration[0] < minx)
             minx = linear_acceleration[0];
         else if (linear_acceleration[0] > maxx)
             maxx = linear_acceleration[0];
 
-        if(linear_acceleration[1] < miny)
+        if (linear_acceleration[1] < miny)
             miny = linear_acceleration[1];
         else if (linear_acceleration[1] > maxy)
             maxy = linear_acceleration[1];
 
-        if(linear_acceleration[2] < minz)
+        if (linear_acceleration[2] < minz)
             minz = linear_acceleration[2];
         else if (linear_acceleration[2] > maxz)
             maxz = linear_acceleration[0];
@@ -138,17 +150,17 @@ public class JumpActivity extends AppCompatActivity implements SensorEventListen
 
         accelaration = Math.sqrt(linear_acceleration[0] * linear_acceleration[0] + linear_acceleration[1] * linear_acceleration[1] + linear_acceleration[2] * linear_acceleration[2]);
 
-        if(accelaration > threshold + 3.5 || accelaration < threshold - 3.5)
+        if (accelaration > threshold + 3.5 || accelaration < threshold - 3.5)
             threshold = accelaration;
 
         module.setText(String.format("%.2f", accelaration));
         thresholdText.setText(String.format("%.2f", threshold));
 
-        if ( time < System.currentTimeMillis() + 250) {
+        if (time < System.currentTimeMillis() + 250) {
             if (threshold > 11 && !thresholdup) {
 
                 count++;
-                countText.setText(String.format("%d", count/2));
+                countText.setText(String.format("%d", count / 2));
                 thresholdup = true;
                 time = System.currentTimeMillis();
             } else
@@ -162,4 +174,8 @@ public class JumpActivity extends AppCompatActivity implements SensorEventListen
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
 
     }
+
+
 }
+
+
