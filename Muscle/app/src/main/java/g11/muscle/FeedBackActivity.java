@@ -131,20 +131,17 @@ public class FeedBackActivity extends AppCompatActivity implements
                     if( endOfLineIndex >= 0){
                         JSONObject jsonObj = new JSONObject(strBuilder.substring(0,endOfLineIndex+1));
                         strBuilder.delete(0,endOfLineIndex+1);
-                        if(jsonObj.has("status")) {
-                            Log.i(TAG, jsonObj.getString("status"));
-                        }
-                        else {
-                            //weight = Integer.parseInt(jsonObj.getString("weight"));
-                            //rep_count = Integer.parseInt(jsonObj.getString("rep"));
-                            weight = 40;
-                            rep_count += 1;
-                            total_intensity += Double.parseDouble(jsonObj.getString("meanAcc"));
-                            addEntry(Double.parseDouble(jsonObj.getString("meanAcc")));
-                            weigthTV.setText(String.valueOf(weight));
 
-                            System.out.println("Get Data from bluetooth");
-                        }
+                        //weight = Integer.parseInt(jsonObj.getString("weight"));
+                        //rep_count = Integer.parseInt(jsonObj.getString("rep"));
+                        Log.e("HERE", jsonObj.getString("weight"));
+                        weight = Double.parseDouble(jsonObj.getString("weight"));
+                        rep_count += 1;
+                        total_intensity += Double.parseDouble(jsonObj.getString("meanAcc"));
+                        addEntry(Double.parseDouble(jsonObj.getString("meanAcc")));
+                        weigthTV.setText(String.valueOf(weight));
+
+                        System.out.println("Get Data from bluetooth");
                     }
                 } catch (JSONException je){
                     Log.e(TAG,"HANDLER EXCEPTION");
@@ -241,7 +238,7 @@ public class FeedBackActivity extends AppCompatActivity implements
         YAxis leftAxis = mChart.getAxisLeft();
         leftAxis.setTypeface(mTfLight);
         leftAxis.setTextColor(Color.WHITE);
-        leftAxis.setAxisMaximum(100f);
+        leftAxis.setAxisMaximum(2f);
         leftAxis.setAxisMinimum(0f);
         leftAxis.setDrawGridLines(true);
 

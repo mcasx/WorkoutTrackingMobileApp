@@ -12,12 +12,9 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.provider.MediaStore;
 import android.support.annotation.ColorRes;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentPagerAdapter;
+
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v7.app.ActionBar;
-import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.Editable;
@@ -44,17 +41,22 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.github.mikephil.charting.animation.Easing;
+import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.charts.RadarChart;
 import com.github.mikephil.charting.components.AxisBase;
 import com.github.mikephil.charting.components.Legend;
 import com.github.mikephil.charting.components.MarkerView;
 import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.components.YAxis;
+import com.github.mikephil.charting.data.Entry;
+import com.github.mikephil.charting.data.LineData;
+import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.data.RadarData;
 import com.github.mikephil.charting.data.RadarDataSet;
 import com.github.mikephil.charting.data.RadarEntry;
 import com.github.mikephil.charting.formatter.IAxisValueFormatter;
 import com.github.mikephil.charting.interfaces.datasets.IRadarDataSet;
+import com.github.mikephil.charting.utils.ColorTemplate;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -62,31 +64,45 @@ import org.json.JSONObject;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import g11.muscle.DB.VolleyProvider;
-import g11.muscle.Fragments.WeightProgressFragment;
 import g11.muscle.MPChartJava.RadarMarkerView;
+import g11.muscle.MPChartJava.LineMarkerView;
 
 import g11.muscle.DB.DBConnect;
 
 public class ProfileActivity extends AppCompatActivity {
 
     private VolleyProvider req_queue;
+
     private String user_email;
     private String profile_email;
     private String name;
     private String base64profile_pic;
+
     private ArrayAdapter<String> followingAdapter;
     private ArrayAdapter<String> followersAdapter;
+
     private boolean friendFlag;
+
+    //Charts
     private RadarChart rChart;
+    private LineChart lChart;
+
     private ImageView profile_image;
     private TextView height_text;
     private TextView weight_text;
+
     String baseUrl = DBConnect.serverURL;
+
     private boolean userProfileFlag = false;
 
     // Chart font
@@ -124,32 +140,14 @@ public class ProfileActivity extends AppCompatActivity {
         createUserInfo();
         createFollowerInfo();
 
-        /*
-        ViewPager pager = (ViewPager) findViewById(R.id.pager);
-        pager.setOffscreenPageLimit(3);
-
-        PageAdapter a = new PageAdapter(getSupportFragmentManager());
-        pager.setAdapter(a);
-
-
-        AlertDialog.Builder b = new AlertDialog.Builder(this);
-        b.setTitle("This is a ViewPager.");
-        b.setMessage("Swipe left and right for more awesome design examples!");
-        b.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.dismiss();
-            }
-        });
-        b.show();*/
-
         rChart = (RadarChart) findViewById(R.id.rChart);
+        lChart = (LineChart) findViewById(R.id.lChart);
         rChart.setVisibility(View.GONE);
 
         // Font for charts text
         mTfLight = Typeface.createFromAsset(this.getAssets(), "fonts/OpenSans-Light.ttf");
         RadarSetup();
+        LineSetup();
 
     }
 
@@ -922,31 +920,141 @@ public class ProfileActivity extends AppCompatActivity {
         VolleyProvider.getInstance(this).addRequest(StrHistReq);
     }
 
-    /*
-    private class PageAdapter extends FragmentPagerAdapter {
+    private void LineSetup(){
+        // no description text
+        lChart.getDescription().setEnabled(false);
 
-        public PageAdapter(FragmentManager fm) {
-            super(fm);
-        }
+        // enable touch gestures
+        lChart.setTouchEnabled(true);
 
-        @Override
-        public Fragment getItem(int pos) {
-            Fragment f = null;
+        lChart.setDragDecelerationFrictionCoef(0.9f);
 
-            switch(pos) {
-                case 0:
-                    f = WeightProgressFragment.newInstance(user_email);
-                    break;
+        // enable scaling and dragging
+        lChart.setDragEnabled(true);
+        lChart.setScaleEnabled(true);
+        lChart.setDrawGridBackground(false);
+        lChart.setHighlightPerDragEnabled(true);
 
+        // set an alternative background color
+        lChart.setBackgroundColor(Color.rgb(48,48,48));
+        lChart.setViewPortOffsets(0f, 0f, 0f, 0f);
+
+        // create a custom MarkerView (extend MarkerView) and specify the layout
+        // to use for it
+        MarkerView mv = new LineMarkerView(this, R.layout.custom_marker_view);
+        mv.setChartView(lChart); // For bounds control
+        lChart.setMarker(mv); // Set the marker to the chart
+
+        String url = DBConnect.serverURL + "/get_weight_history";
+        //Create the exercise history request
+        StringRequest StrHistReq = new StringRequest(Request.Method.POST,url,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        try {
+                            // Chart Array Values List
+                            ArrayList<Entry> values = new ArrayList<>();
+                            JSONArray jsonArray = new JSONArray(response);
+                            try {
+                                for (int i = 0; i < jsonArray.length(); i++) {
+                                    String tmpWeight = new JSONObject(jsonArray.getString(i)).getString("Weight");
+                                    String tmpDate = new JSONObject(jsonArray.getString(i)).getString("Date");
+                                    // parse String to Date - I don't know why but this adds an hour to the date
+                                    Date tmpDat = new SimpleDateFormat("EE, dd MMM yyyy HH:mm:ss z", Locale.UK).parse(tmpDate);
+                                    values.add(new Entry(tmpDat.getTime(),Float.parseFloat(tmpWeight)));
+                                }
+                            } catch (JSONException|ParseException jpe) {
+                                Log.e("WeightChartSetup", jpe.toString());
+                            }
+                            // create a dataset and give it a type
+                            LineDataSet set1 = new LineDataSet(values, "Weight");
+                            set1.setAxisDependency(YAxis.AxisDependency.LEFT);
+                            set1.setColor(ColorTemplate.getHoloBlue());
+                            set1.setValueTextColor(ColorTemplate.getHoloBlue());
+                            set1.setLineWidth(1.5f);
+                            set1.setDrawCircles(true);
+                            set1.setDrawValues(false);
+                            set1.setFillAlpha(65);
+                            set1.setFillColor(ColorTemplate.getHoloBlue());
+                            set1.setHighLightColor(Color.rgb(244, 117, 117));
+                            set1.setDrawCircleHole(false);
+
+                            // create a data object with the datasets
+                            LineData data = new LineData(set1);
+                            data.setValueTextColor(Color.WHITE);
+                            data.setValueTextSize(9f);
+
+                            // set data
+                            lChart.setData(data);
+
+                            lChart.invalidate();
+
+                            // get the legend (only possible after setting data)
+                            Legend l = lChart.getLegend();
+                            l.setEnabled(false);
+
+                            XAxis xAxis = lChart.getXAxis();
+                            xAxis.setPosition(XAxis.XAxisPosition.TOP_INSIDE);
+                            xAxis.setTypeface(mTfLight);
+                            xAxis.setTextSize(10f);
+                            xAxis.setTextColor(Color.WHITE);
+                            xAxis.setDrawAxisLine(false);
+                            xAxis.setDrawGridLines(true);
+                            xAxis.setTextColor(Color.rgb(255, 192, 56));
+                            xAxis.setCenterAxisLabels(true);
+                            xAxis.setGranularity(1f); // one hour
+                            xAxis.setValueFormatter(new IAxisValueFormatter() {
+
+                                private SimpleDateFormat mFormat = new SimpleDateFormat("EE, dd MMM",Locale.UK);
+
+                                @Override
+                                public String getFormattedValue(float value,  AxisBase axis) {
+
+                                    long millis = TimeUnit.HOURS.toMillis((long) value);
+                                    return mFormat.format(new Date(millis));
+                                }
+                            });
+
+                            YAxis leftAxis = lChart.getAxisLeft();
+                            leftAxis.setPosition(YAxis.YAxisLabelPosition.INSIDE_CHART);
+                            leftAxis.setTypeface(mTfLight);
+                            leftAxis.setTextColor(ColorTemplate.getHoloBlue());
+                            leftAxis.setDrawGridLines(true);
+                            leftAxis.setGranularityEnabled(true);
+
+                            leftAxis.setAxisMinimum(30f); // min max values
+                            leftAxis.setAxisMaximum(120f);
+
+                            leftAxis.setYOffset(-9f);
+                            leftAxis.setTextColor(Color.rgb(255, 192, 56));
+
+                            YAxis rightAxis = lChart.getAxisRight();
+                            rightAxis.setEnabled(false);
+
+                        }catch (JSONException e2){
+                            e2.printStackTrace();
+                        }
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        //Handle error response
+                        System.out.println(error.toString());
+                    }
+                }
+        ){
+            // use params are specified here
+            @Override
+            protected Map<String, String> getParams()
+            {
+                Map<String, String>  params = new HashMap<>();
+                params.put("user_email", user_email);
+                return params;
             }
+        };
 
-            return f;
-        }
-
-        @Override
-        public int getCount() {
-            return 5;
-        }
-    }*/
-
+        //Queue the request
+        VolleyProvider.getInstance(this).addRequest(StrHistReq);
+    }
 }
