@@ -73,10 +73,6 @@ public class MyPlanFragment extends Fragment {
 
         // get user email
         email = getActivity().getIntent().getStringExtra("email");
-
-        //getTrainings();
-        // Training data TODO static data - TO REMOVE
-        //training_data = fill_with_data();
     }
 
     @Override

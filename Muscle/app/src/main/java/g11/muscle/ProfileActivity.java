@@ -10,7 +10,11 @@ import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.ColorRes;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.graphics.drawable.DrawableCompat;
+import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Base64;
@@ -51,6 +55,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import g11.muscle.DB.VolleyProvider;
+import g11.muscle.Fragments.WeightProgressFragment;
 import g11.muscle.MPChartJava.RadarMarkerView;
 
 import g11.muscle.DB.DBConnect;
@@ -88,11 +93,31 @@ public class ProfileActivity extends AppCompatActivity {
         createUserInfo();
         createFollowerInfo();
 
-        //rChart = (RadarChart) findViewById(R.id.rChart);
+        /*
+        ViewPager pager = (ViewPager) findViewById(R.id.pager);
+        pager.setOffscreenPageLimit(3);
+
+        PageAdapter a = new PageAdapter(getSupportFragmentManager());
+        pager.setAdapter(a);
+
+
+        AlertDialog.Builder b = new AlertDialog.Builder(this);
+        b.setTitle("This is a ViewPager.");
+        b.setMessage("Swipe left and right for more awesome design examples!");
+        b.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
+        b.show();*/
+
+        rChart = (RadarChart) findViewById(R.id.rChart);
 
         // Font for charts text
-        //mTfLight = Typeface.createFromAsset(this.getAssets(), "fonts/OpenSans-Light.ttf");
-       // RadarSetup();
+        mTfLight = Typeface.createFromAsset(this.getAssets(), "fonts/OpenSans-Light.ttf");
+        RadarSetup();
 
     }
 
@@ -255,7 +280,7 @@ public class ProfileActivity extends AppCompatActivity {
             protected Map<String, String> getParams()
             {
                 Map<String, String>  params = new HashMap<>();
-                params.put("user_email", profile_email);
+                params.put("user_email", user_email);
                 return params;
             }
         };
@@ -444,7 +469,7 @@ public class ProfileActivity extends AppCompatActivity {
     }
 
     private void RadarSetup(){
-        rChart.setBackgroundColor(Color.rgb(60, 65, 82));
+        rChart.setBackgroundColor(Color.rgb(48,48,48));//@color/holo_primary
 
         rChart.getDescription().setEnabled(false);
 
@@ -453,6 +478,8 @@ public class ProfileActivity extends AppCompatActivity {
         rChart.setWebLineWidthInner(1f);
         rChart.setWebColorInner(Color.LTGRAY);
         rChart.setWebAlpha(100);
+
+        rChart.setRotationEnabled(false);
 
         // create a custom MarkerView (extend MarkerView) and specify the layout
         // to use for it
@@ -484,10 +511,26 @@ public class ProfileActivity extends AppCompatActivity {
                                 Log.e("TG", je.toString());
                             }
 
+                            Float max = 0f;
                             // normalize values
-                            for(Float x : MuscleCnt){
-                                Float tmp = x/sum;
-                                entries.add(new RadarEntry(tmp*100));
+                            for(int i = 0; i < MuscleCnt.length;i++){
+                                Float tmp = MuscleCnt[i]/sum;
+                                MuscleCnt[i] = tmp*100;
+                                if(MuscleCnt[i] > max)
+                                    max = MuscleCnt[i];
+                            }
+                            for (Float x : MuscleCnt) {
+                                Float tmp = (x/(max+10))*100;
+                                /*if (max < 60){
+                                    tmp = ((x/(max+10))*100);
+                                }
+                                else if ( max < 70){
+                                    tmp = ((x/(max+12f))*100);
+                                }
+                                else if (max < 80){
+                                    tmp = ((x/(max+14f))*100);
+                                }*/
+                                entries.add(new RadarEntry(tmp));
                             }
 
                             RadarDataSet set1 = new RadarDataSet(entries,"% Worked Group Muscles");
@@ -572,5 +615,32 @@ public class ProfileActivity extends AppCompatActivity {
         //Queue the request
         VolleyProvider.getInstance(this).addRequest(StrHistReq);
     }
+
+    /*
+    private class PageAdapter extends FragmentPagerAdapter {
+
+        public PageAdapter(FragmentManager fm) {
+            super(fm);
+        }
+
+        @Override
+        public Fragment getItem(int pos) {
+            Fragment f = null;
+
+            switch(pos) {
+                case 0:
+                    f = WeightProgressFragment.newInstance(user_email);
+                    break;
+
+            }
+
+            return f;
+        }
+
+        @Override
+        public int getCount() {
+            return 5;
+        }
+    }*/
 
 }

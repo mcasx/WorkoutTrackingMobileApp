@@ -37,6 +37,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import g11.muscle.DB.DBConnect;
+import g11.muscle.DetailedExerciseHistoryActivity;
 import g11.muscle.MPChartJava.HistRadarMarkerView;
 import g11.muscle.R;
 import g11.muscle.DB.VolleyProvider;
@@ -55,13 +56,13 @@ public class DetailedExerciseHistoryGraphs extends Fragment implements OnChartVa
     private String exercise_name;
 
     // Radar Chart data
-    private ArrayList<BarEntry> entries1 = new ArrayList<>();
+    private ArrayList<BarEntry> thisExEntries = new ArrayList<>();
     private ArrayList<BarEntry> myAvgEntries = new ArrayList<>();
     private ArrayList<BarEntry> globalAvgEntries = new ArrayList<>();
 
     private BarDataSet myAvgSet;
     private BarDataSet globalAvgSet;
-    private BarDataSet set;
+    private BarDataSet thisExSet;
 
     public DetailedExerciseHistoryGraphs() {
         // Required empty public constructor
@@ -156,9 +157,7 @@ public class DetailedExerciseHistoryGraphs extends Fragment implements OnChartVa
                     @Override
                     public void onResponse(String response) {
                         try {
-                            Log.e(TAG,response);
                             JSONArray jsonArray = new JSONArray(response);
-                            Log.e(TAG,jsonArray.toString());
                             try {
                                 for (int i = 0; i < jsonArray.length(); i++) {
                                     String tmp_int = new JSONObject(jsonArray.getString(i)).getString("avg_int");
@@ -225,9 +224,7 @@ public class DetailedExerciseHistoryGraphs extends Fragment implements OnChartVa
                     @Override
                     public void onResponse(String response) {
                         try {
-                            Log.e(TAG,response);
                             JSONArray jsonArray = new JSONArray(response);
-                            Log.e(TAG,jsonArray.toString());
                             try {
                                 for (int i = 0; i < jsonArray.length(); i++) {
                                     String tmp_int = new JSONObject(jsonArray.getString(i)).getString("avg_int");
@@ -253,8 +250,8 @@ public class DetailedExerciseHistoryGraphs extends Fragment implements OnChartVa
                             globalAvgSet = new BarDataSet(globalAvgEntries, "Global Average");
                             globalAvgSet.setColor(Color.rgb(73, 162, 169));
 
-                            // set Data();
-                            setData();
+                            // get Next Data set
+                            getThisAverage();
 
                         }catch (JSONException e2){
                             e2.printStackTrace();
@@ -276,6 +273,78 @@ public class DetailedExerciseHistoryGraphs extends Fragment implements OnChartVa
             {
                 Map<String, String>  params = new HashMap<>();
                 params.put("exercise",exercise_name);
+                return params;
+            }
+        };
+
+        // Add the request to the RequestQueue
+        VolleyProvider.getInstance(getActivity()).addRequest(StrHistReq);
+    }
+
+    private void getThisAverage(){
+        String url = DBConnect.serverURL + "/get_this_ex_avg_stats";
+
+        //Create the exercise plan_group request
+        StringRequest StrHistReq = new StringRequest(Request.Method.POST,url,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        try {
+                            Log.e(TAG + " This Ex",response);
+                            JSONArray jsonArray = new JSONArray(response);
+                            Log.e(TAG,jsonArray.toString());
+                            try {
+                                for (int i = 0; i < jsonArray.length(); i++) {
+                                    String tmp_int = new JSONObject(jsonArray.getString(i)).getString("avg_int");
+                                    String tmp_reps = new JSONObject(jsonArray.getString(i)).getString("avg_reps");
+                                    String tmp_rest = new JSONObject(jsonArray.getString(i)).getString("avg_rest");
+                                    String tmp_sets = new JSONObject(jsonArray.getString(i)).getString("avg_sets");
+                                    String tmp_weight = new JSONObject(jsonArray.getString(i)).getString("avg_weight");
+
+                                    int duration = parseData(tmp_rest);
+
+                                    // Adding values to Bar My average data base
+                                    // Order: Repetitions - Intensity - Rest - Weight - Sets
+                                    thisExEntries.add(new BarEntry(i,Float.parseFloat(tmp_reps)));
+                                    thisExEntries.add(new BarEntry(i,Float.parseFloat(tmp_int)));
+                                    thisExEntries.add(new BarEntry(i,(float) duration));
+                                    thisExEntries.add(new BarEntry(i,Float.parseFloat(tmp_weight)));
+                                    thisExEntries.add(new BarEntry(i,Float.parseFloat(tmp_sets)));
+                                }
+                            } catch (JSONException je){
+                                Log.e(TAG, je.toString());
+                            }
+
+                            thisExSet = new BarDataSet(thisExEntries, "This Exercise");
+                            thisExSet.setColor(Color.rgb(103, 110, 129));
+
+                            // set Data();
+                            setData();
+
+                        }catch (JSONException e2){
+                            e2.printStackTrace();
+                        }
+
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        //Handle error response
+
+                        System.out.println(error.toString());
+                    }
+                }
+        ){
+            // use params are specified here
+            @Override
+            protected Map<String, String> getParams()
+            {
+                Map<String, String>  params = new HashMap<>();
+                try {
+                    params.put("id", DetailedExerciseHistoryActivity.exerciseHistoryItem.getString("ID"));
+                }catch(JSONException je){Log.e(TAG, "No Exercise History ID");}
+
                 return params;
             }
         };
@@ -309,25 +378,10 @@ public class DetailedExerciseHistoryGraphs extends Fragment implements OnChartVa
         float barSpace = 0.03f; // x3 DataSet
         float barWidth = 0.278f; // x3 DataSet
 
-        float mult = 80;
-        float min = 20;
-        int cnt = 5;
-
         int start = 0;
         int group = 5;
 
-        // NOTE: The order of the entries when being added to the entries array determines their position around the center of
-        // the chart.
-        entries1.add(new BarEntry(0,15));
-        entries1.add(new BarEntry(1,(float)1.5));
-        entries1.add(new BarEntry(2,40));
-        entries1.add(new BarEntry(3,30));
-        entries1.add(new BarEntry(4,3));
-
-        BarDataSet set1 = new BarDataSet(entries1, "This Exercise");
-        set1.setColor(Color.rgb(103, 110, 129));
-
-        BarData data = new BarData(set1,myAvgSet,globalAvgSet);
+        BarData data = new BarData(thisExSet,myAvgSet,globalAvgSet);
         data.setValueTypeface(mTfLight);
         data.setValueTextSize(8f);
         data.setDrawValues(false);
@@ -347,8 +401,5 @@ public class DetailedExerciseHistoryGraphs extends Fragment implements OnChartVa
         bChart.invalidate();
         
         bChart.invalidate();
-
     }
-
-
 }
