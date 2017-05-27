@@ -25,14 +25,18 @@ import android.text.TextWatcher;
 import android.text.method.DigitsKeyListener;
 import android.util.Base64;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.TableLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -552,6 +556,7 @@ public class ProfileActivity extends AppCompatActivity {
                 final EditText edittext = new EditText(ProfileActivity.this);
                 edittext.setInputType( InputType.TYPE_CLASS_NUMBER);
                 edittext.setFilters(new InputFilter[] {new InputFilter.LengthFilter(3)});
+                edittext.setGravity(Gravity.CENTER);
                 AlertDialog.Builder height_dialog  = new AlertDialog.Builder(ProfileActivity.this)
                         .setTitle("Set height")
                         .setMessage("Height (cm)")
@@ -596,9 +601,11 @@ public class ProfileActivity extends AppCompatActivity {
         weight_text.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
                 final EditText edittext = new EditText(ProfileActivity.this);
                 edittext.setInputType( InputType.TYPE_NUMBER_FLAG_DECIMAL);
                 edittext.setFilters(new InputFilter[] {new InputFilter.LengthFilter(6)});
+                edittext.setGravity(Gravity.CENTER);
                 edittext.setKeyListener(new CustomDigitsKeyListener(true,true));
                 edittext.addTextChangedListener(new TextWatcher() {
                     int len = 0;
@@ -647,7 +654,7 @@ public class ProfileActivity extends AppCompatActivity {
                                 //What ever you want to do with the value
                                 String newWeight = edittext.getText() + "";
                                 if(validWeight(newWeight)) {
-                                    String displayedWeight = Integer.toString(Integer.parseInt(newWeight));
+                                    String displayedWeight = Double.toString(Double.parseDouble(newWeight));
                                     weight_text.setText(displayedWeight + " Kg");
                                     weightDialog.dismiss();
                                     Map<String, String>  params = new HashMap<>();
