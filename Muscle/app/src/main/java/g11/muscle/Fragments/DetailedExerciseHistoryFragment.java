@@ -32,7 +32,7 @@ import g11.muscle.DB.VolleyProvider;
 
 
 public class DetailedExerciseHistoryFragment extends Fragment{
-
+    private final String TAG = "DetExerHistoryFragment";
 
     private TextView averageIntensityText;
     private TextView numberOfSetsText;
@@ -42,7 +42,6 @@ public class DetailedExerciseHistoryFragment extends Fragment{
     private View fView;
     private LayoutInflater inflater;
     final ArrayList<JSONObject> sets = new ArrayList<>();
-    private final String TAG = "DetExerHistoryFragment";
     public DetailedExerciseHistoryFragment() {
         // Required empty public constructor
     }
@@ -105,20 +104,15 @@ public class DetailedExerciseHistoryFragment extends Fragment{
                     @RequiresApi(api = Build.VERSION_CODES.M)
                     @Override
                     public void onResponse(String response) {
-
-                        // Initialization of sets array
-
                         try {
                             JSONArray jsonArray = new JSONArray(response);
                             //From the response create the sets array
                                 for (int i = 0; i < jsonArray.length(); i++) {
                                     createCardViewProgrammatically(new JSONObject(jsonArray.getString(i)));
-
                                 }
                         }catch (JSONException e2){
                             e2.printStackTrace();
                         }
-
                     }
                 },
                 new Response.ErrorListener() {
@@ -147,10 +141,8 @@ public class DetailedExerciseHistoryFragment extends Fragment{
         req_queue.addRequest(StrHistReq);
     }
 
-
     @RequiresApi(api = Build.VERSION_CODES.M)
     public void createCardViewProgrammatically(JSONObject set){
-
 
         View child = inflater.inflate(R.layout.card_view_detailed_exercise_activity_model, null);
 
@@ -169,8 +161,6 @@ public class DetailedExerciseHistoryFragment extends Fragment{
         }catch (JSONException je){ Log.e(TAG, "Set_number");}
 
         baseLayout.addView(child);
-
     }
-
 }
 
