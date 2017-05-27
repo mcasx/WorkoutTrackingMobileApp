@@ -20,6 +20,7 @@ import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.SearchView;
 import android.widget.TextView;
 
@@ -72,6 +73,8 @@ public class FeedFragment extends Fragment {
     private ListView feedView;
     private ListView people_listView;
     private SearchView search_barView;
+    private ProgressBar progressBar;
+    private View fView;
 
     public FeedFragment() {
         // Required empty public constructor
@@ -103,11 +106,15 @@ public class FeedFragment extends Fragment {
         amount = 20;
     }
 
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View fView = inflater.inflate(R.layout.fragment_feed, container, false);
+        fView = inflater.inflate(R.layout.fragment_feed, container, false);
         //GUI elements
+
+        progressBar = (ProgressBar)(fView.findViewById(R.id.feedProgressBar));
+        progressBar.setVisibility(View.VISIBLE);
 
         feedView = (ListView) fView.findViewById(R.id.feed);
         people_listView = (ListView) fView.findViewById(R.id.people_list);
@@ -174,6 +181,7 @@ public class FeedFragment extends Fragment {
                                 // Define the groupView adapter
                                 people_list_adapter.clear();
                                 people_list_adapter.addAll(history);
+
                             }
                         },
                         new Response.ErrorListener() {
@@ -195,9 +203,12 @@ public class FeedFragment extends Fragment {
                 };
 
                 //Queue the request
+
                 search_queue.addRequest(StrUsersLikeReq);
             }
         });
+
+
 
         // Inflate the layout for this fragment
         return fView;
@@ -312,7 +323,7 @@ public class FeedFragment extends Fragment {
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
-
+                        progressBar.setVisibility(View.INVISIBLE);
                         System.out.println(response);
                         // Initialization of history array
                         final ArrayList<feedItem> history = new ArrayList<>();
@@ -447,7 +458,7 @@ public class FeedFragment extends Fragment {
         TextView txtDate;
         ImageView imgUser;
 
-        public FeedViewAdapter(Activity activity, feedItem[] list){
+        private FeedViewAdapter(Activity activity, feedItem[] list){
             super();
             this.activity=activity;
             this.list=list;

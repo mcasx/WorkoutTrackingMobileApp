@@ -13,6 +13,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.android.volley.Request;
@@ -54,6 +55,7 @@ public class ExerciseHistoryFragment extends Fragment {
 
     private VolleyProvider req_queue;
     private ListView recent_historyView;
+    private ProgressBar progressBar;
 
     public ExerciseHistoryFragment() {
         // Required empty public constructor
@@ -73,6 +75,8 @@ public class ExerciseHistoryFragment extends Fragment {
         // Fragment View
         View fView = inflater.inflate(R.layout.fragment_exercise_history, container, false);
 
+        progressBar = (ProgressBar) fView.findViewById(R.id.exerciseHistoryProgressBar);
+        progressBar.setVisibility(View.VISIBLE);
         recent_historyView = (ListView) fView.findViewById(R.id.recent_history);
         createExerciseHistoryList();
         // Inflate the layout for this fragment
@@ -177,12 +181,14 @@ public class ExerciseHistoryFragment extends Fragment {
                                 startActivity(intent);
                             }
                         });
+                        progressBar.setVisibility(View.GONE);
                     }
                 },
                 new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
                         //Handle error response
+                        progressBar.setVisibility(View.GONE);
                         System.out.println(error.toString());
                     }
                 }
