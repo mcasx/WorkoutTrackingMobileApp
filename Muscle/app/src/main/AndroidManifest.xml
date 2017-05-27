@@ -55,6 +55,9 @@
             android:name=".FormActivity"
             android:theme="@style/Theme.AppCompat.NoActionBar" />
         <activity
+            android:name=".SettingsActivity"
+            android:theme="@style/Theme.AppCompat.NoActionBar" />
+        <activity
             android:name=".DetailedExerciseHistoryActivity"
             android:theme="@style/Theme.AppCompat" />
         <activity

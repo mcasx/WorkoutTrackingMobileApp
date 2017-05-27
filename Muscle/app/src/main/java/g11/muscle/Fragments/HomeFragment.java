@@ -12,6 +12,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.ArrayAdapter;
+import android.widget.ProgressBar;
 
 import com.android.volley.Request;
 import com.android.volley.Response;
@@ -49,7 +50,8 @@ public class HomeFragment extends Fragment {
     //GUI
     private ListView recExView;
     private ListView recPlanView;
-
+    private View fView;
+    private ProgressBar progressBar;
     public HomeFragment() {
         // Required empty public constructor
     }
@@ -65,7 +67,11 @@ public class HomeFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState){
         // Fragment View
-        View fView = inflater.inflate(R.layout.fragment_home, container, false);
+
+        fView = inflater.inflate(R.layout.fragment_home, container, false);
+
+        progressBar = (ProgressBar)fView.findViewById(R.id.homeProgressBar);
+        progressBar.setVisibility(View.VISIBLE);
         recExView = (ListView) fView.findViewById(R.id.rec_ex);
         recPlanView = (ListView) fView.findViewById(R.id.rec_plan);
 
@@ -147,13 +153,16 @@ public class HomeFragment extends Fragment {
                                 startActivity(intent);
                             }
                         });
+                        progressBar.setVisibility(View.GONE);
                     }
+
                 },
                 new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
                         //Handle error response
                         System.out.println(error.toString());
+                        progressBar.setVisibility(View.GONE);
                     }
                 }
         ) {

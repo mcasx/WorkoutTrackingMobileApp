@@ -228,7 +228,7 @@ public class HomeActivity extends AppCompatActivity implements PickExerciseFragm
                 return true;
 
             case R.id.settings:
-                Intent settingsIntent = new Intent(HomeActivity.this, FormActivity.class);
+                Intent settingsIntent = new Intent(HomeActivity.this, SettingsActivity.class);
                 settingsIntent.putExtra("email", getIntent().getStringExtra("email"));
                 settingsIntent.putExtra("context", "home");
                 startActivity(settingsIntent);
