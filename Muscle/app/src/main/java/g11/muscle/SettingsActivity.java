@@ -2,19 +2,18 @@ package g11.muscle;
 
 import android.app.DatePickerDialog;
 import android.app.Dialog;
-
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
+import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.design.widget.TextInputEditText;
 import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
-import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
@@ -28,11 +27,15 @@ import android.widget.ProgressBar;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -45,57 +48,119 @@ import g11.muscle.DB.DBConnect;
 import g11.muscle.DB.VolleyProvider;
 
 
-public class FormActivity extends AppCompatActivity {
+public class SettingsActivity  extends AppCompatActivity {
     private final int PICK_IMAGE_REQUEST = 1;
 
     TextInputLayout height_input_layout;
     TextInputLayout weight_input_layout;
-    TextInputLayout name_input_layout;
+    //excelente nome
+    TextView name_output_layout;
 
     String height;
     String weight;
-    String name;
-    String dob;
-    String gender;
     String email;
-    String profile_pic;
     String context;
+
+    Integer retrievedWeight;
+    String profile_pic;
+    Integer retrievedHeight;
+    Boolean gender;
+    String name;
+
+
     //Boolean imageChosen = false;
-    TextView skipButton;
     Button saveButton;
     ImageView pickImage;
-    Button pickDoB;
-    RadioGroup radioGenderGroup;
-    TextView dobInput;
-    TextView viewDob;
     //ImageView imgView;
     ProgressBar progressBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_form);
+        setContentView(R.layout.activity_settings);
 
+        //GUI elements
         height_input_layout = (TextInputLayout) findViewById(R.id.height_input_layout);
         weight_input_layout = (TextInputLayout) findViewById(R.id.weight_input_layout);
-        name_input_layout = (TextInputLayout) findViewById(R.id.name_input_layout);
-
-        saveButton = ((Button) findViewById(R.id.save_button));
         pickImage = ((ImageView) findViewById(R.id.pick_profile_img));
-        //imgView = ((ImageView)findViewById(R.id.userCommentImage));
-        pickDoB = ((Button) findViewById(R.id.button_bod_picker));
-        dobInput = ((TextView) findViewById(R.id.textView));
-        viewDob = ((TextView) findViewById(R.id.textViewDob));
+        name_output_layout = ((TextView) findViewById(R.id.textView5));
         progressBar = (ProgressBar) findViewById(R.id.progressBar2);
-        radioGenderGroup = (RadioGroup) findViewById(R.id.radioSex);
-
-        progressBar.setVisibility(View.GONE);
+        saveButton = ((Button) findViewById(R.id.save_button));
 
         // get email
         Intent in= getIntent();
         Bundle b = in.getExtras();
         email = (String) b.get("email");
         context = (String) b.get("context");
+
+        //get user settings
+        String getUserUrl = DBConnect.serverURL + "/get_user_profile";
+
+        StringRequest stringRequest = new StringRequest(Request.Method.POST, getUserUrl,
+                new Response.Listener<String>() {
+                    public void onResponse(String response){
+                        try {
+                            JSONObject jsonObject = new JSONObject(response);
+                            gender = jsonObject.getInt("Gender") == 1;
+                            Log.i("TG",Boolean.toString(gender));
+                            retrievedHeight = jsonObject.getInt("Height");
+                            retrievedWeight = jsonObject.getInt("Weight");
+                            name = jsonObject.getString("Name");
+
+                            name_output_layout.setText(name);
+                            height_input_layout.getEditText().setText(height);
+                            weight_input_layout.getEditText().setText(weight);
+                            profile_pic = jsonObject.getString("Profile_image");
+
+                            if (profile_pic != null && !profile_pic.equals("null")) {
+
+                                byte[] imageBytes = Base64.decode(profile_pic, Base64.DEFAULT);
+                                Bitmap user_img = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
+                                ImageView profile = ((ImageView) findViewById(R.id.pick_profile_img));
+                                profile.setImageBitmap(user_img);
+                            }
+                            Log.i("TG","howdy partener");
+                            set_progressBar_visibility(View.GONE);
+
+                        }catch (JSONException e2){
+                            e2.printStackTrace();
+                        }
+
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+
+                        AlertDialog alertDialog = new AlertDialog.Builder(SettingsActivity.this).create();
+                        alertDialog.setTitle("No Internet Connection");
+                        // Please connect your device to the Internet and try again
+                        alertDialog.setMessage(error.toString());
+                        alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
+                                new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        dialog.dismiss();
+                                    }
+                                });
+                        alertDialog.show();
+                        set_progressBar_visibility(View.GONE);
+                    }
+                }
+        ){
+            // user params are specified here
+            @Override
+            protected Map<String, String> getParams()
+            {
+                Map<String, String>  params = new HashMap<>();
+
+                params.put("email", email);
+
+                return params;
+            }
+        };
+
+        VolleyProvider.getInstance(this).addRequest(stringRequest);
+
         //get_gender(email);
 
         final TextInputEditText weight_input = ((TextInputEditText) findViewById(R.id.weight_input));
@@ -128,27 +193,21 @@ public class FormActivity extends AppCompatActivity {
         startActivityForResult( pickPhotoIntent,PICK_IMAGE_REQUEST);
     }
 
-
     public void onClickSave(View view) {
 
         set_progressBar_visibility(View.VISIBLE);
 
         height  = ((TextInputEditText) findViewById(R.id.height_input)).getText().toString();
         weight = ((TextInputEditText) findViewById((R.id.weight_input))).getText().toString();
-        name = ((TextInputEditText) findViewById((R.id.name_input))).getText().toString().trim();
-        dob = ((TextView) findViewById((R.id.textView))).getText().toString();
-
 
         if(!validFields())
             return;
 
         // get selected radio button from radioGroup
-        int selectedId = radioGenderGroup.getCheckedRadioButtonId();
-        gender = Integer.toString(((RadioButton) findViewById(selectedId)).getText().equals("Female") ? 1:0 );
 
         String addUserUrl = DBConnect.serverURL + "/update_user_char";
 
-        StringRequest stringRequest = new StringRequest(Request.Method.POST, addUserUrl,
+        StringRequest saveRequest = new StringRequest(Request.Method.POST, addUserUrl,
                 new Response.Listener<String>() {
                     public void onResponse(String response){
 
@@ -158,29 +217,29 @@ public class FormActivity extends AppCompatActivity {
                             // Later in development (like tomorrow <- xD lol nope)
                             // it will redirect to a page where user specifies more parameters
                             // For now it takes the user to the PickExerciseActivity
-                            if(context.equals("register")) {
-                                Intent intent = new Intent(FormActivity.this, HomeActivity.class);
-                                intent.putExtra("email", email);
-                                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                                startActivity(intent);
-                                finish();
-                            }
+
+                            Intent intent = new Intent(SettingsActivity.this, HomeActivity.class);
+                            intent.putExtra("email", email);
+                            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                            startActivity(intent);
+                            finish();
+
                         }
 
                         else{
 
-                                AlertDialog alertDialog = new AlertDialog.Builder(FormActivity.this).create();
-                                alertDialog.setTitle("Error");
-                                // Please connect your device to the Internet and try again
-                                alertDialog.setMessage(response.toString());
-                                alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
-                                        new DialogInterface.OnClickListener() {
-                                            public void onClick(DialogInterface dialog, int which) {
-                                                dialog.dismiss();
-                                            }
-                                        });
-                                alertDialog.show();
-                                set_progressBar_visibility(View.GONE);
+                            AlertDialog alertDialog = new AlertDialog.Builder(SettingsActivity.this).create();
+                            alertDialog.setTitle("Error");
+                            // Please connect your device to the Internet and try again
+                            alertDialog.setMessage(response.toString());
+                            alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
+                                    new DialogInterface.OnClickListener() {
+                                        public void onClick(DialogInterface dialog, int which) {
+                                            dialog.dismiss();
+                                        }
+                                    });
+                            alertDialog.show();
+                            set_progressBar_visibility(View.GONE);
                         }
 
                     }
@@ -189,7 +248,7 @@ public class FormActivity extends AppCompatActivity {
                     @Override
                     public void onErrorResponse(VolleyError error) {
 
-                        AlertDialog alertDialog = new AlertDialog.Builder(FormActivity.this).create();
+                        AlertDialog alertDialog = new AlertDialog.Builder(SettingsActivity.this).create();
                         alertDialog.setTitle("No Internet Connection");
                         // Please connect your device to the Internet and try again
                         alertDialog.setMessage(error.toString());
@@ -210,35 +269,30 @@ public class FormActivity extends AppCompatActivity {
             {
                 Map<String, String>  params = new HashMap<>();
 
-
-                if(!TextUtils.isEmpty(name))
-                    params.put("name", name);
-
                 if(!TextUtils.isEmpty(height))
                     params.put("height", height);
 
                 if(!TextUtils.isEmpty(weight))
                     params.put("weight", String.format("%.2f",Double.parseDouble(weight)));
 
-                if(!TextUtils.isEmpty(dob))
-                    params.put("date_of_birth", dob);
 
                 if(!TextUtils.isEmpty(profile_pic))
                     params.put("profile_pic",profile_pic);
 
                 params.put("email", email);
+                //Log.i("HELP",gender ? "1" : "0");
 
-                params.put("gender", gender);
+                params.put("gender", gender ? "1" : "0");
 
                 return params;
             }
         };
 
-        VolleyProvider.getInstance(this).addRequest(stringRequest);
+        VolleyProvider.getInstance(this).addRequest(saveRequest);
     }
 
     public void onClickPickDate(View v) {
-        DialogFragment newFragment = new DatePickerFragment();
+        DialogFragment newFragment = new FormActivity.DatePickerFragment();
         newFragment.show(getSupportFragmentManager(), "datePicker");
     }
 
@@ -248,10 +302,10 @@ public class FormActivity extends AppCompatActivity {
 
         if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK && data != null && data.getData() != null) {
 
-                //Bitmap user_img = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
-                //ImageView profile_pic = ((ImageView) findViewById(R.id.pick_profile_img));
-                //profile_pic.setScaleType(ImageView.ScaleType.FIT_XY);
-                //profile_pic.setImageBitmap(user_img);
+            //Bitmap user_img = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
+            //ImageView profile_pic = ((ImageView) findViewById(R.id.pick_profile_img));
+            //profile_pic.setScaleType(ImageView.ScaleType.FIT_XY);
+            //profile_pic.setImageBitmap(user_img);
 
             Log.i("TG","getting uri");
 
@@ -278,11 +332,8 @@ public class FormActivity extends AppCompatActivity {
 
     private boolean validFields(){
 
-        name = ((TextInputEditText) findViewById((R.id.name_input))).getText().toString().trim();
-
         weight_input_layout.setError(null);
         height_input_layout.setError(null);
-        name_input_layout.setError(null);
 
         if(!TextUtils.isEmpty(weight)) {
             try {
@@ -303,12 +354,6 @@ public class FormActivity extends AppCompatActivity {
                 return false;
             }
         }
-        if(TextUtils.isEmpty(name)){
-            name_input_layout.requestFocus();
-            name_input_layout.setError("Please enter name");
-            set_progressBar_visibility(View.GONE);
-            return false;
-        }
 
         return true;
     }
@@ -326,7 +371,6 @@ public class FormActivity extends AppCompatActivity {
             int day = c.get(Calendar.DAY_OF_MONTH);
             DatePickerDialog dobForm = new DatePickerDialog(getActivity(), this, year, month, day);
             dobForm.getDatePicker().setMaxDate(new Date().getTime());
-
             // Create a new instance of DatePickerDialog and return it
             return dobForm;
         }
@@ -347,12 +391,6 @@ public class FormActivity extends AppCompatActivity {
             weight_input_layout.setVisibility(View.VISIBLE);
             saveButton.setVisibility(View.VISIBLE);
             pickImage.setVisibility(View.VISIBLE);
-            //imgView.setVisibility(View.VISIBLE);
-            pickDoB.setVisibility(View.VISIBLE);
-            viewDob.setVisibility(View.VISIBLE);
-            dobInput.setVisibility(View.VISIBLE);
-            name_input_layout.setVisibility(View.VISIBLE);
-            radioGenderGroup.setVisibility(View.VISIBLE);
         }
 
         else{
@@ -361,11 +399,6 @@ public class FormActivity extends AppCompatActivity {
             weight_input_layout.setVisibility(View.GONE);
             saveButton.setVisibility(View.GONE);
             pickImage.setVisibility(View.GONE);
-            pickDoB.setVisibility(View.GONE);
-            viewDob.setVisibility(View.GONE);
-            dobInput.setVisibility(View.GONE);
-            name_input_layout.setVisibility(View.GONE);
-            radioGenderGroup.setVisibility(View.GONE);
         }
     }
 }
