@@ -88,7 +88,11 @@ public class GroupExercisesActivity extends AppCompatActivity {
                             public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
                                 //Go to exercise page
                                 String exercise_name = (String) parent.getAdapter().getItem(position);
-                                Intent intent = new Intent(GroupExercisesActivity.this, ExerciseActivity.class);
+                                Intent intent;
+                                if(exercise_name.equals("Running"))
+                                    intent = new Intent(GroupExercisesActivity.this, CardioActivity.class);
+                                else
+                                    intent = new Intent(GroupExercisesActivity.this, ExerciseActivity.class);
                                 intent.putExtra("exercise_name", exercise_name);
                                 intent.putExtra("email", email);
                                 startActivity(intent);
