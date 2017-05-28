@@ -10,19 +10,26 @@ import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.widget.DrawerLayout;
 import android.util.Base64;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.SearchView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.android.volley.Request;
 import com.android.volley.Response;
@@ -95,22 +102,51 @@ public class FeedFragment extends Fragment {
         args.putString(ARG_PARAM1, param1);
         args.putString(ARG_PARAM2, param2);
         fragment.setArguments(args);
+
         return fragment;
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
         req_queue = VolleyProvider.getInstance(getActivity());
         email = getActivity().getIntent().getStringExtra("email");
         amount = 20;
     }
 
+    // SearchView Stuff
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.add_friend_menu, menu);
+        super.onCreateOptionsMenu(menu, inflater);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+
+        switch (item.getItemId()) {
+            case R.id.add_friend:
+                DrawerLayout mDrawerLayout = (DrawerLayout) getActivity().findViewById(R.id.drawer_layout);
+                if(mDrawerLayout.isDrawerOpen(Gravity.END)) {
+                    mDrawerLayout.closeDrawer(Gravity.END); // set Gravity as per your need
+                }else{
+                    mDrawerLayout.openDrawer(Gravity.END); // set Gravity as per your need
+                }
+                break;
+            //R.id.add_friend:
+            //LinearLayout drawer = (LinearLayout) getActivity().findViewById(R.id.drawer);
+            //drawer.setGravity(Gravity.END);
+        }
+        return super.onOptionsItemSelected(item);
+    }
+    //
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         fView = inflater.inflate(R.layout.fragment_feed, container, false);
+
         //GUI elements
 
         progressBar = (ProgressBar)(fView.findViewById(R.id.feedProgressBar));
@@ -143,7 +179,7 @@ public class FeedFragment extends Fragment {
 
             @Override
             public boolean onQueryTextChange(String newText) {
-                if(newText == "") recommendedFollows();
+                if(newText.equals("")) recommendedFollows();
                 else {
                     search_queue.getQueue().cancelAll(getActivity());
                     searchResponse(newText);
@@ -274,6 +310,7 @@ public class FeedFragment extends Fragment {
         super.onStart();
         createUserFeed();
         recommendedFollows();
+
     }
 
     // TODO: Rename method, update argument and hook method into UI event
@@ -288,6 +325,7 @@ public class FeedFragment extends Fragment {
         super.onAttach(context);
         if (context instanceof OnFragmentInteractionListener) {
             mListener = (OnFragmentInteractionListener) context;
+
         } else {
             throw new RuntimeException(context.toString()
                     + " must implement OnFragmentInteractionListener");
@@ -416,7 +454,7 @@ public class FeedFragment extends Fragment {
                 exercise_name = jo.getString("Exercise_name");
                 user = jo.getString("User_email");
                 set_amount = jo.getInt("Set_amount");
-                datetime = jo.getString("Date_Time").substring(0, 15);
+                datetime = jo.getString("Date_Time").substring(0, 16);
                 jsonObj = jo;
             } catch (JSONException je) {
                 Log.e(TAG, "Exception creating feedItem", je);
@@ -482,8 +520,6 @@ public class FeedFragment extends Fragment {
             return 0;
         }
 
-
-
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
 
@@ -494,7 +530,7 @@ public class FeedFragment extends Fragment {
 
             if(convertView == null){
 
-                convertView=inflater.inflate(R.layout.feed_row, null);
+                convertView=inflater.inflate(R.layout.feed_card, null);
 
                 txtExercise=(TextView) convertView.findViewById(R.id.exercise);
                 txtUser=(TextView) convertView.findViewById(R.id.user);
@@ -505,6 +541,8 @@ public class FeedFragment extends Fragment {
                 imgUser=(ImageView) convertView.findViewById(R.id.user_pic);
 
             }
+
+
 
             feedItem item=list[position];
             txtExercise.setText(item.getSet_amount() + " sets of " + item.getExercise_name());

@@ -4,7 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/drawer_layout"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    >
     
     <!-- Main view -->
 
@@ -34,8 +35,7 @@
     <ListView
         android:id="@+id/feed"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:divider="@drawable/border" android:dividerHeight="1dp"/>
+        android:layout_height="match_parent" />
     
     <!-- Following Drawer -->
     <LinearLayout
@@ -43,16 +43,17 @@
         android:layout_height="match_parent"
         android:layout_gravity="end"
         android:orientation="vertical"
-        android:divider="@android:color/transparent"
-        android:dividerHeight="0dp"
-        android:background="#111">
+        android:background="#111"
+        android:id="@+id/drawer">
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="10dp"
+            android:layout_gravity="center"
             android:text="Find People"
             android:textAlignment="center"
+            android:gravity="center_horizontal"
             android:textAppearance="@style/Base.TextAppearance.AppCompat.Title"/>
 
         <ListView

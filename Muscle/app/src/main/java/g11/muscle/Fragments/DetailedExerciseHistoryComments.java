@@ -1,11 +1,14 @@
 package g11.muscle.Fragments;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.drawable.Icon;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.RequiresApi;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
+import android.util.Base64;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,6 +16,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -26,6 +30,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 import g11.muscle.DB.DBConnect;
@@ -39,11 +44,11 @@ import g11.muscle.DB.VolleyProvider;
  */
 public class DetailedExerciseHistoryComments extends Fragment {
 
-
     final String TAG = "DetExerciseHistComments";
     private VolleyProvider req_queue;
     private LayoutInflater inflater;
     private LinearLayout commentsBaseLayout;
+    private HashMap<String,Bitmap> userProfilePicture = new HashMap<>();
 
     public DetailedExerciseHistoryComments() {
         // Required empty public constructor
@@ -74,7 +79,6 @@ public class DetailedExerciseHistoryComments extends Fragment {
         return fview;
     }
 
-
     private void setCommentCards(){
         String url = DBConnect.serverURL + "/get_comments_exercise";
 
@@ -88,11 +92,13 @@ public class DetailedExerciseHistoryComments extends Fragment {
                         // Initialization of sets array
 
                         try {
-                            JSONArray jsonArray = new JSONArray(response);
+                            JSONObject jsonObject = new JSONObject(response);
+
+                            JSONArray comments = jsonObject.getJSONArray("comments");
                             //From the response create the sets array
+                            JSONObject jsonProfile = jsonObject.getJSONObject("pictures");
 
-
-                            if(jsonArray.length() == 0)
+                            if(comments.length() == 0)
                                 new AlertDialog.Builder(getContext())
                                         .setIcon(android.R.drawable.ic_dialog_alert)
                                         .setTitle("No comments")
@@ -101,13 +107,42 @@ public class DetailedExerciseHistoryComments extends Fragment {
                                         .show();
 
                             commentsBaseLayout.removeAllViews();
-                            for (int i = 0; i < jsonArray.length(); i++) {
+
+
+                            //initialize dict with needed pics
+                            for(Iterator keys = jsonProfile.keys(); keys.hasNext();) {
+
+                                String user_key = (String) keys.next();
+                                String b64Pic = jsonProfile.getString(user_key);
+                                if(b64Pic == null || b64Pic.equals("null"))
+                                    continue;
+                                Log.i("TG",user_key);
+                                Log.i("TG",b64Pic);
+                                byte[] imageBytes = Base64.decode(b64Pic, Base64.DEFAULT);
+                                Bitmap user_img = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
+                                userProfilePicture.put(user_key, user_img);
+                            }
+
+
+                            for (int i = 0; i < comments.length(); i++) {
                                 View commentView = inflater.inflate(R.layout.comments, null);
+
+                                ImageView userPicture = (ImageView) commentView.findViewById(R.id.userCommentImage);
                                 TextView userName = (TextView)commentView.findViewById(R.id.commentsUserName);
                                 TextView commentText = (TextView)commentView.findViewById(R.id.commentText);
-                                JSONObject obj = new JSONObject(jsonArray.getString(i));
+                                JSONObject obj = new JSONObject(comments.getString(i));
 
-                                userName.setText(obj.getString("Name"));
+                                String user_name = obj.getString("Name");
+
+                                Bitmap profile = userProfilePicture.get(obj.getString("User_email"));
+
+
+                                if(profile != null) {
+                                    Log.i("TG", profile.toString());
+                                    userPicture.setImageBitmap(profile);
+                                }
+
+                                userName.setText(user_name);
                                 commentText.setText(obj.getString("Comment"));
                                 commentText.setKeyListener(null);
 

@@ -10,12 +10,11 @@
         android:layout_height="match_parent"
         android:orientation="vertical">
 
-        <ListView
+
+        <android.support.v7.widget.RecyclerView
             android:id="@+id/recent_history"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:divider="@drawable/border"
-            android:dividerHeight="4dp"/>
+            android:layout_height="wrap_content" />
 
         <!-- HERE -->
     </LinearLayout>

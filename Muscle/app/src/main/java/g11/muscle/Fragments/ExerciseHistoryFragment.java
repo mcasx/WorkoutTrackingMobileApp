@@ -2,19 +2,33 @@ package g11.muscle.Fragments;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.ContextCompat;
+import android.support.v4.view.MenuItemCompat;
+import android.support.v7.widget.DividerItemDecoration;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.SearchView;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Filter;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.android.volley.Request;
 import com.android.volley.Response;
@@ -27,10 +41,14 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import g11.muscle.Classes.ExerciseHistoryAdapter;
 import g11.muscle.DB.DBConnect;
+import g11.muscle.DB.MuscleDbContract;
 import g11.muscle.DetailedExerciseHistoryActivity;
+import g11.muscle.HomeActivity;
 import g11.muscle.R;
 import g11.muscle.DB.VolleyProvider;
 
@@ -47,15 +65,17 @@ public class ExerciseHistoryFragment extends Fragment {
 
     private static final String TAG = "ExerciseHistoryFragment";
 
-    //
     private String email;
 
     // Used by Main Activity
     private OnFragmentInteractionListener mListener;
 
     private VolleyProvider req_queue;
-    private ListView recent_historyView;
+    private RecyclerView recent_historyView;
     private ProgressBar progressBar;
+    private List<JSONObject> originalList;
+    private ExerciseHistoryAdapter adapter;
+    private ArrayList<JSONObject> history;
 
     public ExerciseHistoryFragment() {
         // Required empty public constructor
@@ -64,10 +84,54 @@ public class ExerciseHistoryFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
         req_queue = VolleyProvider.getInstance(getActivity());
         email = getActivity().getIntent().getStringExtra("email");
 
     }
+
+    // SearchView Stuff
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.search_menu, menu);
+        super.onCreateOptionsMenu(menu, inflater);
+        MenuItem searchViewItem = menu.findItem(R.id.search);
+
+        //SearchView searchView = (SearchView) menu.findItem(R.id.search).getActionView();
+        //MenuItemCompat.setShowAsAction(item, MenuItemCompat.SHOW_AS_ACTION_COLLAPSE_ACTION_VIEW | MenuItemCompat.SHOW_AS_ACTION_IF_ROOM);
+
+        final SearchView searchViewAndroidActionBar = (SearchView) MenuItemCompat.getActionView(searchViewItem);
+        searchViewAndroidActionBar.setMaxWidth( Integer.MAX_VALUE );
+
+        searchViewAndroidActionBar.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                searchViewAndroidActionBar.clearFocus();
+                return true;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                if (TextUtils.isEmpty(newText))
+                    adapter.getFilter().filter("");
+                else
+                    adapter.getFilter().filter(newText);
+                return false;
+            }
+        });
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+
+        switch (item.getItemId()) {
+            case R.id.search:
+                //not sure
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+    //
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -77,7 +141,8 @@ public class ExerciseHistoryFragment extends Fragment {
 
         progressBar = (ProgressBar) fView.findViewById(R.id.exerciseHistoryProgressBar);
         progressBar.setVisibility(View.VISIBLE);
-        recent_historyView = (ListView) fView.findViewById(R.id.recent_history);
+
+        recent_historyView = (RecyclerView) fView.findViewById(R.id.recent_history);
         createExerciseHistoryList();
         // Inflate the layout for this fragment
         return fView;
@@ -122,7 +187,7 @@ public class ExerciseHistoryFragment extends Fragment {
                     public void onResponse(String response) {
 
                         // Initialization of history array
-                        final ArrayList<JSONObject> history = new ArrayList<>();
+                        history = new ArrayList<>();
 
                         try {
                             JSONArray jsonArray = new JSONArray(response);
@@ -141,46 +206,15 @@ public class ExerciseHistoryFragment extends Fragment {
 
                         // Define the groupView adapter
 
-                        ArrayAdapter<JSONObject> adapter = new ArrayAdapter<JSONObject>(getActivity(), android.R.layout.simple_list_item_2, android.R.id.text1, history) {
-                            @Override
-                            public View getView(int position, View convertView, ViewGroup parent) {
-                                View view = super.getView(position, convertView, parent);
-                                TextView text1 = (TextView) view.findViewById(android.R.id.text1);
-                                TextView text2 = (TextView) view.findViewById(android.R.id.text2);
-                                text2.setTextColor(Color.LTGRAY);
-
-                                try {
-                                    text1.setText(history.get(position).getString("Exercise_name"));
-                                    text2.setText(history.get(position).getString("Date_Time"));
-                                } catch (JSONException je) {
-                                    Log.e(TAG, je.toString());
-                                }
-
-
-                                return view;
-                            }
-                        };
-
+                        adapter = new ExerciseHistoryAdapter(history);
                         recent_historyView.setAdapter(adapter);
                         // Set the listeners on the list items
-                        recent_historyView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                            public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
-                                //Go to exercise page
-                                String exercise_name = null;
-                                try {
-                                    exercise_name = ((JSONObject) parent.getAdapter().getItem(position)).getString("Exercise_name");
-                                } catch (JSONException je) {
-                                    Log.e(TAG, je.toString());
-                                }
 
-                                DetailedExerciseHistoryActivity.exerciseHistoryItem = (JSONObject) parent.getAdapter().getItem(position);
-                                Intent intent = new Intent(getActivity(), DetailedExerciseHistoryActivity.class);
-                                intent.putExtra("email", email);
-                                intent.putExtra("exercise_name",exercise_name);
+                        LinearLayoutManager mLayoutManager = new LinearLayoutManager(getActivity());
+                        recent_historyView.setLayoutManager(mLayoutManager);
+                        recent_historyView.addItemDecoration(new DividerItemDecoration(getActivity(),mLayoutManager.getOrientation()));
+                        adapter.mOnClickListener = new HistoryOnClickListener();
 
-                                startActivity(intent);
-                            }
-                        });
                         progressBar.setVisibility(View.GONE);
                     }
                 },
@@ -212,6 +246,31 @@ public class ExerciseHistoryFragment extends Fragment {
     public interface OnFragmentInteractionListener {
         // Needed to compile
         void onFragmentInteraction(Uri uri);
+    }
+
+    private class HistoryOnClickListener implements View.OnClickListener {
+
+        @Override
+        public void onClick(final View view) {
+            int itemPosition = recent_historyView.getChildLayoutPosition(view);
+            JSONObject item = history.get(itemPosition);
+            String exercise_name = null;
+            try {
+                exercise_name = (item.getString("Exercise_name"));
+            } catch (JSONException je) {
+                Log.e(TAG, je.toString());
+            }
+
+            String email = getContext().getSharedPreferences("UserData",0).getString("email", null);
+            DetailedExerciseHistoryActivity.exerciseHistoryItem = item;
+
+            Intent intent = new Intent(getActivity(), DetailedExerciseHistoryActivity.class);
+
+            intent.putExtra("email", email);
+            intent.putExtra("exercise_name",exercise_name);
+            startActivity(intent);
+        }
+
     }
 
 }
