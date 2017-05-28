@@ -38,6 +38,7 @@ public class DetailedExerciseHistoryActivity extends AppCompatActivity {
     public static JSONObject exerciseHistoryItem = null;
     private final String TAG = "DetailedExerciseHistory";
     private VolleyProvider req_queue;
+    private boolean hasThumbs = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,9 +46,7 @@ public class DetailedExerciseHistoryActivity extends AppCompatActivity {
         setContentView(R.layout.activity_detailed_exercise_history);
         req_queue = VolleyProvider.getInstance(this);
 
-        Log.e(TAG, "SHADSHKASDNSA\n\n\nasdjajosnalnda" + getSharedPreferences("UserData", 0).getString("email", null));
-
-
+        hasThumbsUp();
         TabLayout tabLayout = (TabLayout) findViewById(R.id.tab_layout);
         tabLayout.addTab(tabLayout.newTab().setText("Exercise"));
         tabLayout.addTab(tabLayout.newTab().setText("Stats"));
@@ -61,13 +60,13 @@ public class DetailedExerciseHistoryActivity extends AppCompatActivity {
             Log.e(TAG, je.toString());
         }
 
-
         final ViewPager viewPager = (ViewPager) findViewById(R.id.pager);
         final PagerAdapter adapter = new PagerAdapter
                 (getSupportFragmentManager(), tabLayout.getTabCount());
         viewPager.setAdapter(adapter);
         viewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
         tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
                 viewPager.setCurrentItem(tab.getPosition());
@@ -90,9 +89,13 @@ public class DetailedExerciseHistoryActivity extends AppCompatActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.detailed_exercise_menu, menu);
-        if(hasThumbsUp()){
+
+        if(hasThumbs){
             (menu.findItem(R.id.thumbsUp)).setIcon(R.drawable.ic_thumb_up_full_white_24dp);
         }
+
+        else
+            (menu.findItem(R.id.thumbsUp)).setIcon(R.drawable.ic_thumb_up_white_24dp);
 
         try {
             if(!getSharedPreferences("UserData", 0).getString("email", null).equals(exerciseHistoryItem.getString("User_email"))){
@@ -113,7 +116,8 @@ public class DetailedExerciseHistoryActivity extends AppCompatActivity {
         switch (item.getItemId()) {
             case R.id.thumbsUp:
                 // User chose the "Settings" item, show the app settings UI...
-                thumbsUp();
+                item.setEnabled(false);
+                thumbsUp(item);
                 return true;
 
             case R.id.share:
@@ -154,7 +158,7 @@ public class DetailedExerciseHistoryActivity extends AppCompatActivity {
 
                             if(isShared.equals("1")){
                                 new AlertDialog.Builder(DetailedExerciseHistoryActivity.this)
-                                        .setIcon(android.R.drawable.ic_dialog_alert)
+                                        .setIcon(android.R.drawable.ic_menu_share)
                                         .setTitle("Share")
                                         .setMessage("You're currently sharing this page. Do you wish to keep sharing or do you want to stop?")
                                         .setPositiveButton("Keep", new DialogInterface.OnClickListener() {
@@ -174,7 +178,7 @@ public class DetailedExerciseHistoryActivity extends AppCompatActivity {
                             }
                                 else {
                                 new AlertDialog.Builder(DetailedExerciseHistoryActivity.this)
-                                        .setIcon(android.R.drawable.ic_dialog_alert)
+                                        .setIcon(android.R.drawable.ic_menu_share)
                                         .setTitle("Share")
                                         .setMessage("Do you wish to share this page?")
                                         .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
@@ -255,12 +259,84 @@ public class DetailedExerciseHistoryActivity extends AppCompatActivity {
         req_queue.addRequest(StrHistReq);
     }
 
-    private void thumbsUp(){
+    private void thumbsUp(final MenuItem item){
+        String url = hasThumbs ? DBConnect.serverURL + "/delete_user_bump" : DBConnect.serverURL + "/add_user_bump";
 
+        StringRequest StrHistReq = new StringRequest(Request.Method.POST, url, new Response.Listener<String>(){
+            @RequiresApi(api = Build.VERSION_CODES.M)
+            @Override
+            public void onResponse(String response) {
+                hasThumbs = !hasThumbs;
+                invalidateOptionsMenu();
+                item.setEnabled(true);
+            }
+        },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        //Handle error response
+                        System.out.println(error.toString());
+                    }
+                }
+        ){
+            // use params are specified here
+            @Override
+            protected Map<String, String> getParams()
+            {
+                Map<String, String>  params = new HashMap<>();
+                try {
+                    params.put("exercise_id", DetailedExerciseHistoryActivity.exerciseHistoryItem.getString("ID"));
+                    params.put("email", "" + getSharedPreferences("UserData", 0).getString("email", null));
+                }catch(JSONException je){Log.e(TAG, "No Exercise History ID");}
+
+                return params;
+            }
+        };
+
+        req_queue.addRequest(StrHistReq);
     }
 
-    private boolean hasThumbsUp(){
-        return true;
+
+    private void hasThumbsUp(){
+        String url = DBConnect.serverURL + "/does_user_bump";
+
+        StringRequest StrHistReq = new StringRequest(Request.Method.POST, url, new Response.Listener<String>(){
+            @RequiresApi(api = Build.VERSION_CODES.M)
+            @Override
+            public void onResponse(String response) {
+                if(response.equals("true")){
+                    hasThumbs = true;
+                }
+                else{
+                    hasThumbs = false;
+                }
+                invalidateOptionsMenu();
+            }
+        },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        //Handle error response
+                        System.out.println(error.toString());
+                    }
+                }
+        ){
+            // use params are specified here
+            @Override
+            protected Map<String, String> getParams()
+            {
+                Map<String, String>  params = new HashMap<>();
+                try {
+                    params.put("exercise_id", DetailedExerciseHistoryActivity.exerciseHistoryItem.getString("ID"));
+                    params.put("email", "" + getSharedPreferences("UserData", 0).getString("email", null));
+                }catch(JSONException je){Log.e(TAG, "No Exercise History ID");}
+
+                return params;
+            }
+        };
+
+        req_queue.addRequest(StrHistReq);
+
     }
 
 }

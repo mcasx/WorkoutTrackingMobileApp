@@ -770,6 +770,26 @@ def get_plan_trainings():
     except Exception as e:
         return str(e)
 
+
+@app.route('/get_plans',methods = ['POST'])
+def get_plans():
+    try:
+        
+        plan_name = "%" + request.form['plan_name'] + "%"
+        conn = MySQLdb.connect(host='localhost', user='muscle', password='some_pass')
+        c = conn.cursor(MySQLdb.cursors.DictCursor)
+        c.execute('USE muscle2')
+
+        c.execute("""SELECT * FROM PLAN where Name LIKE %s""", [plan_name])
+        fetched = c.fetchall()
+        tmp = c.fetchall()
+        c.close()
+        conn.close()
+        return jsonify(fetched)
+    except Exception as e:
+        return str(e)
+
+
 @app.route('/get_exercise', methods=['POST'])
 def get_exercise():
     try:
@@ -1073,10 +1093,7 @@ def get_user_profile():
         c = conn.cursor(MySQLdb.cursors.DictCursor)
         c.execute('USE muscle2')
 
-        c.execute("""SELECT Email, Name, Height, 
-            Weight, Profile_image, Gender, Plan, 
-            Date_of_birth, TIMESTAMPDIFF(YEAR,Date_of_birth,CURDATE()) AS Age 
-            FROM USER WHERE Email = %s""", [email])
+        c.execute("""SELECT Email, Name, Height,Weight, Profile_image, Gender,Date_of_birth, TIMESTAMPDIFF(YEAR,Date_of_birth,CURDATE()) AS Age FROM USER WHERE Email = %s""", [email])
 
         fetched = c.fetchone()
         
@@ -1233,6 +1250,91 @@ def get_avg_stats_ex():
 
     except Exception as e:
         return str(e)
+
+
+@app.route('/does_user_bump', methods=['POST'])
+def does_user_bump():
+	try:
+		user_email = request.form['email']
+		exercise_id = int(request.form['exercise_id'])
+		
+		conn = MySQLdb.connect(host='localhost', user='muscle', password='some_pass', database='muscle')
+		c = conn.cursor(MySQLdb.cursors.DictCursor)
+		
+		c.execute('USE muscle2')
+		c.execute("""
+			SELECT *
+			FROM BUMPS
+			WHERE User_email = %s
+			and Exercise = %s
+			""", [user_email, exercise_id])
+
+		r = c.fetchall()		
+		c.close()		
+		conn.close()			
+
+		if(len(r) == 0):
+			return "false"
+		else:
+			return "true"
+			
+		
+
+	except Exception as e:
+		return str(e)
+
+
+@app.route('/delete_user_bump', methods=['POST'])
+def delete_user_bump():
+	try:
+		user_email = request.form['email']
+		exercise_id = request.form['exercise_id']
+		
+		conn = MySQLdb.connect(host='localhost', user='muscle', password='some_pass', database='muscle')
+		c = conn.cursor(MySQLdb.cursors.DictCursor)
+		
+		c.execute('USE muscle2')
+		c.execute("""
+			DELETE
+			FROM BUMPS
+			WHERE (User_email = %s
+			and Exercise = %s)
+			""", [user_email, exercise_id])
+
+		conn.commit()
+		c.close()		
+		conn.close()
+
+		return "Sou obrigado a returnar uma resposta senão a app crasha"
+		
+	except Exception as e:
+		return str(e)
+
+
+@app.route('/add_user_bump', methods=['POST'])
+def add_user_bump():
+	try:
+		user_email = request.form['email']
+		exercise_id = int(request.form['exercise_id'])
+		
+		conn = MySQLdb.connect(host='localhost', user='muscle', password='some_pass', database='muscle')
+		c = conn.cursor(MySQLdb.cursors.DictCursor)
+		
+		c.execute('USE muscle2')
+		c.execute("""
+			INSERT INTO BUMPS VALUES (%s, %s)
+			""", [user_email, exercise_id])
+
+		conn.commit()
+		c.close()		
+		conn.close()
+		
+		return "Sou obrigado a returnar uma resposta senão a app crasha"			
+
+	except Exception as e:
+		return str(e)
+
+
 
 #####################
 ##   SOCIAL FEED   ##

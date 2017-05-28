@@ -148,16 +148,6 @@ public class MainActivity extends Activity {
         }
         locationManagerGPS.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListenerGPS);
 
-
-
-
-        LocationManager locationManagerGSM = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
-        if(locationManagerGSM.isProviderEnabled(LocationManager.NETWORK_PROVIDER)){
-            locationListenerGSM.onProviderEnabled("Network");
-        }else{
-            locationListenerGSM.onProviderDisabled("Network");
-        }
-        locationManagerGSM.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, locationListenerGSM);
     }
 
     public void sendMessage(View view) {
