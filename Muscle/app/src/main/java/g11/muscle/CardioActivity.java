@@ -3,6 +3,7 @@ package g11.muscle;
 import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.graphics.Typeface;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -45,8 +46,6 @@ public class CardioActivity extends AppCompatActivity implements SensorEventList
 
     private boolean started = false;
     private Handler handler = new Handler();
-
-
     private Runnable runnable = new Runnable() {
         @Override
         public void run() {
@@ -85,7 +84,10 @@ public class CardioActivity extends AppCompatActivity implements SensorEventList
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_cardio);
-        count = (TextView) findViewById(R.id.instantSpeed);
+
+        count = (TextView) findViewById(R.id.steps);
+
+
         first = true;
         sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
 
@@ -105,15 +107,6 @@ public class CardioActivity extends AppCompatActivity implements SensorEventList
 
     }
 
-    public final Handler updateTextView = new Handler(){
-        @Override
-        public void handleMessage(Message msg)
-        {
-            if(msg.what == UPDATE_TEXT){
-                ((TextView)findViewById(R.id.counter)).setText((String)msg.obj);
-            }
-        }
-    };
 
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     @Override
@@ -144,7 +137,7 @@ public class CardioActivity extends AppCompatActivity implements SensorEventList
             first = false;
         }
         countSteps = (int) (event.values[0] - sensorInitialValue);
-        count.setText("" + countSteps);
+        count.setText("Steps: " + countSteps);
 
     }
 
