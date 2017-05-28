@@ -1,5 +1,8 @@
 package g11.muscle;
 
+import android.net.Uri;
+import android.support.design.widget.TabLayout;
+import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.content.Intent;
@@ -26,25 +29,24 @@ import java.util.Map;
 import g11.muscle.Classes.BounceInterpolator;
 import g11.muscle.DB.DBConnect;
 import g11.muscle.DB.VolleyProvider;
+import g11.muscle.Fragments.ExerciseFragment;
+import g11.muscle.Fragments.ExerciseMusclesFragment;
+import g11.muscle.Fragments.ExercisePagerAdapter;
+import g11.muscle.Fragments.PagerAdapter;
 
-public class ExerciseActivity extends AppCompatActivity {
+public class ExerciseActivity extends AppCompatActivity implements ExerciseFragment.OnFragmentInteractionListener, ExerciseMusclesFragment.OnFragmentInteractionListener{
 
     private static final String TAG = "ExerciseActivity";
-
-    //GUI
-    private TextView exerciseView;
-    private TextView kindView;
-    private ImageView imgView;
-
-    private TextView descriptionView;
 
     //Exercise name
     private String exercise;
     //User email
     private String email;
 
-    private VolleyProvider req_queue;
-
+    @Override
+    public void onFragmentInteraction(Uri uri){
+        //you can leave it empty - Used for interaction between fragments
+    }
 
     // Defines several constants used when transmitting messages between the
     // service and the UI.
@@ -54,123 +56,38 @@ public class ExerciseActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_exercise);
 
-        // Information from previous activity
         final Intent intent = getIntent();
         exercise = intent.getStringExtra("exercise_name");
         email = intent.getStringExtra("email");
+        Log.e(TAG, exercise);
+        TabLayout tabLayout = (TabLayout) findViewById(R.id.tab_layout);
+        tabLayout.addTab(tabLayout.newTab().setText("Exercise"));
+        tabLayout.addTab(tabLayout.newTab().setText("Muscle Groups"));
 
-        //button animation
-        Button button = (Button)findViewById(R.id.button);
-        final Animation myAnim = AnimationUtils.loadAnimation(this, R.anim.bounce);
+        final ViewPager viewPager = (ViewPager) findViewById(R.id.pager);
+        final ExercisePagerAdapter adapter = new ExercisePagerAdapter
+                (getSupportFragmentManager(), tabLayout.getTabCount());
+        viewPager.setAdapter(adapter);
+        viewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
+        tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
 
-        // Use bounce interpolator with amplitude 0.2 and frequency 20
-        BounceInterpolator interpolator = new BounceInterpolator(0.4, 20);
-        myAnim.setInterpolator(interpolator);
-            button.startAnimation(myAnim);
-
-        //GUI elements
-        exerciseView  = (TextView)findViewById(R.id.exercise);
-        kindView  = (TextView)findViewById(R.id.kind);
-        imgView = (ImageView)findViewById(R.id.image);
-        descriptionView = (TextView)findViewById(R.id.description);
-
-        // Exercise Name
-        exerciseView.setText(exercise);
-
-        req_queue = VolleyProvider.getInstance(ExerciseActivity.this);
-
-        // get exercise information
-        String urlEx = DBConnect.serverURL + "/get_exercise";
-
-        StringRequest Ex_Req = new StringRequest(StringRequest.Method.POST, urlEx,
-            new Response.Listener<String>() {
-                @Override
-                public void onResponse(String response) {
-
-                    try{
-                        JSONObject jsonObject = new JSONObject(response);
-                        descriptionView.setText(jsonObject.getString("Description"));
-                        kindView.setText(jsonObject.getString("Kind"));
-
-                        //Image name must be in lowercase
-                        String DrawableName = jsonObject.getString("Image").toLowerCase();
-                        //Can't have extension
-                        if(DrawableName.contains("."))
-                            DrawableName = DrawableName.split("\\.")[0];
-                        int resID = getResources().getIdentifier(DrawableName,"drawable",getPackageName());
-                        imgView.setImageResource(resID);
-                    } catch (JSONException je){
-                        Log.e(TAG,"GET EXERCISE DATA EXCEPTION");
-                        Log.e(TAG, je.toString());
-                    }
-                }
-        }, new Response.ErrorListener() {
-                @Override
-                public void onErrorResponse(VolleyError error) {
-                    // Error Response
-                    System.out.println(error.toString());
-                }
-        }
-        ) {
-            // use params are specified here
             @Override
-            protected Map<String, String> getParams() {
-                Map<String, String> params = new HashMap<>();
-                params.put("exercise_name", exercise);
-                return params;
+            public void onTabSelected(TabLayout.Tab tab) {
+                viewPager.setCurrentItem(tab.getPosition());
             }
-        };
-        req_queue.addRequest(Ex_Req);
-    }
 
-    @Override
-    protected void onStart(){
-        super.onStart();
-        getLastExerciseInfo();
-    }
-
-
-    //Get last exercise info
-    private void getLastExerciseInfo(){
-        String urlLast = DBConnect.serverURL + "/get_last_exercise_of_user";
-
-        // get last exercise information
-        StringRequest Last_Ex_Req = new StringRequest(Request.Method.POST, urlLast,
-            new Response.Listener<String>() {
-                @Override
-                public void onResponse(String response) {
-
-                    try{
-                        JSONObject jsonObject = new JSONObject(response);
-                        //last_weightView.setText(response.getString("Weight"));
-                        //last_repsView.setText(response.getString("Repetitions"));
-                        //last_intensityView.setText(response.getString("Intensity"));
-                        Log.e(TAG,jsonObject.toString());
-                    } catch (Exception e){
-                        Log.e(TAG, e.toString());
-                    }
-                }
-        }, new Response.ErrorListener() {
-                @Override
-                public void onErrorResponse(VolleyError error) {
-                    // User doesn't have anything in it's exercise history
-                    Log.i(TAG,"User never did this exercise");
-                }
-        }
-        ){
-            // use params are specified here
             @Override
-            protected Map<String, String> getParams() {
-                Map<String, String> params = new HashMap<>();
-                params.put("user_email", email);
-                params.put("exercise_name", exercise);
-                return params;
-            }
-        };
+            public void onTabUnselected(TabLayout.Tab tab) {
 
-        //Queue the request
-        req_queue.addRequest(Last_Ex_Req);
+            }
+
+            @Override
+            public void onTabReselected(TabLayout.Tab tab) {
+
+            }
+        });
     }
+
 
     public void onClickStartButton(View view){
         Intent intent = new Intent(ExerciseActivity.this, FeedBackActivity.class);
