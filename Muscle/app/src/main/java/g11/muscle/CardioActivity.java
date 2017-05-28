@@ -123,8 +123,11 @@ public class CardioActivity extends AppCompatActivity implements SensorEventList
         private Location previousLocation = null;
         private double totalDistance = 0D;
 
+        private int MY_PERMISSIONS_REQUEST_READ_LOCATION = 1;
         private static final long MIN_DISTANCE_CHANGE_FOR_UPDATES = 20; // 100 meters
         private static final long MIN_TIME_BW_UPDATES = 1000 * 30; // 30 seconds
+        private boolean gpsEnabled;
+
         Context context;
 
         public void run(Context context) {
@@ -134,6 +137,12 @@ public class CardioActivity extends AppCompatActivity implements SensorEventList
             this.context = context;
             // Add new listeners with the given params
             if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+
+                ActivityCompat.requestPermissions(CardioActivity.this,
+                        new String[]{Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION},
+                        MY_PERMISSIONS_REQUEST_READ_LOCATION);
+
+
                 // TODO: Consider calling
                 //    ActivityCompat#requestPermissions
                 // here to request the missing permissions, and then overriding
