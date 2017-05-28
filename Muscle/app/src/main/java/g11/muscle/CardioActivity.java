@@ -3,7 +3,6 @@ package g11.muscle;
 import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
-import android.graphics.Typeface;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -14,7 +13,6 @@ import android.location.LocationManager;
 import android.location.LocationProvider;
 import android.os.Build;
 import android.os.Handler;
-import android.os.Message;
 import android.os.PowerManager;
 import android.support.annotation.RequiresApi;
 import android.support.v4.app.ActivityCompat;
@@ -26,9 +24,8 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.util.Random;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.text.DecimalFormat;
+import java.util.ArrayList;
 
 
 public class CardioActivity extends AppCompatActivity implements SensorEventListener {
@@ -43,14 +40,21 @@ public class CardioActivity extends AppCompatActivity implements SensorEventList
     int countSteps;
     private String TAG = "CardioActivity";
     private LocationManager locationManagerGPS;
-
+    private float stepDistance = 0;
+    private DistanceTime distanceTime;
     private boolean started = false;
     private Handler handler = new Handler();
+    private TextView counter;
+    private TextView distance;
+    private TextView averageSpeed;
+    private TextView instantSpeed;
+    private TextView maximumSpeed;
+
     private Runnable runnable = new Runnable() {
         @Override
         public void run() {
 
-            TextView counter = (TextView) findViewById(R.id.counter);
+
             String[] time = counter.getText().toString().split(":");
             int min = Integer.parseInt(time[0]);
             int sec = Integer.parseInt(time[1]);
@@ -61,7 +65,13 @@ public class CardioActivity extends AppCompatActivity implements SensorEventList
             else
                 sec++;
 
+            DecimalFormat df = new DecimalFormat("0.00");
+
             counter.setText((min < 10 ? "0" + min : min) + ":" + (sec < 10 ? "0" + sec : sec));
+
+            averageSpeed.setText("Average Speed: " + df.format(distanceTime.getAverageSpeed(sec+min*60)) + " Km/h");
+            instantSpeed.setText("Instant Speed: " + df.format(distanceTime.getInstantSpeed(sec+min*60)) + " Km/h");
+            maximumSpeed.setText("Maximum Speed: " + df.format(distanceTime.getMaxSpeed()) + " Km/h");
 
             if(started)
                 start();
@@ -76,8 +86,6 @@ public class CardioActivity extends AppCompatActivity implements SensorEventList
     public void start() {
         started = true;
         handler.postDelayed(runnable, 1000);
-
-
     }
 
     @Override
@@ -85,9 +93,15 @@ public class CardioActivity extends AppCompatActivity implements SensorEventList
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_cardio);
 
+
         count = (TextView) findViewById(R.id.steps);
+        counter = (TextView) findViewById(R.id.counter);
+        distance = (TextView) findViewById(R.id.distance);
+        averageSpeed = (TextView) findViewById(R.id.averageSpeed);
+        instantSpeed = (TextView) findViewById(R.id.instantSpeed);
+        maximumSpeed = (TextView) findViewById(R.id.maximumSpeed);
 
-
+        distanceTime = new DistanceTime();
         first = true;
         sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
 
@@ -139,6 +153,14 @@ public class CardioActivity extends AppCompatActivity implements SensorEventList
         countSteps = (int) (event.values[0] - sensorInitialValue);
         count.setText("Steps: " + countSteps);
 
+        stepDistance += getSharedPreferences("UserData", 0).getFloat("height", 1.75f) * 0.45;
+
+        if (gpsDistance <= stepDistance * 0.75) {
+            distance.setText("Distance: " + stepDistance/1000 + " Km");
+            String[] time = counter.getText().toString().split(":");
+            int secs =  Integer.parseInt(time[1]) + Integer.parseInt(time[0]) * 60;
+            distanceTime.add(stepDistance, secs);
+        }
     }
 
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
@@ -159,7 +181,7 @@ public class CardioActivity extends AppCompatActivity implements SensorEventList
                 return;
             }
 
-            locationManagerGPS.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListenerGPS);
+            locationManagerGPS.requestLocationUpdates(LocationManager.GPS_PROVIDER, 2500, 10, locationListenerGPS);
             ((Button) view).setText("Stop");
         } else {
             stop();
@@ -183,28 +205,27 @@ public class CardioActivity extends AppCompatActivity implements SensorEventList
     private String latGPS = null;
     private String lngGPS = null;
     private String accGPS = null;
-    private String latGSM = null;
-    private String lngGSM = null;//Status
-    private String accGSM = null;
     private String str = null;
+    private Location previousLocation = null;
+    private float gpsDistance = 0;
 
     LocationListener locationListenerGPS = new LocationListener() {
         public void onLocationChanged(Location location) {
 
-            latGPS = String.valueOf(location.getLatitude());
-            lngGPS = String.valueOf(location.getLongitude());
-            accGPS = String.valueOf(location.getAccuracy());
-
-
-            if(location.getExtras() != null){
-                Bundle extra = location.getExtras();
-                String estr = "";
-                for(String s : extra.keySet()) {
-                    estr += "  "+s+": "+extra.get(s).toString()+"\n";
-                }
-
+            if(previousLocation == null){
+                previousLocation = location;
+                gpsDistance = stepDistance;
+                return;
             }
-            ((TextView)findViewById(R.id.averageSpeed)).setText(latGPS);
+
+            gpsDistance += location.distanceTo(previousLocation);
+
+            if(gpsDistance > stepDistance * 0.75) {
+                distance.setText("Distance: " + gpsDistance/1000 + " Km");
+                String[] time = counter.getText().toString().split(":");
+                int secs =  Integer.parseInt(time[1]) + Integer.parseInt(time[0]) * 60;
+                distanceTime.add(stepDistance, secs);
+            }
         }
 
         public void onStatusChanged(String provider, int status, Bundle extras) {
@@ -219,7 +240,6 @@ public class CardioActivity extends AppCompatActivity implements SensorEventList
             }else{
                 str += "unknown";
             }
-            //view_gps.setText(str);
 
         }
 
@@ -234,30 +254,6 @@ public class CardioActivity extends AppCompatActivity implements SensorEventList
         }
     };
 
-
-    LocationListener locationListenerGSM = new LocationListener() {
-        public void onLocationChanged(Location location) {
-
-            latGSM = String.valueOf(location.getLatitude());
-            lngGSM = String.valueOf(location.getLongitude());
-            accGSM = String.valueOf(location.getAccuracy());
-
-
-            if(location.getExtras() != null){
-                Bundle extra = location.getExtras();
-                String estr = "";
-                for(String s : extra.keySet()) {
-                    String d = extra.get(s).toString();
-                    //if(extra.get(s) instanceof Location){
-                    //    d.replaceFirst("\\{Bundle\\[mParcelledData.dataSize=\\d+\\]\\}", "");
-                    //}
-                    estr += "  "+s+": '"+d+"'\n";
-                }
-                //view_gsm_extra.setText(estr);
-            }
-
-            //updatedLastUpdated((TextView) findViewById(R.id.display_gsm_updated));
-        }
 
         public void onStatusChanged(String provider, int status, Bundle extras) {
             //final TextView view_gsm = (TextView) findViewById(R.id.display_gsm_status);
@@ -280,6 +276,48 @@ public class CardioActivity extends AppCompatActivity implements SensorEventList
 
         public void onProviderDisabled(String provider) {
         }
-    };
+
+
+    private class DistanceTime{
+        private ArrayList<Float> distances; //distance in meters
+        private ArrayList<Integer> times;    //time in seconds
+        float maxSpeed = 0;
+
+        public DistanceTime(){
+            distances = new ArrayList<>();
+            times = new ArrayList<>();
+        }
+
+        public void add(float distance, int time){
+            this.distances.add(distance);
+            times.add(time);
+        }
+
+        public float getInstantSpeed(int currentTime){
+
+
+            if(times.get(times.size()-1) + 5 < currentTime)
+                return 0.0f;
+
+            float instantSpeed = ((distances.get(distances.size()-1) - distances.get(distances.size()-1)) / (times.get(times.size()-1) - times.get(times.size()-1))) * 3600 / 1000;
+
+            if(instantSpeed> maxSpeed){
+                maxSpeed = instantSpeed;
+            }
+
+            return instantSpeed;
+        }
+
+        public float getMaxSpeed(){
+            return maxSpeed;
+        }
+
+        public float getAverageSpeed(int currentTime){
+            return (distances.get(distances.size()-1)/ currentTime) * 3600 / 1000;
+        }
+
+
+
+    }
 
 }
