@@ -14,6 +14,7 @@ import android.widget.ArrayAdapter;
 import android.widget.GridView;
 import android.widget.ListView;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import com.android.volley.Request;
 import com.android.volley.Response;
@@ -55,6 +56,9 @@ public class PickExerciseFragment extends Fragment {
     private GridView groupsView;
     private ListView recent_historyView;
 
+    private TextView groupExercises;
+    private TextView recentExercises;
+
     // Used by Main Activity
     private OnFragmentInteractionListener mListener;
 
@@ -78,12 +82,16 @@ public class PickExerciseFragment extends Fragment {
         //GUI elements
         progressBar = (ProgressBar) fView.findViewById(R.id.pickExerciseProgressBar);
         progressBar.setVisibility(View.VISIBLE);
+
         groupsView  = (GridView) fView.findViewById(R.id.groups);
         recent_historyView = (ListView) fView.findViewById(R.id.recent_history);
+        recentExercises = (TextView)fView.findViewById(R.id.textView4);
+        groupExercises = (TextView)fView.findViewById(R.id.textView7);
         //UI Static elements
         createMuscleGroupGrid();
         createExerciseHistoryList();
         // Inflate the layout for this fragment
+
         return fView;
     }
 
@@ -136,6 +144,8 @@ public class PickExerciseFragment extends Fragment {
                     @Override
                     public void onResponse(String response) {
                         progressBar.setVisibility(View.GONE);
+                        recentExercises.setText("Groups of Exercises");
+                        groupExercises.setText("Recent Exercises");
                         try {
                             JSONArray jsonArray = new JSONArray(response);
                             //From the response create the history array
@@ -173,7 +183,9 @@ public class PickExerciseFragment extends Fragment {
                     public void onErrorResponse(VolleyError error) {
                         //Handle error response
                         System.out.println(error.toString());
+
                         progressBar.setVisibility(View.GONE);
+
                     }
                 }
         );

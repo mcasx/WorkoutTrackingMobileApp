@@ -262,6 +262,7 @@ public class ExerciseHistoryFragment extends Fragment {
             }
 
             String email = getContext().getSharedPreferences("UserData",0).getString("email", null);
+            Log.i("TG",email);
             DetailedExerciseHistoryActivity.exerciseHistoryItem = item;
 
             Intent intent = new Intent(getActivity(), DetailedExerciseHistoryActivity.class);

@@ -6,144 +6,132 @@
     android:layout_width="fill_parent"
     android:layout_height="fill_parent">
 
-<FrameLayout
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context="g11.muscle.ProfileActivity">
-
-
-    <Button
-        android:id="@+id/fab"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom|end"
-        android:layout_marginRight="@dimen/activity_horizontal_margin"
-        android:layout_marginEnd="@dimen/activity_horizontal_margin"
-        android:layout_marginBottom="@dimen/activity_vertical_margin"
-        android:visibility="invisible"/>
-
-
-    <RelativeLayout
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:id="@+id/wrapper">
-        <!-- Profile Photo, name and email-->
-        <LinearLayout
-            android:id="@+id/info"
+        tools:context="g11.muscle.ProfileActivity">
+
+
+        <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
+            android:layout_height="match_parent"
+            android:id="@+id/wrapper">
 
-            <RelativeLayout
+            <!-- Profile Photo, name and email-->
+            <LinearLayout
+                android:id="@+id/info"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_weight="1">
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
 
-                <ImageView
-                    android:id="@+id/profile_img"
-                    android:layout_width="128dp"
-                    android:layout_height="128dp"
-                    android:layout_alignParentTop="true"
-                    android:layout_centerHorizontal="true"
-                    android:layout_marginTop="@dimen/activity_vertical_margin"
-                    android:adjustViewBounds="true"
-                    android:cropToPadding="false"
-                    android:scaleType="centerCrop"
-                    app:layout_constraintLeft_toLeftOf="parent"
-                    app:layout_constraintRight_toRightOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:srcCompat="@drawable/ic_profile" />
-
-                <TextView
-                    android:id="@+id/username"
+                <RelativeLayout
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentLeft="true"
-                    android:layout_alignParentStart="true"
-                    android:layout_below="@+id/profile_img"
-                    android:layout_marginTop="20dp"
-                    android:gravity="center" />
+                    android:layout_height="match_parent"
+                    android:layout_weight="1">
 
-                <TextView
-                    android:id="@+id/email"
+                    <ImageView
+                        android:id="@+id/profile_img"
+                        android:layout_width="128dp"
+                        android:layout_height="128dp"
+                        android:layout_alignParentTop="true"
+                        android:layout_centerHorizontal="true"
+                        android:layout_marginTop="@dimen/activity_vertical_margin"
+                        android:adjustViewBounds="true"
+                        android:cropToPadding="false"
+                        android:scaleType="centerCrop"
+                        app:layout_constraintLeft_toLeftOf="parent"
+                        app:layout_constraintRight_toRightOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:srcCompat="@drawable/ic_profile" />
+
+                    <TextView
+                        android:id="@+id/username"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentLeft="true"
+                        android:layout_alignParentStart="true"
+                        android:layout_below="@+id/profile_img"
+                        android:layout_marginTop="20dp"
+                        android:gravity="center" />
+
+                    <TextView
+                        android:id="@+id/email"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentLeft="true"
+                        android:layout_alignParentStart="true"
+                        android:layout_below="@+id/username"
+                        android:gravity="center" />
+
+                </RelativeLayout>
+
+                <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentLeft="true"
-                    android:layout_alignParentStart="true"
-                    android:layout_below="@+id/username"
-                    android:gravity="center" />
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
 
-            </RelativeLayout>
+                    <TextView
+                        android:id="@+id/gender"
+                        android:layout_width="match_parent"
+                        android:layout_height="fill_parent"
+                        android:layout_weight="1"
+                        android:gravity="center" />
+
+                    <TextView
+                        android:id="@+id/age"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:gravity="center" />
+
+                    <TextView
+                        android:id="@+id/height"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:gravity="center" />
+
+                    <TextView
+                        android:id="@+id/weight"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:gravity="center" />
+
+                </LinearLayout>
+            </LinearLayout>
+
 
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:orientation="vertical">
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"
+                android:layout_below="@+id/info"
+                android:orientation="horizontal"
+                android:layout_marginTop="@dimen/activity_vertical_margin"
+                android:id="@+id/follow">
 
                 <TextView
-                    android:id="@+id/gender"
+                    android:id="@+id/following"
                     android:layout_width="match_parent"
-                    android:layout_height="fill_parent"
+                    android:layout_height="50dp"
                     android:layout_weight="1"
-                    android:gravity="center" />
+                    android:clickable="true"
+                    android:gravity="center"
+                    android:onClick="onClickFollowing"/>
 
                 <TextView
-                    android:id="@+id/age"
+                    android:id="@+id/followers"
+                    android:clickable="true"
+                    android:onClick="onClickFollowers"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:gravity="center" />
-
-                <TextView
-                    android:id="@+id/height"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:gravity="center" />
-
-                <TextView
-                    android:id="@+id/weight"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:gravity="center" />
+                    android:layout_height="50dp"
+                    android:gravity="center"
+                    android:layout_weight="1"/>
 
             </LinearLayout>
-        </LinearLayout>
-
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true"
-            android:layout_below="@+id/info"
-            android:orientation="horizontal"
-            android:layout_marginTop="@dimen/activity_vertical_margin"
-            android:id="@+id/follow">
-
-            <TextView
-                android:id="@+id/following"
-                android:layout_width="match_parent"
-                android:layout_height="50dp"
-                android:layout_weight="1"
-                android:clickable="true"
-                android:gravity="center"
-                android:onClick="onClickFollowing"/>
-
-            <TextView
-                android:id="@+id/followers"
-                android:clickable="true"
-                android:onClick="onClickFollowers"
-                android:layout_width="match_parent"
-                android:layout_height="50dp"
-                android:gravity="center"
-                android:layout_weight="1"/>
-
-        </LinearLayout>
-
-
 
             <HorizontalScrollView
                 android:id="@+id/horizontalScrollView"
@@ -175,5 +163,15 @@
 
             </HorizontalScrollView>
         </RelativeLayout>
+
+        <Button
+            android:id="@+id/fab"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|end"
+            android:layout_marginRight="@dimen/activity_horizontal_margin"
+            android:layout_marginEnd="@dimen/activity_horizontal_margin"
+            android:layout_marginBottom="@dimen/activity_vertical_margin"
+            android:visibility="invisible"/>
     </FrameLayout>
 </ScrollView>

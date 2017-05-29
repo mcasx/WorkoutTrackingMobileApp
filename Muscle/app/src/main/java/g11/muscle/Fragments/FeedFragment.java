@@ -83,6 +83,7 @@ public class FeedFragment extends Fragment {
     private ProgressBar progressBar;
     private View fView;
 
+
     public FeedFragment() {
         // Required empty public constructor
     }
@@ -405,12 +406,14 @@ public class FeedFragment extends Fragment {
 
 
                         FeedViewAdapter adapter = new FeedViewAdapter(getActivity(), history.toArray(temp));
+
                         feedView.setAdapter(adapter);
 
                         // Set the listeners on the list items
 
                         feedView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                             public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
+                                Log.i("HELP","in on feed item click");
                                 //Go to exercise page
                                 DetailedExerciseHistoryActivity.exerciseHistoryItem = history.get(position).getJsonObj();
                                 startActivity(new Intent(getActivity(), DetailedExerciseHistoryActivity.class));
@@ -521,27 +524,33 @@ public class FeedFragment extends Fragment {
         }
 
         @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
+        public View getView(final int position, View convertView, ViewGroup parent) {
 
             // used to prevent updates when scrolling, could be desirable so feel free to remove it
             if (convertView != null) return convertView;
 
             LayoutInflater inflater=activity.getLayoutInflater();
 
-            if(convertView == null){
 
-                convertView=inflater.inflate(R.layout.feed_card, null);
 
-                txtExercise=(TextView) convertView.findViewById(R.id.exercise);
-                txtUser=(TextView) convertView.findViewById(R.id.user);
-                txtDate=(TextView) convertView.findViewById(R.id.date);
-                txtUser.setTextColor(Color.LTGRAY);
-                txtDate.setTextColor(Color.LTGRAY);
+            convertView=inflater.inflate(R.layout.feed_card, null);
 
-                imgUser=(ImageView) convertView.findViewById(R.id.user_pic);
+            convertView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    //Go to exercise page
+                    DetailedExerciseHistoryActivity.exerciseHistoryItem = list[position].getJsonObj();
+                    startActivity(new Intent(getActivity(), DetailedExerciseHistoryActivity.class));
+                }
+            });
 
-            }
+            txtExercise=(TextView) convertView.findViewById(R.id.exercise);
+            txtUser=(TextView) convertView.findViewById(R.id.user);
+            txtDate=(TextView) convertView.findViewById(R.id.date);
+            txtUser.setTextColor(Color.LTGRAY);
+            txtDate.setTextColor(Color.LTGRAY);
 
+            imgUser=(ImageView) convertView.findViewById(R.id.user_pic);
 
 
             feedItem item=list[position];

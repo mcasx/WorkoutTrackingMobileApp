@@ -63,6 +63,9 @@ public class ExerciseActivity extends AppCompatActivity implements ExerciseFragm
         exercise = intent.getStringExtra("exercise_name");
         email = intent.getStringExtra("email");
 
+        setTitle(exercise);
+        getSupportActionBar().setSubtitle("Strenght");
+
         if(intent.getStringExtra("exercise_rest") != null) {
             rest = intent.getStringExtra("exercise_rest");
             reps = intent.getIntExtra("exercise_reps",0);

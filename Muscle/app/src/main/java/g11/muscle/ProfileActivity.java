@@ -120,6 +120,9 @@ public class ProfileActivity extends AppCompatActivity {
         user_email = getIntent().getStringExtra("user_email");
         profile_email = getIntent().getStringExtra("profile_email");
 
+        Log.i("TG",user_email);
+        Log.i("TG",profile_email);
+
         //Guilherme
         profile_image = (ImageView) findViewById(R.id.profile_img);
         height_text = (TextView) findViewById(R.id.height);
@@ -246,8 +249,9 @@ public class ProfileActivity extends AppCompatActivity {
 
 
                             if (jsonFollowingArray != null)
-                                for (int i=0;i<jsonFollowingArray.length();i++)
+                                for (int i=0;i<jsonFollowingArray.length();i++) {
                                     followingAdapter.add(jsonFollowingArray.getString(i));
+                            }
 
 
                             if (jsonFollowersArray != null)
@@ -269,7 +273,6 @@ public class ProfileActivity extends AppCompatActivity {
                             if(friendFlag){
                                 //fab.setImageResource(R.drawable.ic_remove_black_24dp);
                                 //fab.setBackgroundTintList(getApplicationContext().getResources().getColorStateList(R.color.colorPrimary));
-                                fab.setVisibility(View.VISIBLE);
                                 fab.setText("Unfollow");
                                 fab.setOnClickListener(new View.OnClickListener() {
                                     @Override
@@ -278,6 +281,8 @@ public class ProfileActivity extends AppCompatActivity {
 
                                     }
                                 });
+                                fab.setVisibility(View.VISIBLE);
+
                             }
                             else if(user_email.equals(profile_email)){
                                 fab.setVisibility(View.INVISIBLE);
@@ -313,7 +318,7 @@ public class ProfileActivity extends AppCompatActivity {
             protected Map<String, String> getParams()
             {
                 Map<String, String>  params = new HashMap<>();
-                params.put("user_email", user_email);
+                params.put("user_email", profile_email);
                 return params;
             }
         };
@@ -338,6 +343,8 @@ public class ProfileActivity extends AppCompatActivity {
                             createFollowerInfo();
                         }
                         else{
+                            Log.i("HELP user:",user_email);
+                            Log.i("HELP profile:",profile_email);
                             Toast.makeText(getApplicationContext(), "Couldn't add user",
                                     Toast.LENGTH_SHORT).show();
                         }
@@ -826,7 +833,7 @@ public class ProfileActivity extends AppCompatActivity {
                             }
                             for (Float x : MuscleCnt) {
                                 Float tmp = (x/(max+10))*100;
-                                /*if (max < 60){
+                                if (max < 60){
                                     tmp = ((x/(max+10))*100);
                                 }
                                 else if ( max < 70){
@@ -834,7 +841,7 @@ public class ProfileActivity extends AppCompatActivity {
                                 }
                                 else if (max < 80){
                                     tmp = ((x/(max+14f))*100);
-                                }*/
+                                }
                                 entries.add(new RadarEntry(tmp));
                             }
                             // Graph is explicit i think

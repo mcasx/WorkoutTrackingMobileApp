@@ -34,8 +34,9 @@
             android:layout_height="wrap_content"
             android:paddingBottom="10dp"
             android:paddingTop="10dp"
-            android:text="Groups of Exercises"
+            android:text=""
             android:textAlignment="center"
+            android:gravity="center"
             android:textAppearance="@style/Base.TextAppearance.AppCompat.Title"
             tools:ignore="HardcodedText" />
 
@@ -50,7 +51,8 @@
             android:id="@+id/textView7"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Recent Exercises"
+            android:text=""
+            android:gravity="center"
             android:textAlignment="center"
             android:textAppearance="@style/Base.TextAppearance.AppCompat.Title"
             tools:ignore="HardcodedText" />
