@@ -267,11 +267,11 @@ public class PlanListFragment extends Fragment {
 
             if(convertView == null){
 
-                convertView=inflater.inflate(R.layout.plan_list_row, null);
+                convertView=inflater.inflate(android.R.layout.simple_list_item_2, null);
 
-                txtPlan=(TextView) convertView.findViewById(R.id.plan);
-                txtCreator=(TextView) convertView.findViewById(R.id.creator);
-                txtCreator.setTextColor(Color.LTGRAY);
+
+                txtPlan=(TextView) convertView.findViewById(android.R.id.text1);
+                txtCreator=(TextView) convertView.findViewById(android.R.id.text2);
             }
 
             PlanItem item=list.get(position);
