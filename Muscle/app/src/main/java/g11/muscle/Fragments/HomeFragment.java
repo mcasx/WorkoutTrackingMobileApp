@@ -1,7 +1,11 @@
 package g11.muscle.Fragments;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -10,10 +14,14 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.BaseAdapter;
+import android.widget.GridView;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.ArrayAdapter;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
+import android.widget.TextView;
 
 import com.android.volley.Request;
 import com.android.volley.Response;
@@ -22,15 +30,23 @@ import com.android.volley.toolbox.StringRequest;
 
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 
+import java.lang.reflect.Array;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
+import g11.muscle.Classes.MuscleProgressItem;
 import g11.muscle.DB.DBConnect;
 import g11.muscle.ExerciseActivity;
+import g11.muscle.GroupExercisesActivity;
 import g11.muscle.PlanActivity;
 import g11.muscle.R;
 import g11.muscle.DB.VolleyProvider;
+
+import static g11.muscle.R.layout.muscle_progress_view;
 
 
 /**
@@ -55,6 +71,10 @@ public class HomeFragment extends Fragment {
     private ListView recList;
     private View fView;
     private ProgressBar progressBar;
+    private GridView muscle_groupView;
+
+    private ArrayList<MuscleProgressItem> list;
+
     public HomeFragment() {
         // Required empty public constructor
     }
@@ -70,13 +90,13 @@ public class HomeFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState){
         // Fragment View
-
         fView = inflater.inflate(R.layout.fragment_home, container, false);
 
         this.arraySpinner = new String[] {
                 "Recommended Exercises", "Recommended Plans"
         };
 
+        muscle_groupView = (GridView)fView.findViewById(R.id.groups);
         progressBar = (ProgressBar)fView.findViewById(R.id.homeProgressBar);
         progressBar.setVisibility(View.VISIBLE);
         recList = (ListView) fView.findViewById(R.id.home_rec_list);
@@ -96,7 +116,7 @@ public class HomeFragment extends Fragment {
             public void onNothingSelected(AdapterView<?> parent) {
             }
         });
-
+        getMuscleProgress();
         // Inflate the layout for this fragment
         return fView;
     }
@@ -131,6 +151,61 @@ public class HomeFragment extends Fragment {
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
         void onFragmentInteraction(Uri uri);
+    }
+
+    private void getMuscleProgress() {
+        String url = DBConnect.serverURL + "/get_muscle_progress";
+
+        //Create the exercise plan_group request
+        StringRequest StrHistReq = new StringRequest(Request.Method.POST, url,
+                new Response.Listener<String>() {
+
+                    @Override
+                    public void onResponse(String r) {
+                        JSONObject response = null;
+                        try {
+                            response = new JSONObject(r);
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                        list = new ArrayList<>();
+                        Iterator<String> iter = response.keys();
+                        while (iter.hasNext()) {
+                            String key = iter.next();
+                            try {
+                                Double value = response.getDouble(key);
+                                list.add(new MuscleProgressItem(value, key));
+                            } catch (JSONException e) {
+                                // Something went wrong!
+                            }
+                        }
+
+                        // Define the groupView adapter
+
+                        progressBar.setVisibility(View.GONE);
+                    }
+
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        //Handle error response
+                        System.out.println(error.toString());
+                        progressBar.setVisibility(View.GONE);
+                    }
+                }
+        ) {
+            // use params are specified here
+            @Override
+            protected Map<String, String> getParams() {
+                Map<String, String> params = new HashMap<>();
+                params.put("user_email", email);
+                return params;
+            }
+        };
+
+        // Add the request to the RequestQueue
+        VolleyProvider.getInstance(getActivity()).addRequest(StrHistReq);
     }
 
     // Get Recommended Exercises ( ID + Name )
