@@ -1,9 +1,11 @@
 package g11.muscle;
 
 import android.content.Intent;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -29,16 +31,28 @@ public class GroupExercisesActivity extends AppCompatActivity {
 
     private static final String TAG = "groupExercisesActivity";
     private String email;
-    private TextView titleView;
     private ListView exercisesView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_group_exercises);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setHomeButtonEnabled(true);
+
         //GUI elements
-        titleView  = (TextView)findViewById(R.id.title);
         exercisesView = (ListView) findViewById(R.id.exercises);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                finish();
+                return true;
+        }
+
+        return super.onOptionsItemSelected(item);
     }
 
     @Override
@@ -49,9 +63,9 @@ public class GroupExercisesActivity extends AppCompatActivity {
         Intent intent = getIntent();
         final String group = intent.getStringExtra("group");
         email = intent.getStringExtra("email");
+        getSupportActionBar().setTitle(group);
 
         // Define title
-        titleView.setText(group);
 
         //Create the list items through a request
         String url = DBConnect.serverURL + "/get_exercises_by_muscle_group";
