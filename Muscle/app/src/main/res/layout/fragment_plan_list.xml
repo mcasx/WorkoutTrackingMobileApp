@@ -12,9 +12,7 @@
         <ListView
             android:id="@+id/plan_list"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:divider="@drawable/border"
-            android:dividerHeight="4dp"/>
+            android:layout_height="wrap_content" />
 
     </LinearLayout>
 

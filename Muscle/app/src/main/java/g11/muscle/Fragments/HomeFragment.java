@@ -13,6 +13,7 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.ArrayAdapter;
 import android.widget.ProgressBar;
+import android.widget.Spinner;
 
 import com.android.volley.Request;
 import com.android.volley.Response;
@@ -47,9 +48,11 @@ public class HomeFragment extends Fragment {
 
     private String email;
 
+    private String[] arraySpinner;
+
     //GUI
-    private ListView recExView;
-    private ListView recPlanView;
+    private Spinner spinner;
+    private ListView recList;
     private View fView;
     private ProgressBar progressBar;
     public HomeFragment() {
@@ -70,13 +73,30 @@ public class HomeFragment extends Fragment {
 
         fView = inflater.inflate(R.layout.fragment_home, container, false);
 
+        this.arraySpinner = new String[] {
+                "Recommended Exercises", "Recommended Plans"
+        };
+
         progressBar = (ProgressBar)fView.findViewById(R.id.homeProgressBar);
         progressBar.setVisibility(View.VISIBLE);
-        recExView = (ListView) fView.findViewById(R.id.rec_ex);
-        recPlanView = (ListView) fView.findViewById(R.id.rec_plan);
+        recList = (ListView) fView.findViewById(R.id.home_rec_list);
 
-        getRecommendedExercises();
-        getRecommendedPlans();
+        spinner = (Spinner) fView.findViewById(R.id.home_spinner);
+
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(getActivity(),
+                android.R.layout.simple_spinner_dropdown_item, arraySpinner);
+        spinner.setAdapter(adapter);
+        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
+                if(pos == 0)
+                    getRecommendedExercises();
+                else
+                    getRecommendedPlans();
+            }
+            public void onNothingSelected(AdapterView<?> parent) {
+            }
+        });
+
         // Inflate the layout for this fragment
         return fView;
     }
@@ -143,8 +163,8 @@ public class HomeFragment extends Fragment {
 
                         // Define the groupView adapter
                         ArrayAdapter<String> adapter = new ArrayAdapter<>(getActivity(), android.R.layout.simple_list_item_1, rE);
-                        recExView.setAdapter(adapter);
-                        recExView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                        recList.setAdapter(adapter);
+                        recList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                             public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
                                 //Go to Exercise Activity
                                 Intent intent = new Intent(getActivity(), ExerciseActivity.class);
@@ -217,8 +237,8 @@ public class HomeFragment extends Fragment {
 
                         // Define the groupView adapter
                         ArrayAdapter<String> adapter = new ArrayAdapter<>(getActivity(), android.R.layout.simple_list_item_1, cola);
-                        recPlanView.setAdapter(adapter);
-                        recPlanView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                        recList.setAdapter(adapter);
+                        recList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                             public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
                                 //Go to
                                 Intent intent = new Intent(getActivity(), PlanActivity.class);
