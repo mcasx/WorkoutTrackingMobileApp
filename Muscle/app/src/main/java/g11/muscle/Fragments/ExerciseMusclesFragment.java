@@ -1,12 +1,14 @@
 package g11.muscle.Fragments;
 
 import android.content.Context;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import g11.muscle.R;
 
@@ -19,6 +21,13 @@ import g11.muscle.R;
 public class ExerciseMusclesFragment extends Fragment {
 
     private OnFragmentInteractionListener mListener;
+    private LayoutInflater inflater;
+    private View fView;
+
+    private String email, exercise;
+
+    //GUI
+    private TextView nameTV;
 
     public ExerciseMusclesFragment() {
         // Required empty public constructor
@@ -29,14 +38,20 @@ public class ExerciseMusclesFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_exercise_muscles, container, false);
-    }
+        this.inflater = inflater;
+        fView = inflater.inflate(R.layout.fragment_exercise_muscles, container, false);
 
-    // TODO: Rename method, update argument and hook method into UI event
-    public void onButtonPressed(Uri uri) {
-        if (mListener != null) {
-            mListener.onFragmentInteraction(uri);
-        }
+        // Information from previous activity
+        final Intent intent = getActivity().getIntent();
+
+        exercise = intent.getStringExtra("exercise_name");
+        email = intent.getStringExtra("email");
+
+        nameTV = (TextView) fView.findViewById(R.id.Ex_Name);
+        nameTV.setText(exercise);
+
+        // Inflate the layout for this fragment
+        return fView;
     }
 
     @Override
@@ -67,7 +82,6 @@ public class ExerciseMusclesFragment extends Fragment {
      * >Communicating with Other Fragments</a> for more information.
      */
     public interface OnFragmentInteractionListener {
-        // TODO: Update argument type and name
         void onFragmentInteraction(Uri uri);
     }
 }

@@ -70,10 +70,9 @@ public class PlanActivity extends AppCompatActivity {
     }
 
     public void onClickSetPlan(View view){
-        //TODO
         new AlertDialog.Builder(this)
                 .setIcon(android.R.drawable.ic_dialog_alert)
-                .setTitle("Set Plan")
+                .setTitle("Set Plan AQUI")
                 .setMessage("\n    You still have an unfinished plan.\n\n    Are you sure you want to set a new plan?")
                 .setPositiveButton("Yes", new DialogInterface.OnClickListener()
                 {
@@ -204,7 +203,7 @@ public class PlanActivity extends AppCompatActivity {
                                     String tmp_rest = new JSONObject(jsonArray.getString(i)).getString("Resting_Time");
                                     int tmp_weight = Integer.parseInt(new JSONObject(jsonArray.getString(i)).getString("Weight"));
                                     // TODO NEEDS IMAGE
-                                    training_data.add(new PlanExerciseItem(tmp_name,tmp_reps,tmp_sets,tmp_rest,tmp_weight,R.mipmap.default_avatar));
+                                    training_data.add(new PlanExerciseItem(tmp_name,tmp_reps,tmp_sets,tmp_rest,tmp_weight));
                                 }
                             } catch (JSONException je){
                                 Log.e(TAG, je.toString());
@@ -242,7 +241,7 @@ public class PlanActivity extends AppCompatActivity {
     }
 
 
-    public class MyOnClickListener implements View.OnClickListener {
+    private class MyOnClickListener implements View.OnClickListener {
         @Override
         public void onClick(final View view) {
             int itemPosition = recyclerView.getChildLayoutPosition(view);

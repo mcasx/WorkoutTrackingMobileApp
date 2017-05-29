@@ -12,6 +12,7 @@ import android.content.Intent;
 import android.os.Handler;
 import android.util.Log;
 import android.view.View;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -35,17 +36,27 @@ import com.github.mikephil.charting.listener.OnChartValueSelectedListener;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.w3c.dom.Text;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
+import java.util.Date;
+import java.util.Locale;
 import java.util.Set;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.UUID;
 
 import android.graphics.Typeface;
+
+import android.animation.ObjectAnimator;
+import android.view.animation.DecelerateInterpolator;
+
+import android.os.CountDownTimer;
+import java.text.SimpleDateFormat;
+import java.text.ParseException;
 
 import g11.muscle.DB.DBConnect;
 import g11.muscle.DB.VolleyProvider;
@@ -70,14 +81,26 @@ public class FeedBackActivity extends AppCompatActivity implements
 
     //Information to save
     private double weight;
-    private int rep_count = 0;
-    private int set = 1; //TODO what to do with sets??
+    private int rep_count;
+    private int set_count;
     // sum of all intensities values  (devide by rep_count to get average intensity)
     private double total_intensity;
 
+    //Plan information
+    private String plan_rest;
+    private int plan_reps, plan_sets, plan_weight;
+    private boolean plan;
+
     //GUI
     private LineChart mChart;
-    private TextView weigthTV;
+    private TextView weightTV;
+    private TextView setsTV;
+    private TextView repsTV;
+    private TextView repsTotalTV;
+    private TextView nameTV;
+
+    private ProgressBar progress;
+    private ProgressBar progressSet;
 
     // multi adds chart thread
     private Thread chTread;
@@ -88,6 +111,8 @@ public class FeedBackActivity extends AppCompatActivity implements
     private StringBuilder strBuilder;
 
     private RequestQueue req_queue;
+
+    private AlertDialog alertDialog;
 
     // Intent vars
     private String email;
@@ -103,6 +128,20 @@ public class FeedBackActivity extends AppCompatActivity implements
         email = intent.getStringExtra("email");
         exercise = intent.getStringExtra("exercise_name");
 
+        if(intent.getStringExtra("exercise_rest") != null) { // Plan Information
+            plan_rest = intent.getStringExtra("exercise_rest");
+            plan_reps = intent.getIntExtra("exercise_reps",0);
+            plan_sets = intent.getIntExtra("exercise_sets",0);
+            plan_weight = intent.getIntExtra("exercise_weight",0);
+
+            plan = true;
+        }
+        else {
+            plan = false;
+        }
+
+        alertDialog = new AlertDialog.Builder(this).create();
+
         // for bluetooth data
         strBuilder = new StringBuilder();
 
@@ -111,7 +150,33 @@ public class FeedBackActivity extends AppCompatActivity implements
 
         // gui
         mChart = (LineChart) findViewById(R.id.chart);
-        weigthTV = (TextView) findViewById(R.id.weightTextView);
+        weightTV = (TextView) findViewById(R.id.weightTextView);
+        repsTV = (TextView) findViewById(R.id.Rep);
+        repsTotalTV = (TextView) findViewById(R.id.repsTotal);
+        nameTV =  (TextView) findViewById(R.id.Exercise_name);
+        setsTV = (TextView) findViewById(R.id.feed_set);
+
+        progress = (ProgressBar) findViewById(R.id.progressExercise);
+        progressSet = (ProgressBar) findViewById(R.id.progressSet);
+
+        rep_count = 0;
+
+        nameTV.setText(exercise);
+        repsTV.setText(String.valueOf(0));
+
+        if(plan){
+            progress.setMax(plan_reps * 100);
+            progress.setProgress(0);
+
+            repsTotalTV.setVisibility(View.VISIBLE);
+            repsTotalTV.setText(String.valueOf(plan_reps));
+
+            set_count = 1;
+            setsTV.setText(String.valueOf(set_count));
+
+            progressSet.setMax(plan_sets * 100);
+            progressSet.setProgress(set_count*100);
+        }
 
         // start chart
         chartSetup();
@@ -121,6 +186,8 @@ public class FeedBackActivity extends AppCompatActivity implements
             public void handleMessage(android.os.Message msg){
                 String readMessage;
                 try {
+                    alertDialog.cancel(); //Closes time alert dialog if opened
+
                     // Send the obtained bytes to the UI activity
                     readMessage = new String((byte[]) msg.obj, "UTF-8");
                     readMessage = readMessage.split("\0")[0];
@@ -132,14 +199,31 @@ public class FeedBackActivity extends AppCompatActivity implements
                         JSONObject jsonObj = new JSONObject(strBuilder.substring(0,endOfLineIndex+1));
                         strBuilder.delete(0,endOfLineIndex+1);
 
-                        //weight = Integer.parseInt(jsonObj.getString("weight"));
                         //rep_count = Integer.parseInt(jsonObj.getString("rep"));
-                        Log.e("HERE", jsonObj.getString("weight"));
                         weight = Double.parseDouble(jsonObj.getString("weight"));
+                        weightTV.setText(String.valueOf((int)weight));
+
                         rep_count += 1;
+
+                        repsTV.setText(String.valueOf(rep_count));
+
+                        if(plan) {
+                            ObjectAnimator animation = ObjectAnimator.ofInt(progress, "progress", progress.getProgress(), rep_count * 100);
+                            animation.setDuration(500);
+                            animation.setInterpolator(new DecelerateInterpolator());
+                            animation.start();
+                        }
+
                         total_intensity += Double.parseDouble(jsonObj.getString("meanAcc"));
                         addEntry(Double.parseDouble(jsonObj.getString("meanAcc")));
-                        weigthTV.setText(String.valueOf(weight));
+
+                        if(rep_count == plan_reps){
+
+                            rep_count = 0;
+                            set_count += 1;
+
+                            timeAlert(plan_rest);
+                        }
 
                         System.out.println("Get Data from bluetooth");
                     }
@@ -175,20 +259,6 @@ public class FeedBackActivity extends AppCompatActivity implements
         enableAdapter();
     }
 
-    public void onClickAddEntryButton(View view){
-        addEntry();
-    }
-
-    public void onClickClearButton(View view) {
-        mChart.clearValues();
-        Toast.makeText(this, "Chart cleared!", Toast.LENGTH_SHORT).show();
-
-    }
-
-    public void onClickMultiButton(View view) {
-        feedMultiple();
-    }
-
     private void chartSetup() {
         // Font for chart text
         Typeface mTfLight = Typeface.createFromAsset(getAssets(), "fonts/OpenSans-Light.ttf");
@@ -196,9 +266,11 @@ public class FeedBackActivity extends AppCompatActivity implements
         // Chart Listener
         mChart.setOnChartValueSelectedListener(this);
 
-
         // enable description text
         mChart.getDescription().setEnabled(true);
+        mChart.getDescription().setText("Intensity/Reps");
+        mChart.getDescription().setTextColor(Color.WHITE);
+
 
         // enable touch gestures
         mChart.setTouchEnabled(true);
@@ -212,7 +284,7 @@ public class FeedBackActivity extends AppCompatActivity implements
         mChart.setPinchZoom(true);
 
         // set an alternative background color
-        mChart.setBackgroundColor(Color.BLACK);
+        mChart.setBackgroundColor(Color.TRANSPARENT);
 
         LineData data = new LineData();
         data.setValueTextColor(Color.WHITE);
@@ -248,11 +320,8 @@ public class FeedBackActivity extends AppCompatActivity implements
         mChart.invalidate();
     }
 
-    private void addEntry() {
-        addEntry(-1234567890);
-    } //Add random value - TEST ONLY
-
     private void addEntry(double x) {
+        CancelTimer();
 
         LineData data = mChart.getData();
 
@@ -266,11 +335,7 @@ public class FeedBackActivity extends AppCompatActivity implements
                 data.addDataSet(set);
             }
 
-            // random value for testing
-            if (x == -1234567890)
-                data.addEntry(new Entry(set.getEntryCount(), (float) (Math.random() * 40) + 30f), 0);
-            else
-                data.addEntry(new Entry(set.getEntryCount(), (float) x),0);
+            data.addEntry(new Entry(set.getEntryCount(), (float) x),0);
             data.notifyDataChanged();
 
             // let the chart know it's data has changed
@@ -289,11 +354,12 @@ public class FeedBackActivity extends AppCompatActivity implements
     }
 
     private LineDataSet createSet() {
-
-        LineDataSet set = new LineDataSet(null, "meanAcc");
+        LineDataSet set = new LineDataSet(null, "SET "+set_count);
         set.setAxisDependency(YAxis.AxisDependency.LEFT);
         set.setColor(Color.rgb(235,57,20));     // LINE COLOR - RED
-        set.setCircleColor(Color.WHITE);
+        set.setCircleColor(Color.rgb(29,31,34));
+        set.setCircleColorHole(Color.rgb(29,31,34));
+        //set.setDrawCircles(false);   KEEP CIRCLES ???
         set.setLineWidth(2f);
         set.setCircleRadius(4f);
         set.setFillAlpha(65);
@@ -305,40 +371,45 @@ public class FeedBackActivity extends AppCompatActivity implements
         return set;
     }
 
+    private void timeAlert(String time){
+        SimpleDateFormat dateFormat = new SimpleDateFormat("hh:mm:ss", Locale.UK);
+        Date convertedDate = new Date();
 
-    private void feedMultiple() {
+        try {
+            convertedDate = dateFormat.parse(time);
+        } catch (ParseException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
 
-        if (chTread != null)
-            chTread.interrupt();
+        alertDialog.setTitle("Rest Time");
+        alertDialog.setMessage(time);
+        alertDialog.show();
 
-        final Runnable runnable = new Runnable() {
+        new CountDownTimer(5000, 1000) {
+            @Override
+            public void onTick(long millisUntilFinished) {
+                alertDialog.setMessage("00:"+ (millisUntilFinished/1000));
+            }
 
             @Override
-            public void run() {
-                addEntry();
+            public void onFinish() {
+                CancelTimer();
             }
-        };
+        }.start();
+    }
 
-        chTread = new Thread(new Runnable() {
+    private void CancelTimer(){
+        alertDialog.dismiss();
 
-            @Override
-            public void run() {
-                for (int i = 0; i < 1000; i++) {
+        repsTV.setText(String.valueOf(rep_count));
+        progress.setProgress(rep_count);
 
-                    // Don't generate garbage runnables inside the loop.
-                    runOnUiThread(runnable);
-
-                    try {
-                        Thread.sleep(25);
-                    } catch (InterruptedException e) {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
-                    }
-                }
-            }
-        });
-
-        chTread.start();
+        setsTV.setText(String.valueOf(set_count));
+        ObjectAnimator animation = ObjectAnimator.ofInt(progressSet, "progress", progressSet.getProgress(), set_count * 100);
+        animation.setDuration(1000);
+        animation.setInterpolator(new DecelerateInterpolator());
+        animation.start();
     }
 
     @Override
@@ -399,14 +470,12 @@ public class FeedBackActivity extends AppCompatActivity implements
                 return params;
             }
         };
-
         VolleyProvider.getInstance(this).addRequest(Add_Req);
     }
 
-
-    /*
-     * BLUETOOTH METHODS
-     */
+    /****************************
+     *    BLUETOOTH METHODS     *
+     ****************************/
     public void createDevicePickDialog() {
         if( FeedBackActivity.muscleDevice != null){
             ConnectThread mConnectThread = new ConnectThread();

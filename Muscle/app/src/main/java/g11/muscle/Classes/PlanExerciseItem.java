@@ -10,42 +10,50 @@ public class PlanExerciseItem {
     private int exercise_reps;
     private int exercise_sets;
     private String exercise_rest;
-    private int exercise_image;
     private int exercise_weight;
+    private boolean mode; // used in my plan current exercise (oval shape)
 
-    public PlanExerciseItem(String name, int reps, int sets, String rest,int weight, int image){
+    public PlanExerciseItem(String name, int reps, int sets, String rest,int weight){
         exercise_name = name;
         exercise_reps = reps;
         exercise_sets = sets;
         exercise_rest = rest;
         exercise_weight = weight;
-        exercise_image = image;
+        this.mode = false;
+    }
+
+    public PlanExerciseItem(String name, int reps, int sets, String rest,int weight, boolean mode){
+        exercise_name = name;
+        exercise_reps = reps;
+        exercise_sets = sets;
+        exercise_rest = rest;
+        exercise_weight = weight;
+        this.mode = mode;
     }
 
     public String getExercise_name(){
         return exercise_name;
     }
 
-    int getExercise_reps(){
+    public int getExercise_reps(){
         return exercise_reps;
     }
 
-    int getExercise_sets(){
+    public int getExercise_sets(){
         return exercise_sets;
     }
 
-    String getExercise_rest(){
+    public String getExercise_rest(){
         return exercise_rest;
     }
 
-    int getExercise_weight() {return exercise_weight; }
+    public int getExercise_weight() {return exercise_weight; }
 
-    int getExercise_image(){
-        return exercise_image;
-    }
+    public boolean getMode() { return mode; }
 
     @Override
     public String toString(){
-        return "\n###################\nPLAN EXERCISE ITEM\nName: " + exercise_name + "\nSets: " + exercise_sets + "\nReps: " + exercise_reps + "\nRest: " + exercise_rest;
+        return "\n###################\nPLAN EXERCISE ITEM\nName: " + exercise_name + "\nSets: " + exercise_sets + "\nReps: "
+                + exercise_reps + "\nRest: " + exercise_rest +"\nWeight: " + exercise_weight;
     }
 }

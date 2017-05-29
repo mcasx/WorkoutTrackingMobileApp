@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.widget.Spinner;
+import android.widget.TextView;
 
 import g11.muscle.Classes.PlanExerciseItem;
 import g11.muscle.Classes.TrainingsItem;
@@ -55,6 +56,9 @@ public class MyPlanFragment extends Fragment {
 
     private String email;
 
+    private int countPlanExercises; // nº of my plan exercises
+    private int currentExerciseCount; //used to count exercises between trainings
+
     // Initialization of plan_group array
     private List<TrainingsItem> plan_trainings;
     private List<PlanExerciseItem> training_data;
@@ -76,6 +80,8 @@ public class MyPlanFragment extends Fragment {
 
         // get user email
         email = getActivity().getIntent().getStringExtra("email");
+        countPlanExercises = 0;
+        currentExerciseCount = 0;
     }
 
     @Override
@@ -188,7 +194,7 @@ public class MyPlanFragment extends Fragment {
     }
 
     private void getTrainingExercises(final String training) {
-        String url = DBConnect.serverURL + "/get_training_exercises";
+        String url = DBConnect.serverURL + "/get_my_training_exercises";
 
         //Create the exercise plan_group request
         StringRequest StrHistReq = new StringRequest(Request.Method.POST,url,
@@ -199,14 +205,22 @@ public class MyPlanFragment extends Fragment {
                             JSONArray jsonArray = new JSONArray(response);
                             training_data.clear(); // clear data - when other training selected
                             try {
-                                for (int i = 0; i < jsonArray.length(); i++) {
+                                // My Plan Exercises count
+                                countPlanExercises = Integer.parseInt(new JSONObject(jsonArray.getString(jsonArray.length()-1)).getString("Plan_Exercise_Count"));
+
+                                for (int i = 0; i < jsonArray.length() - 1; i++) {
                                     String tmp_name = new JSONObject(jsonArray.getString(i)).getString("Exercise_name");
                                     int tmp_reps = Integer.parseInt(new JSONObject(jsonArray.getString(i)).getString("Repetitions"));
                                     int tmp_sets = Integer.parseInt(new JSONObject(jsonArray.getString(i)).getString("Sets"));
                                     String tmp_rest = new JSONObject(jsonArray.getString(i)).getString("Resting_Time");
                                     int tmp_weight = Integer.parseInt(new JSONObject(jsonArray.getString(i)).getString("Weight"));
-                                    // TODO NEEDS IMAGE
-                                    training_data.add(new PlanExerciseItem(tmp_name,tmp_reps,tmp_sets,tmp_rest,tmp_weight,R.mipmap.default_avatar));
+
+                                    if(currentExerciseCount < countPlanExercises){ // Exercise was already completed
+                                        training_data.add(new PlanExerciseItem(tmp_name,tmp_reps,tmp_sets,tmp_rest,tmp_weight,true));
+                                        currentExerciseCount++;
+                                    }else{
+                                        training_data.add(new PlanExerciseItem(tmp_name,tmp_reps,tmp_sets,tmp_rest,tmp_weight,false));
+                                    }
                                 }
                             } catch (JSONException je){
                                 Log.e(TAG, je.toString());
@@ -236,6 +250,7 @@ public class MyPlanFragment extends Fragment {
             {
                 Map<String, String>  params = new HashMap<>();
                 params.put("training",training);
+                params.put("User_email",email);
                 return params;
             }
         };
@@ -244,16 +259,24 @@ public class MyPlanFragment extends Fragment {
         VolleyProvider.getInstance(getActivity()).addRequest(StrHistReq);
     }
 
-    public class MyOnClickListener implements View.OnClickListener {
+    private class MyOnClickListener implements View.OnClickListener {
         @Override
         public void onClick(final View view) {
             int itemPosition = recyclerView.getChildLayoutPosition(view);
             PlanExerciseItem item = training_data.get(itemPosition);
-            String email = getContext().getSharedPreferences("UserData",0).getString("email", null);
-            Intent intent = new Intent(getActivity(), ExerciseActivity.class);
-            intent.putExtra("email", email);
-            intent.putExtra("exercise_name", item.getExercise_name());
-            startActivity(intent);
+
+            if(!item.getMode()) { // Exercise not done yet
+                String email = getContext().getSharedPreferences("UserData", 0).getString("email", null);
+                Intent intent = new Intent(getActivity(), ExerciseActivity.class);
+                intent.putExtra("email", email);
+                intent.putExtra("exercise_name", item.getExercise_name());
+                Log.e("CLICK ITEM",item.toString());
+                intent.putExtra("exercise_reps",item.getExercise_reps());
+                intent.putExtra("exercise_sets",item.getExercise_sets());
+                intent.putExtra("exercise_rest",item.getExercise_rest());
+                intent.putExtra("exercise_weight",item.getExercise_weight());
+                startActivity(intent);
+            }
         }
     }
 }

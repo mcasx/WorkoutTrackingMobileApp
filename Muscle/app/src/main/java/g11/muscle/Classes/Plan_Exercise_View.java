@@ -40,7 +40,9 @@ public class Plan_Exercise_View extends RecyclerView.Adapter<Plan_Exercise_View.
         holder.plan_reps.setText(Integer.toString(list.get(position).getExercise_reps()));
         holder.plan_rest.setText(list.get(position).getExercise_rest());
         holder.plan_weight.setText(Integer.toString(list.get(position).getExercise_weight()));
-        holder.plan_image.setImageResource(list.get(position).getExercise_image());
+
+        if(list.get(position).getMode()) // check mark visible
+            holder.check.setVisibility(View.VISIBLE);
         //animate(holder);
     }
 
@@ -68,16 +70,15 @@ public class Plan_Exercise_View extends RecyclerView.Adapter<Plan_Exercise_View.
         notifyItemRemoved(position);
     }
 
-
-    public class Plan_Exercise_View_Holder extends  RecyclerView.ViewHolder  {
+    public class Plan_Exercise_View_Holder extends  RecyclerView.ViewHolder {
 
         private CardView cv;
-        private ImageView plan_image;
         private TextView plan_exercise;
         private TextView plan_sets;
         private TextView plan_reps;
         private TextView plan_rest;
         private TextView plan_weight;
+        private TextView check;
 
         private Plan_Exercise_View_Holder(View itemView) {
             super(itemView);
@@ -87,7 +88,7 @@ public class Plan_Exercise_View extends RecyclerView.Adapter<Plan_Exercise_View.
             plan_reps = (TextView) itemView.findViewById(R.id.plan_reps);
             plan_rest = (TextView) itemView.findViewById(R.id.plan_rest);
             plan_weight = (TextView) itemView.findViewById(R.id.plan_weight);
-            plan_image = (ImageView) itemView.findViewById(R.id.plan_image);
+            check = (TextView) itemView.findViewById(R.id.check);
         }
     }
 }

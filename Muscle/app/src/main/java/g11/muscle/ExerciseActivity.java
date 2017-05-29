@@ -43,6 +43,9 @@ public class ExerciseActivity extends AppCompatActivity implements ExerciseFragm
     //User email
     private String email;
 
+    private String rest;
+    private int reps,sets,weight;
+
     @Override
     public void onFragmentInteraction(Uri uri){
         //you can leave it empty - Used for interaction between fragments
@@ -59,7 +62,15 @@ public class ExerciseActivity extends AppCompatActivity implements ExerciseFragm
         final Intent intent = getIntent();
         exercise = intent.getStringExtra("exercise_name");
         email = intent.getStringExtra("email");
-        Log.e(TAG, exercise);
+
+        if(intent.getStringExtra("exercise_rest") != null) {
+            rest = intent.getStringExtra("exercise_rest");
+            reps = intent.getIntExtra("exercise_reps",0);
+            sets = intent.getIntExtra("exercise_sets",0);
+            weight = intent.getIntExtra("exercise_weight",0);
+        }else
+            rest = null;
+
         TabLayout tabLayout = (TabLayout) findViewById(R.id.tab_layout);
         tabLayout.addTab(tabLayout.newTab().setText("Exercise"));
         tabLayout.addTab(tabLayout.newTab().setText("Muscle Groups"));
@@ -93,6 +104,13 @@ public class ExerciseActivity extends AppCompatActivity implements ExerciseFragm
         Intent intent = new Intent(ExerciseActivity.this, FeedBackActivity.class);
         intent.putExtra("email", email);
         intent.putExtra("exercise_name", exercise);
+        if(rest != null)
+        {
+            intent.putExtra("exercise_rest",rest);
+            intent.putExtra("exercise_reps",reps);
+            intent.putExtra("exercise_sets",sets);
+            intent.putExtra("exercise_weight",weight);
+        }
         startActivity(intent);
     }
 }

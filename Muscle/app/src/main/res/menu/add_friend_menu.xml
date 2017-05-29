@@ -5,6 +5,6 @@
         android:id="@+id/add_friend"
         app:showAsAction="always"
         android:title="Add Friends"
-        android:icon="@drawable/ic_group_add_24dp" />
+        android:icon="@drawable/find_users"/>
 
 </menu>
