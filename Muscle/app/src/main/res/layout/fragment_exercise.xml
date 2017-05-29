@@ -13,34 +13,6 @@
         tools:layout_editor_absoluteY="81dp"
         tools:layout_editor_absoluteX="0dp">
 
-        <TextView
-            android:id="@+id/exercise"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:textAppearance="@style/Base.TextAppearance.AppCompat.Title"
-            android:layout_marginRight="8dp"
-            app:layout_constraintRight_toRightOf="parent"
-            android:layout_marginLeft="8dp"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            android:layout_marginTop="8dp"
-            android:layout_marginStart="8dp"
-            android:layout_marginEnd="8dp" />
-
-        <TextView
-            android:id="@+id/kind"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:layout_marginRight="8dp"
-            app:layout_constraintRight_toRightOf="parent"
-            android:layout_marginLeft="8dp"
-            app:layout_constraintLeft_toLeftOf="parent"
-            android:layout_marginTop="8dp"
-            app:layout_constraintTop_toBottomOf="@+id/exercise"
-            android:layout_marginStart="8dp"
-            android:layout_marginEnd="8dp" />
 
         <ImageView
             android:id="@+id/image"

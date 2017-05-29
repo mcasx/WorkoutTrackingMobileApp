@@ -14,6 +14,7 @@ import android.location.LocationProvider;
 import android.os.Build;
 import android.os.Handler;
 import android.os.PowerManager;
+import android.support.annotation.FloatRange;
 import android.support.annotation.RequiresApi;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -24,8 +25,21 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.volley.Request;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+
+import g11.muscle.DB.DBConnect;
+import g11.muscle.DB.VolleyProvider;
 
 
 public class CardioActivity extends AppCompatActivity implements SensorEventListener {
@@ -49,11 +63,13 @@ public class CardioActivity extends AppCompatActivity implements SensorEventList
     private TextView averageSpeed;
     private TextView instantSpeed;
     private TextView maximumSpeed;
+    private float height = 0.0f;
+    private VolleyProvider req_queue;
+
 
     private Runnable runnable = new Runnable() {
         @Override
         public void run() {
-
 
             String[] time = counter.getText().toString().split(":");
             int min = Integer.parseInt(time[0]);
@@ -71,6 +87,7 @@ public class CardioActivity extends AppCompatActivity implements SensorEventList
 
             averageSpeed.setText("Average Speed: " + df.format(distanceTime.getAverageSpeed(sec+min*60)) + " Km/h");
             instantSpeed.setText("Instant Speed: " + df.format(distanceTime.getInstantSpeed(sec+min*60)) + " Km/h");
+            Log.e(TAG, "Instant Speed: " + distanceTime.getInstantSpeed(sec+min*60));
             maximumSpeed.setText("Maximum Speed: " + df.format(distanceTime.getMaxSpeed()) + " Km/h");
 
             if(started)
@@ -93,7 +110,8 @@ public class CardioActivity extends AppCompatActivity implements SensorEventList
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_cardio);
 
-
+        req_queue = VolleyProvider.getInstance(this);
+        getHeight();
         count = (TextView) findViewById(R.id.steps);
         counter = (TextView) findViewById(R.id.counter);
         distance = (TextView) findViewById(R.id.distance);
@@ -153,7 +171,7 @@ public class CardioActivity extends AppCompatActivity implements SensorEventList
         countSteps = (int) (event.values[0] - sensorInitialValue);
         count.setText("Steps: " + countSteps);
 
-        stepDistance += getSharedPreferences("UserData", 0).getFloat("height", 1.75f) * 0.45;
+        stepDistance += height==0.0f ? height * 0.45 : 1.75 * 0.45;
 
         if (gpsDistance <= stepDistance * 0.75) {
             distance.setText("Distance: " + stepDistance/1000 + " Km");
@@ -277,6 +295,41 @@ public class CardioActivity extends AppCompatActivity implements SensorEventList
         public void onProviderDisabled(String provider) {
         }
 
+    public void getHeight(){
+        String url = DBConnect.serverURL + "/get_user_height";
+
+        StringRequest StrHistReq = new StringRequest(Request.Method.POST, url, new Response.Listener<String>(){
+            @RequiresApi(api = Build.VERSION_CODES.M)
+            @Override
+            public void onResponse(String response) {
+                try {
+                    height = new JSONObject(response).getInt("Height") / 100;
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        //Handle error response
+                        System.out.println(error.toString());
+                    }
+                }
+        ){
+            // use params are specified here
+            @Override
+            protected Map<String, String> getParams()
+            {
+                Map<String, String>  params = new HashMap<>();
+                params.put("email", "" + getSharedPreferences("UserData", 0).getString("email", null));
+
+                return params;
+            }
+        };
+
+        req_queue.addRequest(StrHistReq);
+    }
 
     private class DistanceTime{
         private ArrayList<Float> distances; //distance in meters
@@ -301,7 +354,7 @@ public class CardioActivity extends AppCompatActivity implements SensorEventList
 
             float instantSpeed = ((distances.get(distances.size()-1) - distances.get(distances.size()-1)) / (times.get(times.size()-1) - times.get(times.size()-1))) * 3600 / 1000;
 
-            if(instantSpeed> maxSpeed){
+            if(instantSpeed > maxSpeed){
                 maxSpeed = instantSpeed;
             }
 
@@ -315,6 +368,7 @@ public class CardioActivity extends AppCompatActivity implements SensorEventList
         public float getAverageSpeed(int currentTime){
             return (distances.get(distances.size()-1)/ currentTime) * 3600 / 1000;
         }
+
 
 
 

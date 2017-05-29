@@ -92,7 +92,7 @@ public class ExerciseFragment extends Fragment {
         exercise = intent.getStringExtra("exercise_name");
         email = intent.getStringExtra("email");
         // Exercise Name
-        exerciseView.setText(exercise);
+        //exerciseView.setText(exercise);
         req_queue = VolleyProvider.getInstance(getActivity());
         // get exercise information
         String urlEx = DBConnect.serverURL + "/get_exercise";
@@ -105,7 +105,7 @@ public class ExerciseFragment extends Fragment {
                         try{
                             JSONObject jsonObject = new JSONObject(response);
                             descriptionView.setText(jsonObject.getString("Description"));
-                            kindView.setText(jsonObject.getString("Kind"));
+                            //kindView.setText(jsonObject.getString("Kind"));
 
                             //Image name must be in lowercase
                             String DrawableName = jsonObject.getString("Image").toLowerCase();

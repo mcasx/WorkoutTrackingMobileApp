@@ -11,18 +11,12 @@
         android:layout_height="match_parent"
         android:orientation="vertical">
 
-        <TextView
-            android:id="@+id/Ex_Name"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textSize="25sp"
-            android:layout_marginTop="10dp"
-            android:text="Exercise name" />
+
 
         <ImageView
-            android:id="@+id/imageView"
+            android:id="@+id/muscleImage"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
+            android:layout_height="400dp"/>
     </LinearLayout>
 
 </FrameLayout>
