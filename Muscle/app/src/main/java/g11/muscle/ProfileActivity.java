@@ -1,6 +1,7 @@
 package g11.muscle;
 
 import android.app.AlertDialog;
+import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -61,6 +62,10 @@ import com.github.mikephil.charting.data.RadarEntry;
 import com.github.mikephil.charting.formatter.IAxisValueFormatter;
 import com.github.mikephil.charting.interfaces.datasets.IRadarDataSet;
 import com.github.mikephil.charting.utils.ColorTemplate;
+import com.squareup.picasso.Picasso;
+import com.theartofdev.edmodo.cropper.CropImage;
+import com.theartofdev.edmodo.cropper.CropImageActivity;
+import com.theartofdev.edmodo.cropper.CropImageView;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -91,7 +96,7 @@ public class ProfileActivity extends AppCompatActivity {
     private String profile_email;
     private String name;
     private String base64profile_pic;
-
+    final int PIC_CROP = 1;
     private ArrayAdapter<String> followingAdapter;
     private ArrayAdapter<String> followersAdapter;
 
@@ -104,6 +109,7 @@ public class ProfileActivity extends AppCompatActivity {
     private ImageView profile_image;
     private TextView height_text;
     private TextView weight_text;
+    private Uri picURI;
 
     String baseUrl = DBConnect.serverURL;
 
@@ -251,7 +257,7 @@ public class ProfileActivity extends AppCompatActivity {
                             if (jsonFollowingArray != null)
                                 for (int i=0;i<jsonFollowingArray.length();i++) {
                                     followingAdapter.add(jsonFollowingArray.getString(i));
-                            }
+                                }
 
 
                             if (jsonFollowersArray != null)
@@ -326,6 +332,34 @@ public class ProfileActivity extends AppCompatActivity {
         // Add the request to the RequestQueue
         req_queue.addRequest(StrProfileReq);
 
+    }
+
+    private void performCrop() {
+        try {
+            Intent cropIntent = new Intent("com.android.camera.action.CROP");
+            // indicate image type and Uri
+
+            cropIntent.setData(null);
+            // set crop properties here
+            cropIntent.putExtra("crop", true);
+            // indicate aspect of desired crop
+            cropIntent.putExtra("aspectX", 1);
+            cropIntent.putExtra("aspectY", 1);
+            // indicate output X and Y
+            cropIntent.putExtra("outputX", 128);
+            cropIntent.putExtra("outputY", 128);
+            // retrieve data on return
+            cropIntent.putExtra("return-data", true);
+            // start the activity - we handle returning in onActivityResult
+            startActivityForResult(cropIntent, PIC_CROP);
+        }
+        // respond to users whose devices do not support the crop action
+        catch (ActivityNotFoundException anfe) {
+            // display an error message
+            String errorMessage = "Whoops - your device doesn't support the crop action!";
+            Toast toast = Toast.makeText(this, errorMessage, Toast.LENGTH_SHORT);
+            toast.show();
+        }
     }
 
     private void addToFollowers() {
@@ -509,10 +543,50 @@ public class ProfileActivity extends AppCompatActivity {
     }
 
     public void onClickPickImage(View view) {
-        Intent pickPhotoIntent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-        startActivityForResult( pickPhotoIntent,1);
+
+        CropImage.activity(picURI)
+                .setGuidelines(CropImageView.Guidelines.ON)
+                .setFixAspectRatio(true)
+                .setInitialCropWindowPaddingRatio(0)
+                .start( this);
+
+    //        Intent pickPhotoIntent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+     //   startActivityForResult( pickPhotoIntent,1);
     }
 
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE) {
+            CropImage.ActivityResult result = CropImage.getActivityResult(data);
+            if (resultCode == RESULT_OK) {
+                try {
+                    Uri resultUri = result.getUri();
+
+                    Picasso.with(getApplication()).load(resultUri).into(profile_image);
+
+                    Bitmap user_img = MediaStore.Images.Media.getBitmap(getContentResolver(), resultUri);
+                    ByteArrayOutputStream stream = new ByteArrayOutputStream();
+                    user_img.compress(Bitmap.CompressFormat.JPEG, 80, stream);
+                    byte [] byte_arr = stream.toByteArray();
+                    base64profile_pic = Base64.encodeToString(byte_arr, Base64.DEFAULT);
+                    Map<String, String>  params = new HashMap<>();
+                    params.put("profile_pic", base64profile_pic);
+                    Log.i("nice",base64profile_pic);
+                    updateUser("/update_user_profile_pic", params);
+
+
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+            } else if (resultCode == CropImage.CROP_IMAGE_ACTIVITY_RESULT_ERROR_CODE) {
+                Exception error = result.getError();
+            }
+
+        }
+    }
+
+    /*
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -536,6 +610,7 @@ public class ProfileActivity extends AppCompatActivity {
 
                 ByteArrayOutputStream stream = new ByteArrayOutputStream();
                 resized.compress(Bitmap.CompressFormat.JPEG, 80, stream);
+
                 byte [] byte_arr = stream.toByteArray();
                 base64profile_pic = Base64.encodeToString(byte_arr, Base64.DEFAULT);
                 Map<String, String>  params = new HashMap<>();
@@ -546,7 +621,7 @@ public class ProfileActivity extends AppCompatActivity {
                 e.printStackTrace();
             }
         }
-    }
+    }*/
 
     protected void setUserProfileSetup(){
 
@@ -693,7 +768,7 @@ public class ProfileActivity extends AppCompatActivity {
     }
     private boolean validHeight(String height){
         if(!TextUtils.isEmpty(height) && Integer.parseInt(height) <= 400){
-                return true;
+            return true;
         }
         return false;
 
@@ -771,7 +846,7 @@ public class ProfileActivity extends AppCompatActivity {
             @Override
             protected Map<String, String> getParams()
             {
-                params.put("email",user_email);
+                params.put("email",profile_email);
                 return params;
             }
         };

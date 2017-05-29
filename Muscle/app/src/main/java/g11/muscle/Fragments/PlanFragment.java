@@ -3,6 +3,7 @@ package g11.muscle.Fragments;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.design.widget.BottomNavigationView;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -12,6 +13,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 
 import g11.muscle.R;
 
@@ -25,6 +27,7 @@ public class PlanFragment extends Fragment{
 
     private OnFragmentInteractionListener mListener;
     private FragmentManager manager;
+    private int buttonHeight;
 
     public PlanFragment() {
         // Required empty public constructor
@@ -35,13 +38,25 @@ public class PlanFragment extends Fragment{
                              Bundle savedInstanceState) {
         manager = getChildFragmentManager();
         View fView = inflater.inflate(R.layout.fragment_plan, container, false);
-
         TabLayout tabLayout = (TabLayout) fView.findViewById(R.id.plan_tab_layout);
         tabLayout.addTab(tabLayout.newTab().setText("My Plan"));
         tabLayout.addTab(tabLayout.newTab().setText("Plans"));
         tabLayout.setTabGravity(TabLayout.GRAVITY_FILL);
         // Inflate the layout for this fragment
         final ViewPager viewPager = (ViewPager) fView.findViewById(R.id.plan_pager);
+
+        BottomNavigationView  bottom = (BottomNavigationView) container.findViewById(R.id.navigation);
+        if (bottom != null) {
+            buttonHeight = bottom.getHeight();
+        }
+        else
+            buttonHeight = 60;
+
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
+        lp.setMargins(0, 0, 0, buttonHeight);
+        viewPager.setLayoutParams(lp);
+
+
         final PlanPagerAdapter adapter = new PlanPagerAdapter
                 (manager, tabLayout.getTabCount());
         viewPager.setAdapter(adapter);
