@@ -43,7 +43,7 @@
                 android:editable="false"
                 android:text="TextView"
                 android:textAppearance="@style/TextAppearance.AppCompat.Light.SearchResult.Title"
-                android:textColor="#B7B327"
+                android:textColor="#f8ff40"
                 app:layout_constraintHorizontal_bias="0.501"
                 app:layout_constraintLeft_toRightOf="@+id/userCommentImage"
                 app:layout_constraintRight_toRightOf="parent"

@@ -119,12 +119,13 @@
             android:text="Start" />
 
         <Button
-            android:id="@+id/button3"
+            android:id="@+id/finishButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:elevation="0dp"
             android:enabled="false"
 
+            android:onClick="onFinishClicked"
             android:text="Finish"
             app:layout_constraintRight_toRightOf="parent" />
     </LinearLayout>

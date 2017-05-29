@@ -334,9 +334,6 @@ public class DetailedExerciseHistoryActivity extends AppCompatActivity {
                 return params;
             }
         };
-
         req_queue.addRequest(StrHistReq);
-
     }
-
 }
