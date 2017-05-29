@@ -1,0 +1,20 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="horizontal"
+    android:minHeight="?attr/listPreferredItemHeight">
+
+    <ImageView
+        android:id="@+id/arrow"
+        android:layout_width="0px"
+        android:layout_height="25px"
+        android:layout_weight="1"/>
+
+    <TextView
+        android:id="@+id/muscle_group"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:layout_width="0px"
+        android:layout_height="match_parent"
+        android:layout_weight="4"/>
+
+</LinearLayout>
