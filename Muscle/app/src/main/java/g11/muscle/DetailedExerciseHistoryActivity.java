@@ -37,6 +37,7 @@ public class DetailedExerciseHistoryActivity extends AppCompatActivity {
 
     public static JSONObject exerciseHistoryItem = null;
     private final String TAG = "DetailedExerciseHistory";
+    private static final String ERROR_MSG = "Please try to reconnect";
     private VolleyProvider req_queue;
     private boolean hasThumbs = false;
 
@@ -278,7 +279,7 @@ public class DetailedExerciseHistoryActivity extends AppCompatActivity {
                         AlertDialog alertDialog = new AlertDialog.Builder(DetailedExerciseHistoryActivity.this).create();
                         alertDialog.setTitle("No Internet Connection");
                         //"Please connect your device to the Internet and try again")
-                        alertDialog.setMessage(error.toString());
+                        alertDialog.setMessage(ERROR_MSG);
                         alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
                                 new DialogInterface.OnClickListener() {
                                     public void onClick(DialogInterface dialog, int which) {

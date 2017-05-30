@@ -35,6 +35,8 @@ public class RegisterActivity extends AppCompatActivity {
     private String email;
     private String password;
     private String repeatedPassword;
+    private static final String ERROR_MSG = "Please try to reconnect";
+
 
     ProgressBar progressBar;
     TextInputLayout email_layout;
@@ -150,7 +152,7 @@ public class RegisterActivity extends AppCompatActivity {
                         AlertDialog alertDialog = new AlertDialog.Builder(RegisterActivity.this).create();
                         alertDialog.setTitle("No Internet Connection");
                         // Please connect your device to the Internet and try again
-                        alertDialog.setMessage(error.toString());
+                        alertDialog.setMessage(ERROR_MSG);
                         alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
                                 new DialogInterface.OnClickListener() {
                                     public void onClick(DialogInterface dialog, int which) {
@@ -159,6 +161,7 @@ public class RegisterActivity extends AppCompatActivity {
                                 });
                         alertDialog.show();
                         set_progressBar_visibility(View.GONE);
+
                     }
                 }
         ){

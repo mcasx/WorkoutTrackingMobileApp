@@ -50,6 +50,8 @@ import g11.muscle.DB.VolleyProvider;
 
 public class SettingsActivity  extends AppCompatActivity {
     private final int PICK_IMAGE_REQUEST = 1;
+    private static final String ERROR_MSG = "Please try to reconnect";
+
 
     TextInputLayout height_input_layout;
     TextInputLayout weight_input_layout;
@@ -135,7 +137,7 @@ public class SettingsActivity  extends AppCompatActivity {
                         AlertDialog alertDialog = new AlertDialog.Builder(SettingsActivity.this).create();
                         alertDialog.setTitle("No Internet Connection");
                         // Please connect your device to the Internet and try again
-                        alertDialog.setMessage(error.toString());
+                        alertDialog.setMessage(ERROR_MSG);
                         alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
                                 new DialogInterface.OnClickListener() {
                                     public void onClick(DialogInterface dialog, int which) {
@@ -251,7 +253,7 @@ public class SettingsActivity  extends AppCompatActivity {
                         AlertDialog alertDialog = new AlertDialog.Builder(SettingsActivity.this).create();
                         alertDialog.setTitle("No Internet Connection");
                         // Please connect your device to the Internet and try again
-                        alertDialog.setMessage(error.toString());
+                        alertDialog.setMessage(ERROR_MSG);
                         alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
                                 new DialogInterface.OnClickListener() {
                                     public void onClick(DialogInterface dialog, int which) {

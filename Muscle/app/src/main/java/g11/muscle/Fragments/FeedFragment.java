@@ -226,6 +226,7 @@ public class FeedFragment extends Fragment {
                             public void onErrorResponse(VolleyError error) {
                                 //Handle error response
                                 System.out.println(error.toString());
+                                progressBar.setVisibility(View.GONE);
                             }
                         }
                 ){
@@ -244,8 +245,8 @@ public class FeedFragment extends Fragment {
                 search_queue.addRequest(StrUsersLikeReq);
             }
         });
-
-
+        createUserFeed();
+        recommendedFollows();
 
         // Inflate the layout for this fragment
         return fView;
@@ -288,6 +289,7 @@ public class FeedFragment extends Fragment {
                     public void onErrorResponse(VolleyError error) {
                         //Handle error response
                         System.out.println(error.toString());
+                        progressBar.setVisibility(View.GONE);
                     }
                 }
         ){
@@ -304,14 +306,6 @@ public class FeedFragment extends Fragment {
 
         //Queue the request
         search_queue.addRequest(StrUsersLikeReq);
-    }
-
-    @Override
-    public void onStart(){
-        super.onStart();
-        createUserFeed();
-        recommendedFollows();
-
     }
 
     // TODO: Rename method, update argument and hook method into UI event
@@ -409,17 +403,6 @@ public class FeedFragment extends Fragment {
 
                         feedView.setAdapter(adapter);
 
-                        // Set the listeners on the list items
-
-                        feedView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                            public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
-                                Log.i("HELP","in on feed item click");
-                                //Go to exercise page
-                                DetailedExerciseHistoryActivity.exerciseHistoryItem = history.get(position).getJsonObj();
-                                startActivity(new Intent(getActivity(), DetailedExerciseHistoryActivity.class));
-                            }
-                        });
-
                     }
                 },
                 new Response.ErrorListener() {
@@ -427,6 +410,8 @@ public class FeedFragment extends Fragment {
                     public void onErrorResponse(VolleyError error) {
                         //Handle error response
                         System.out.println(error.toString());
+                        progressBar.setVisibility(View.GONE);
+
                     }
                 }
         ){

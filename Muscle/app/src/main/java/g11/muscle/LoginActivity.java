@@ -38,6 +38,8 @@ public class LoginActivity extends AppCompatActivity {
     private ImageView          logo;
     private SharedPreferences  sp;
 
+    private static final String ERROR_MSG = "Please try to reconnect";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -155,7 +157,7 @@ public class LoginActivity extends AppCompatActivity {
                         AlertDialog alertDialog = new AlertDialog.Builder(LoginActivity.this).create();
                         alertDialog.setTitle("No Internet Connection");
                         //"Please connect your device to the Internet and try again")
-                        alertDialog.setMessage(error.toString());
+                        alertDialog.setMessage(ERROR_MSG);
                         alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
                                 new DialogInterface.OnClickListener() {
                                     public void onClick(DialogInterface dialog, int which) {
