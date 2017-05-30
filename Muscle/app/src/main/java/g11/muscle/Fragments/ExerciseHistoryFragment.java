@@ -48,6 +48,7 @@ import g11.muscle.Classes.ExerciseHistoryAdapter;
 import g11.muscle.DB.DBConnect;
 import g11.muscle.DB.MuscleDbContract;
 import g11.muscle.DetailedExerciseHistoryActivity;
+import g11.muscle.DetailedRunningActivity;
 import g11.muscle.HomeActivity;
 import g11.muscle.R;
 import g11.muscle.DB.VolleyProvider;
@@ -264,8 +265,15 @@ public class ExerciseHistoryFragment extends Fragment {
             String email = getContext().getSharedPreferences("UserData",0).getString("email", null);
             Log.i("TG",email);
             DetailedExerciseHistoryActivity.exerciseHistoryItem = item;
+            DetailedRunningActivity.exerciseHistoryItem = item;
 
-            Intent intent = new Intent(getActivity(), DetailedExerciseHistoryActivity.class);
+
+            Intent intent;
+
+            if(exercise_name.equals("Running"))
+                intent = new Intent(getActivity(), DetailedRunningActivity.class);
+            else
+                intent = new Intent(getActivity(), DetailedExerciseHistoryActivity.class);
 
             intent.putExtra("email", email);
             intent.putExtra("exercise_name",exercise_name);

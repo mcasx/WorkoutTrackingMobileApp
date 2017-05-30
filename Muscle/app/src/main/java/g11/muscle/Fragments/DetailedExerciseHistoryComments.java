@@ -67,6 +67,7 @@ public class DetailedExerciseHistoryComments extends Fragment {
         View fview = inflater.inflate(R.layout.fragment_detailed_exercise_history_comments, container, false);
         this.inflater = inflater;
         commentsBaseLayout = (LinearLayout)fview.findViewById(R.id.commentsBaseLayout);
+
         setCommentCards();
         ImageButton sendButton = (ImageButton)fview.findViewById(R.id.sendButton);
         sendButton.setOnClickListener(new View.OnClickListener() {

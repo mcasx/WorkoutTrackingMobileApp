@@ -47,6 +47,7 @@ import java.util.Map;
 
 import g11.muscle.DB.DBConnect;
 import g11.muscle.DetailedExerciseHistoryActivity;
+import g11.muscle.DetailedRunningActivity;
 import g11.muscle.ProfileActivity;
 import g11.muscle.R;
 import g11.muscle.DB.VolleyProvider;
@@ -525,7 +526,15 @@ public class FeedFragment extends Fragment {
                 public void onClick(View v) {
                     //Go to exercise page
                     DetailedExerciseHistoryActivity.exerciseHistoryItem = list[position].getJsonObj();
-                    startActivity(new Intent(getActivity(), DetailedExerciseHistoryActivity.class));
+                    DetailedRunningActivity.exerciseHistoryItem = list[position].getJsonObj();
+                    try {
+                        if(list[position].getJsonObj().getString("Exercise_name").equals("Running"))
+                            startActivity(new Intent(getActivity(), DetailedRunningActivity.class));
+                        else
+                            startActivity(new Intent(getActivity(), DetailedExerciseHistoryActivity.class));
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
                 }
             });
 
