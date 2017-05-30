@@ -33,6 +33,9 @@ import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
+import com.squareup.picasso.Picasso;
+import com.theartofdev.edmodo.cropper.CropImage;
+import com.theartofdev.edmodo.cropper.CropImageView;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -71,6 +74,7 @@ public class FormActivity extends AppCompatActivity {
     TextView viewDob;
     //ImageView imgView;
     ProgressBar progressBar;
+    Uri picURI;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -125,8 +129,11 @@ public class FormActivity extends AppCompatActivity {
     }
 
     public void onClickPickImage(View view) {
-        Intent pickPhotoIntent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-        startActivityForResult( pickPhotoIntent,PICK_IMAGE_REQUEST);
+        CropImage.activity(picURI)
+                .setGuidelines(CropImageView.Guidelines.ON)
+                .setFixAspectRatio(true)
+                .setInitialCropWindowPaddingRatio(0)
+                .start( this);
     }
 
 
@@ -247,33 +254,39 @@ public class FormActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK && data != null && data.getData() != null) {
 
-                //Bitmap user_img = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
-                //ImageView profile_pic = ((ImageView) findViewById(R.id.pick_profile_img));
-                //profile_pic.setScaleType(ImageView.ScaleType.FIT_XY);
-                //profile_pic.setImageBitmap(user_img);
+        if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE) {
+            CropImage.ActivityResult result = CropImage.getActivityResult(data);
+            if (resultCode == RESULT_OK) {
+                try {
+                    Uri resultUri = result.getUri();
+                    /*
+                    Bitmap user_img = MediaStore.Images.Media.getBitmap(getContentResolver(), uri);
+                    Bitmap resized = Bitmap.createScaledBitmap(user_img, 100, 100, true);
+                    pickImage.setImageBitmap(resized);
 
-            Log.i("TG","getting uri");
+                    ByteArrayOutputStream stream = new ByteArrayOutputStream();
+                    resized.compress(Bitmap.CompressFormat.JPEG, 80, stream);
+                    byte [] byte_arr = stream.toByteArray();
+                    profile_pic = Base64.encodeToString(byte_arr, Base64.DEFAULT);*/
 
-            Uri uri = data.getData();
+                    Picasso.with(getApplication()).load(resultUri).into(pickImage);
 
-            try {
-                Log.i("TG","getting image");
+                    Bitmap user_img = MediaStore.Images.Media.getBitmap(getContentResolver(), resultUri);
+                    ByteArrayOutputStream stream = new ByteArrayOutputStream();
+                    user_img.compress(Bitmap.CompressFormat.JPEG, 80, stream);
+                    byte [] byte_arr = stream.toByteArray();
+                    profile_pic = Base64.encodeToString(byte_arr, Base64.DEFAULT);
 
 
-                Bitmap user_img = MediaStore.Images.Media.getBitmap(getContentResolver(), uri);
-                Bitmap resized = Bitmap.createScaledBitmap(user_img, 100, 100, true);
-                pickImage.setImageBitmap(resized);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
 
-                ByteArrayOutputStream stream = new ByteArrayOutputStream();
-                resized.compress(Bitmap.CompressFormat.JPEG, 80, stream);
-                byte [] byte_arr = stream.toByteArray();
-                profile_pic = Base64.encodeToString(byte_arr, Base64.DEFAULT);
-
-            } catch (IOException e) {
-                e.printStackTrace();
+            } else if (resultCode == CropImage.CROP_IMAGE_ACTIVITY_RESULT_ERROR_CODE) {
+                Exception error = result.getError();
             }
+
         }
     }
 
@@ -287,13 +300,22 @@ public class FormActivity extends AppCompatActivity {
 
         if(!TextUtils.isEmpty(weight)) {
             try {
-                Double.parseDouble(weight);
+                Double weight_value = Double.parseDouble(weight);
+                if(weight_value > 300)
+                    return false;
+
             } catch (NumberFormatException e) {
                 weight_input_layout.requestFocus();
                 set_progressBar_visibility(View.GONE);
                 weight_input_layout.setError("Invalid weight");
                 return false;
             }
+        }
+        else{
+            weight_input_layout.requestFocus();
+            set_progressBar_visibility(View.GONE);
+            weight_input_layout.setError("Invalid weight");
+            return false;
         }
 
         if(!TextUtils.isEmpty(height)){

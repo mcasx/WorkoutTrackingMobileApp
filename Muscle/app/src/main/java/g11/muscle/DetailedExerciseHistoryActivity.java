@@ -83,7 +83,7 @@ public class DetailedExerciseHistoryActivity extends AppCompatActivity {
 
             }
         });
-
+        Log.i("HELP","finished onCreate");
     }
 
     @Override

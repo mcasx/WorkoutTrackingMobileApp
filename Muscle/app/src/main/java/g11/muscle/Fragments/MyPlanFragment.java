@@ -158,18 +158,24 @@ public class MyPlanFragment extends Fragment {
                     public void onResponse(String response) {
                         try {
                             JSONArray jsonArray = new JSONArray(response);
+                            Log.i("HELP","in 1 onresponse");
                             plan_trainings.clear(); // check the list is empty before adding items
                             try {
                                 for (int i = 0; i < jsonArray.length(); i++) {
                                     String tmp_name = new JSONObject(jsonArray.getString(i)).getString("Name");
                                     int tmp_id = Integer.parseInt(new JSONObject(jsonArray.getString(i)).getString("ID"));
                                     plan_trainings.add(new TrainingsItem(tmp_id,tmp_name));
+                                    myPlanProgressBar.setVisibility(View.INVISIBLE);
                                 }
                             } catch (JSONException je){
                                 Log.e(TAG, je.toString());
+                                myPlanProgressBar.setVisibility(View.INVISIBLE);
+
                             }
                         }catch (JSONException e2){
                             e2.printStackTrace();
+                            myPlanProgressBar.setVisibility(View.INVISIBLE);
+
                         }
 
                         String[] items = new String[plan_trainings.size()];
@@ -185,6 +191,7 @@ public class MyPlanFragment extends Fragment {
                             public void onNothingSelected(AdapterView<?> parent) {
                             }
                         });
+                        myPlanProgressBar.setVisibility(View.INVISIBLE);
                     }
                 },
                 new Response.ErrorListener() {
@@ -252,9 +259,13 @@ public class MyPlanFragment extends Fragment {
                                 }
                             } catch (JSONException je){
                                 Log.e(TAG, je.toString());
+                                myPlanProgressBar.setVisibility(View.INVISIBLE);
+
                             }
                         }catch (JSONException e2){
                             e2.printStackTrace();
+                            myPlanProgressBar.setVisibility(View.INVISIBLE);
+
                         }
 
                         Plan_Exercise_View adapter = new Plan_Exercise_View(training_data);
@@ -263,8 +274,8 @@ public class MyPlanFragment extends Fragment {
                         recyclerView.setAdapter(adapter);
                         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
 
-                        content.setVisibility(View.VISIBLE);
                         myPlanProgressBar.setVisibility(View.INVISIBLE);
+                        content.setVisibility(View.VISIBLE);
                     }
                 },
                 new Response.ErrorListener() {
@@ -282,6 +293,7 @@ public class MyPlanFragment extends Fragment {
                                     }
                                 });
                         alertDialog.show();
+                        Log.i("HELP","10");
                         myPlanProgressBar.setVisibility(View.INVISIBLE);
                     }
                 }
