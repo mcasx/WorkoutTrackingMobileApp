@@ -91,8 +91,10 @@ public class HomeActivity extends AppCompatActivity implements PickExerciseFragm
 
 
         // Start app in home fragment
-        setTitle("Home");
-        switchToFragmentHome();
+        if(savedInstanceState == null){
+            setTitle("Home");
+            switchToFragmentHome();
+        }
     }
 
     @Override
