@@ -355,6 +355,7 @@ public class HomeFragment extends Fragment implements OnChartValueSelectedListen
                     @Override
                     public void onResponse(String response) {
                         try {
+                            Log.e(TAG,response);
                             JSONArray jsonArray = new JSONArray(response);
                             rE = new String[jsonArray.length()];
                             try {
@@ -425,23 +426,18 @@ public class HomeFragment extends Fragment implements OnChartValueSelectedListen
                             Log.e("Response", response);
                             JSONArray jsonArray = new JSONArray(response);
                             rP = new String[jsonArray.length()];
+                            cola = new String[jsonArray.length()];
                             try {
                                 for (int i = 0; i < jsonArray.length(); i++) {
-                                    String tmp = jsonArray.getJSONObject(i).getString("ID");
-                                    // TODO Needs a way to list plans by count
-                                    rP[i] = tmp;
+                                    JSONObject tmp = jsonArray.getJSONObject(i);
+                                    rP[i] = tmp.getString("ID");
+                                    cola[i] = tmp.getString("Name");
                                 }
                             } catch (JSONException je) {
                                 Log.e(TAG, je.toString());
                             }
                         } catch (JSONException e2) {
                             e2.printStackTrace();
-                        }
-
-                        //TODO REMOVE THIS
-                        cola = new String[rP.length];
-                        for(int i = 0; i < rP.length;i++){
-                            cola[i] = "Plan "+ rP[i];
                         }
 
                         // Define the groupView adapter

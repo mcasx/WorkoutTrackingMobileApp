@@ -98,14 +98,6 @@ public class DetailedExerciseHistoryComments extends Fragment {
                             //From the response create the sets array
                             JSONObject jsonProfile = jsonObject.getJSONObject("pictures");
 
-                            if(comments.length() == 0)
-                                new AlertDialog.Builder(getContext())
-                                        .setIcon(android.R.drawable.ic_dialog_alert)
-                                        .setTitle("No comments")
-                                        .setMessage("This exercise currently has no comments")
-                                        .setPositiveButton("Ok", null)
-                                        .show();
-
                             commentsBaseLayout.removeAllViews();
 
 
