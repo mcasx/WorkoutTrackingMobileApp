@@ -882,6 +882,7 @@ public class ProfileActivity extends AppCompatActivity {
                     @Override
                     public void onResponse(String response) {
                         try {
+
                             JSONArray jsonArray = new JSONArray(response);
                             // Chart Array Values List
                             ArrayList<RadarEntry> entries = new ArrayList<>();
@@ -919,6 +920,7 @@ public class ProfileActivity extends AppCompatActivity {
                                 }
                                 entries.add(new RadarEntry(tmp));
                             }
+
                             // Graph is explicit i think
                             RadarDataSet set1 = new RadarDataSet(entries,"% Worked Group Muscles");
                             set1.setColor(Color.rgb(121, 162, 175));
@@ -1000,7 +1002,7 @@ public class ProfileActivity extends AppCompatActivity {
             protected Map<String, String> getParams()
             {
                 Map<String, String>  params = new HashMap<>();
-                params.put("User_email", user_email);
+                params.put("User_email", profile_email);
                 return params;
             }
         };
@@ -1010,6 +1012,7 @@ public class ProfileActivity extends AppCompatActivity {
     }
 
     private void LineSetup(){
+
         // no description text
         lChart.getDescription().setEnabled(false);
 
@@ -1036,6 +1039,7 @@ public class ProfileActivity extends AppCompatActivity {
 
         String url = DBConnect.serverURL + "/get_weight_history";
         //Create the exercise history request
+
         StringRequest StrHistReq = new StringRequest(Request.Method.POST,url,
                 new Response.Listener<String>() {
                     @Override
@@ -1078,9 +1082,11 @@ public class ProfileActivity extends AppCompatActivity {
 
                             lChart.invalidate();
 
+
                             // get the legend (only possible after setting data)
                             Legend l = lChart.getLegend();
                             l.setEnabled(false);
+
 
                             XAxis xAxis = lChart.getXAxis();
                             xAxis.setPosition(XAxis.XAxisPosition.TOP_INSIDE);
@@ -1092,6 +1098,8 @@ public class ProfileActivity extends AppCompatActivity {
                             xAxis.setTextColor(Color.rgb(255, 192, 56));
                             xAxis.setCenterAxisLabels(true);
                             xAxis.setGranularity(1f); // one hour
+
+
                             xAxis.setValueFormatter(new IAxisValueFormatter() {
 
                                 private SimpleDateFormat mFormat = new SimpleDateFormat("EE, dd MMM",Locale.UK);
@@ -1120,6 +1128,7 @@ public class ProfileActivity extends AppCompatActivity {
                             YAxis rightAxis = lChart.getAxisRight();
                             rightAxis.setEnabled(false);
 
+
                         }catch (JSONException e2){
                             e2.printStackTrace();
                         }
@@ -1138,7 +1147,7 @@ public class ProfileActivity extends AppCompatActivity {
             protected Map<String, String> getParams()
             {
                 Map<String, String>  params = new HashMap<>();
-                params.put("user_email", user_email);
+                params.put("user_email", profile_email);
                 return params;
             }
         };

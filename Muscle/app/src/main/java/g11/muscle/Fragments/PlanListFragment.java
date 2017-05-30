@@ -59,6 +59,8 @@ import g11.muscle.DB.VolleyProvider;
 public class PlanListFragment extends Fragment {
 
     private static final String TAG = "PlanListFragment";
+    private static final String ERROR_MSG = "Please try to reconnect";
+
 
 
     // Used by Main Activity
@@ -172,18 +174,19 @@ public class PlanListFragment extends Fragment {
                     @Override
                     public void onErrorResponse(VolleyError error) {
                         //Handle error response
+                        /*
                         AlertDialog alertDialog = new AlertDialog.Builder(getActivity()).create();
                         alertDialog.setTitle("No Internet Connection");
                         //"Please connect your device to the Internet and try again")
-                        alertDialog.setMessage(error.toString());
+                        alertDialog.setMessage(ERROR_MSG);
                         alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
                                 new DialogInterface.OnClickListener() {
                                     public void onClick(DialogInterface dialog, int which) {
                                         dialog.dismiss();
                                     }
                                 });
-                        alertDialog.show();
-                        System.out.println(error.toString());
+                        alertDialog.show();*/
+                        planListProgressBar.setVisibility(View.GONE);
                     }
                 }
         ){

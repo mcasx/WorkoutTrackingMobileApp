@@ -67,6 +67,7 @@ import g11.muscle.DB.VolleyProvider;
  */
 public class HomeFragment extends Fragment implements OnChartValueSelectedListener {
     private static final String TAG = "HomeFragment";
+    private static final String ERROR_MSG = "Please try to reconnect";
 
     private OnFragmentInteractionListener mListener;
 
@@ -192,23 +193,27 @@ public class HomeFragment extends Fragment implements OnChartValueSelectedListen
                         }
 
                         list = new ArrayList<>();
-                        Iterator<String> iter = response.keys();
-                        while (iter.hasNext()) {
-                            String key = iter.next();
-                            try {
-                                Double value = response.getDouble(key);
-                                list.add(new MuscleProgressItem(value, key));
-                            } catch (JSONException e) {
-                                // Something went wrong!
+
+                        Iterator<String> iter;
+                        if(response != null) {
+                            iter = response.keys();
+                            while (iter.hasNext()) {
+                                String key = iter.next();
+                                try {
+                                    Double value = response.getDouble(key);
+                                    list.add(new MuscleProgressItem(value, key));
+                                } catch (JSONException e) {
+                                    // Something went wrong!
+                                }
                             }
+
+                            // Define the groupView adapter
+
+                            progressBar.setVisibility(View.GONE);
+
+                            // set bar chart
+                            barChartSetup();
                         }
-
-                        // Define the groupView adapter
-
-                        progressBar.setVisibility(View.GONE);
-
-                        // set bar chart
-                        barChartSetup();
                     }
 
                 },
@@ -385,12 +390,12 @@ public class HomeFragment extends Fragment implements OnChartValueSelectedListen
                     @Override
                     public void onErrorResponse(VolleyError error) {
                         //Handle error response
-                        System.out.println(error.toString());
+                        System.out.println();
                         progressBar.setVisibility(View.GONE);
                         AlertDialog alertDialog = new AlertDialog.Builder(getActivity()).create();
                         alertDialog.setTitle("No Internet Connection");
                         //"Please connect your device to the Internet and try again")
-                            alertDialog.setMessage(error.toString());
+                            alertDialog.setMessage(ERROR_MSG);
                             alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
                                 new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int which) {
@@ -465,10 +470,11 @@ public class HomeFragment extends Fragment implements OnChartValueSelectedListen
                         //Handle error response
                         System.out.println(error.toString());
                         progressBar.setVisibility(View.GONE);
+
                         AlertDialog alertDialog = new AlertDialog.Builder(getActivity()).create();
                         alertDialog.setTitle("No Internet Connection");
                         //"Please connect your device to the Internet and try again")
-                        alertDialog.setMessage(error.toString());
+                        alertDialog.setMessage("Please try to reconnect");
                         alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
                                 new DialogInterface.OnClickListener() {
                                     public void onClick(DialogInterface dialog, int which) {

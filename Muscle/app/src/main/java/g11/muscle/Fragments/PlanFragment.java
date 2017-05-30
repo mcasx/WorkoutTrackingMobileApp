@@ -50,7 +50,7 @@ public class PlanFragment extends Fragment{
             buttonHeight = bottom.getHeight();
         }
         else
-            buttonHeight = 60;
+            buttonHeight = 120;
 
         LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
         lp.setMargins(0, 0, 0, buttonHeight);

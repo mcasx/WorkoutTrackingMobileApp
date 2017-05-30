@@ -57,6 +57,7 @@ public class MyPlanFragment extends Fragment {
     private OnFragmentInteractionListener mListener;
 
     private static final String TAG = "MyPlanFragment";
+    private static final String ERROR_MSG = "Please try to reconnect";
 
     private String email;
 
@@ -190,7 +191,19 @@ public class MyPlanFragment extends Fragment {
                     @Override
                     public void onErrorResponse(VolleyError error) {
                         //Handle error response
-                        System.out.println(error.toString());
+                        /*
+                        AlertDialog alertDialog = new AlertDialog.Builder(getActivity()).create();
+                        alertDialog.setTitle("No Internet Connection");
+                        //"Please connect your device to the Internet and try again")
+                        alertDialog.setMessage(ERROR_MSG);
+                        alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
+                                new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        dialog.dismiss();
+                                    }
+                                });
+                        alertDialog.show();*/
+                        myPlanProgressBar.setVisibility(View.INVISIBLE);
                     }
                 }
         ){
@@ -258,12 +271,10 @@ public class MyPlanFragment extends Fragment {
                     @Override
                     public void onErrorResponse(VolleyError error) {
                         //Handle error response
-                        System.out.println(error.toString());
-                        myPlanProgressBar.setVisibility(View.GONE);
                         AlertDialog alertDialog = new AlertDialog.Builder(getActivity()).create();
                         alertDialog.setTitle("No Internet Connection");
                         //"Please connect your device to the Internet and try again")
-                        alertDialog.setMessage(error.toString());
+                        alertDialog.setMessage(ERROR_MSG);
                         alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
                                 new DialogInterface.OnClickListener() {
                                     public void onClick(DialogInterface dialog, int which) {
@@ -271,6 +282,7 @@ public class MyPlanFragment extends Fragment {
                                     }
                                 });
                         alertDialog.show();
+                        myPlanProgressBar.setVisibility(View.INVISIBLE);
                     }
                 }
         ){
