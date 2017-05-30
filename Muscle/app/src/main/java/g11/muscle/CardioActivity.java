@@ -3,6 +3,7 @@ package g11.muscle;
 import android.Manifest;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
@@ -410,7 +411,12 @@ public class CardioActivity extends AppCompatActivity implements SensorEventList
     public void onFinishClicked(View view){
 
         stop();
+        startButton.setText("Start");
 
+        if(finishButton.getText().toString().equals("Restart")){
+            startActivity(new Intent(this, CardioActivity.class));
+            finish();
+        }
         new AlertDialog.Builder(this)
                 .setIcon(android.R.drawable.ic_dialog_alert)
                 .setTitle("Finish")
@@ -419,18 +425,11 @@ public class CardioActivity extends AppCompatActivity implements SensorEventList
                 {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
+                        saveExercise();
 
-
-                        finish();
                     }
                 })
                 .setNegativeButton("No", null)
-                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-
-                    }
-                })
                 .show();
 
     }
@@ -438,14 +437,16 @@ public class CardioActivity extends AppCompatActivity implements SensorEventList
     private void saveExercise(){
         // current date time
         final java.sql.Timestamp date = new java.sql.Timestamp(new java.util.Date().getTime());
-
+        startButton.setEnabled(false);
+        finishButton.setEnabled(false);
+        finishButton.setText("Restart");
         // add exercise to user history
+
         StringRequest Add_Req = new StringRequest(Request.Method.POST, DBConnect.serverURL + "/add_exercise_history",
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response){
                         Log.e(TAG,"Posted exercise");
-
                         saveSet(Integer.parseInt(response));
                     }
                 },
@@ -485,18 +486,15 @@ public class CardioActivity extends AppCompatActivity implements SensorEventList
         VolleyProvider.getInstance(this).addRequest(Add_Req);
     }
 
-    private void saveSet(int exerciseID){
-
-        // current date time
-        final java.sql.Timestamp date = new java.sql.Timestamp(new java.util.Date().getTime());
+    private void saveSet(final int exerciseID){
 
         // add exercise to user history
-        StringRequest Add_Req = new StringRequest(Request.Method.POST, DBConnect.serverURL + "/add_exercise_history",
+        StringRequest Add_Req = new StringRequest(Request.Method.POST, DBConnect.serverURL + "/add_set",
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response){
                         Log.e(TAG,"Posted exercise");
-
+                        finish();
                     }
                 },
                 new Response.ErrorListener() {
@@ -524,11 +522,12 @@ public class CardioActivity extends AppCompatActivity implements SensorEventList
             protected Map<String, String> getParams()
             {
                 Map<String, String>  params = new HashMap<>();
-                params.put("user", getSharedPreferences("UserData", 0).getString("email", null));
-                params.put("date_time", String.valueOf(date));
-                params.put("exercise_name", "Running");
-                params.put("set_amount", String.valueOf(1));
-                params.put("average_intensity", averageSpeed.getText().toString().split(" ")[1]);
+                params.put("exercise_history_id", "" + exerciseID);
+                params.put("set_number", "" + 1);
+                params.put("repetitions", "" + Math.round(Float.valueOf(distance.getText().toString()) * 1000));
+                params.put("weight", "null");
+                params.put("resting_time", "null");
+                params.put("intensity_deviation", "null");
                 return params;
             }
         };

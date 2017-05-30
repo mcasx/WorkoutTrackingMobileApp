@@ -423,7 +423,7 @@ def add_exercise_history():
         id = c.lastrowid
         c.close()
         conn.close()
-        return "Exercise History " + str(id) + " added"
+        return "Exercise History " + str(id)
     except Exception as e:
         return str(e)
 
@@ -442,6 +442,30 @@ def rm_exercise_history():
         c.close()
         conn.close()
         return 'Exercise_history ' + id + ' removed'
+    except Exception as e:
+        return str(e)
+
+
+@app.route('/add_set', methods = ['POST'])
+def add_set():
+    try:
+	exercise_history_id = int(request.form['exercise_history_id'])
+        set_number = int(request.form['set_number'])
+        repetition = int(request.form['repetitions'])
+        weight = int(request.form['weight']) if request.form['weight'] != "null" else None
+        intensity = float(request.form['intensity']) if request.form['intensity'] != "null" else None
+	resting_time = request.form['resting_time'] if request.form['resting_time'] != "null" else None
+	intensity_deviation = request.form['intensity_deviation'] if request.form['intensity_deviation'] != "null" else None
+
+        conn = MySQLdb.connect(host='localhost', user='muscle', password='some_pass')
+        c = conn.cursor()
+        c.execute('USE muscle2')
+        c.execute("INSERT INTO SETS (Exercise_history_id, Set_number, Repetitions, Weight, Intensity, Resting_Time, Intensity_deviation) VALUES (%s, %s, %s, %s, %s, %s, %s)", [exercise_history_id, set_number, repetition, weight, intensity, resting_time, intensity_deviation])
+        conn.commit()
+        id = c.lastrowid
+        c.close()
+        conn.close()
+        return "Set: " + str(id)
     except Exception as e:
         return str(e)
 
