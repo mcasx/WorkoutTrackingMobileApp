@@ -72,8 +72,8 @@ public class PlanActivity extends AppCompatActivity {
     public void onClickSetPlan(View view){
         new AlertDialog.Builder(this)
                 .setIcon(android.R.drawable.ic_dialog_alert)
-                .setTitle("Set Plan AQUI")
-                .setMessage("\n    You still have an unfinished plan.\n\n    Are you sure you want to set a new plan?")
+                .setTitle("Set Plan")
+                .setMessage("\n    Any plan unfinished plan will be forgottenn\n    Are you sure you want to set a new plan?")
                 .setPositiveButton("Yes", new DialogInterface.OnClickListener()
                 {
                     @Override
