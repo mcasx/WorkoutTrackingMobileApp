@@ -435,5 +435,104 @@ public class CardioActivity extends AppCompatActivity implements SensorEventList
 
     }
 
-    private 
+    private void saveExercise(){
+        // current date time
+        final java.sql.Timestamp date = new java.sql.Timestamp(new java.util.Date().getTime());
+
+        // add exercise to user history
+        StringRequest Add_Req = new StringRequest(Request.Method.POST, DBConnect.serverURL + "/add_exercise_history",
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response){
+                        Log.e(TAG,"Posted exercise");
+
+                        saveSet(Integer.parseInt(response));
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+
+                        android.app.AlertDialog alertDialog = new android.app.AlertDialog.Builder(CardioActivity.this).create();
+                        alertDialog.setTitle("No Internet Connection");
+                        // Please connect your device to the Internet and try again
+                        alertDialog.setMessage(error.toString());
+                        alertDialog.setButton(android.app.AlertDialog.BUTTON_NEUTRAL, "OK",
+                                new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        dialog.dismiss();
+                                    }
+                                });
+                        alertDialog.show();
+                    }
+                }
+        ){
+            // use params are specified here
+            // DoB, height, gender and weight are specified later, for now they have default values
+            // effin not nulls
+            @Override
+            protected Map<String, String> getParams()
+            {
+                Map<String, String>  params = new HashMap<>();
+                params.put("user", getSharedPreferences("UserData", 0).getString("email", null));
+                params.put("date_time", String.valueOf(date));
+                params.put("exercise_name", "Running");
+                params.put("set_amount", String.valueOf(1));
+                params.put("average_intensity", averageSpeed.getText().toString().split(" ")[1]);
+                return params;
+            }
+        };
+        VolleyProvider.getInstance(this).addRequest(Add_Req);
+    }
+
+    private void saveSet(int exerciseID){
+
+        // current date time
+        final java.sql.Timestamp date = new java.sql.Timestamp(new java.util.Date().getTime());
+
+        // add exercise to user history
+        StringRequest Add_Req = new StringRequest(Request.Method.POST, DBConnect.serverURL + "/add_exercise_history",
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response){
+                        Log.e(TAG,"Posted exercise");
+
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+
+                        android.app.AlertDialog alertDialog = new android.app.AlertDialog.Builder(CardioActivity.this).create();
+                        alertDialog.setTitle("No Internet Connection");
+                        // Please connect your device to the Internet and try again
+                        alertDialog.setMessage(error.toString());
+                        alertDialog.setButton(android.app.AlertDialog.BUTTON_NEUTRAL, "OK",
+                                new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        dialog.dismiss();
+                                    }
+                                });
+                        alertDialog.show();
+                    }
+                }
+        ){
+            // use params are specified here
+            // DoB, height, gender and weight are specified later, for now they have default values
+            // effin not nulls
+            @Override
+            protected Map<String, String> getParams()
+            {
+                Map<String, String>  params = new HashMap<>();
+                params.put("user", getSharedPreferences("UserData", 0).getString("email", null));
+                params.put("date_time", String.valueOf(date));
+                params.put("exercise_name", "Running");
+                params.put("set_amount", String.valueOf(1));
+                params.put("average_intensity", averageSpeed.getText().toString().split(" ")[1]);
+                return params;
+            }
+        };
+        VolleyProvider.getInstance(this).addRequest(Add_Req);
+
+    }
 }
