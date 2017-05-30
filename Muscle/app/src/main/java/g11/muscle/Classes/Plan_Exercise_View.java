@@ -5,12 +5,10 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.util.List;
 
-import g11.muscle.PlanActivity;
 import g11.muscle.R;
 
 // adapter of recycler view used in training exercises list view
@@ -26,7 +24,7 @@ public class Plan_Exercise_View extends RecyclerView.Adapter<Plan_Exercise_View.
     @Override
     public Plan_Exercise_View_Holder onCreateViewHolder(ViewGroup parent, int viewType) {
         //Inflate the layout, initialize the View Holder
-        View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.costum_plan_exercise, parent, false);
+        View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.costum_plan_exercise_card, parent, false);
         v.setOnClickListener(mOnClickListener);
         return new Plan_Exercise_View_Holder(v);
     }

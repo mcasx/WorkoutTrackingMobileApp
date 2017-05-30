@@ -2,6 +2,7 @@ package g11.muscle.Fragments;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -9,6 +10,7 @@ import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.AlertDialog;
 import android.util.Base64;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -19,6 +21,7 @@ import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.android.volley.Request;
@@ -38,6 +41,7 @@ import java.util.Map;
 
 import g11.muscle.DB.DBConnect;
 import g11.muscle.DetailedExerciseHistoryActivity;
+import g11.muscle.LoginActivity;
 import g11.muscle.PlanActivity;
 import g11.muscle.ProfileActivity;
 import g11.muscle.R;
@@ -59,9 +63,10 @@ public class PlanListFragment extends Fragment {
 
     // Used by Main Activity
     private OnFragmentInteractionListener mListener;
-
+    private ProgressBar planListProgressBar;
     private VolleyProvider req_queue;
     private ListView plan_listView;
+
 
     public PlanListFragment() {
         // Required empty public constructor
@@ -79,8 +84,10 @@ public class PlanListFragment extends Fragment {
         // Fragment View
         View fView = inflater.inflate(R.layout.fragment_plan_list, container, false);
 
+        planListProgressBar = (ProgressBar) fView.findViewById(R.id.planListProgressBar);
+        planListProgressBar.setVisibility(View.VISIBLE);
         plan_listView = (ListView) fView.findViewById(R.id.plan_list);
-
+        plan_listView.setVisibility(View.INVISIBLE);
         createPlanList();
         // Inflate the layout for this fragment
         return fView;
@@ -139,13 +146,13 @@ public class PlanListFragment extends Fragment {
                         }catch (JSONException e2){
                             e2.printStackTrace();
                         }
-
                         // Define the groupView adapter
 
 
                         ListViewAdapter adapter = new ListViewAdapter(getActivity(), history);
                         plan_listView.setAdapter(adapter);
-
+                        plan_listView.setVisibility(View.VISIBLE);
+                        planListProgressBar.setVisibility(View.GONE);
                         // Set the listeners on the list items
 
                         plan_listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -165,6 +172,17 @@ public class PlanListFragment extends Fragment {
                     @Override
                     public void onErrorResponse(VolleyError error) {
                         //Handle error response
+                        AlertDialog alertDialog = new AlertDialog.Builder(getActivity()).create();
+                        alertDialog.setTitle("No Internet Connection");
+                        //"Please connect your device to the Internet and try again")
+                        alertDialog.setMessage(error.toString());
+                        alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
+                                new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        dialog.dismiss();
+                                    }
+                                });
+                        alertDialog.show();
                         System.out.println(error.toString());
                     }
                 }
