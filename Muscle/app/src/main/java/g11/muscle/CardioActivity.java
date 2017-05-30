@@ -116,6 +116,7 @@ public class CardioActivity extends AppCompatActivity implements SensorEventList
 
         req_queue = VolleyProvider.getInstance(this);
         getHeight();
+
         count = (TextView) findViewById(R.id.steps);
         counter = (TextView) findViewById(R.id.counter);
         distance = (TextView) findViewById(R.id.distance);
@@ -124,11 +125,12 @@ public class CardioActivity extends AppCompatActivity implements SensorEventList
         maximumSpeed = (TextView) findViewById(R.id.maximumSpeed);
         startButton = (Button) findViewById(R.id.startButton);
         finishButton = (Button) findViewById(R.id.finishButton);
-        df = new DecimalFormat("0.00");
 
+        df = new DecimalFormat("0.00");
         distanceTime = new DistanceTime();
         first = true;
         sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+
 
         ///////////Location////////////////
         locationManagerGPS = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
@@ -143,18 +145,13 @@ public class CardioActivity extends AppCompatActivity implements SensorEventList
         PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
         wl = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "My Tag");
         wl.acquire();
-
     }
-
-
 
     @Override
     protected void onResume() {
         super.onResume();
         activityRunning = true;
-
     }
-
 
     @Override
     protected void onPause() {
@@ -187,7 +184,6 @@ public class CardioActivity extends AppCompatActivity implements SensorEventList
             distanceTime.add(stepDistance, secs);
         }
     }
-
 
     public void onClickButton(View view) {
         if (((Button) view).getText().equals("Start")) {
@@ -346,7 +342,7 @@ public class CardioActivity extends AppCompatActivity implements SensorEventList
         private ArrayList<Integer> times;    //time in seconds
         float maxSpeed = 0;
 
-        public DistanceTime(){
+        private DistanceTime(){
             distances = new ArrayList<>();
             times = new ArrayList<>();
         }
@@ -356,7 +352,7 @@ public class CardioActivity extends AppCompatActivity implements SensorEventList
             times.add(time);
         }
 
-        public float getInstantSpeed(int currentTime){
+        private float getInstantSpeed(int currentTime){
 
 
             if(times.get(times.size()-1) + 5 < currentTime)
@@ -381,11 +377,11 @@ public class CardioActivity extends AppCompatActivity implements SensorEventList
             return instantSpeed;
         }
 
-        public float getMaxSpeed(){
+        private float getMaxSpeed(){
             return maxSpeed;
         }
 
-        public float getAverageSpeed(int currentTime){
+        private float getAverageSpeed(int currentTime){
             return (distances.get(distances.size()-1)/ currentTime) * 3600 / 1000;
         }
     }
@@ -413,5 +409,31 @@ public class CardioActivity extends AppCompatActivity implements SensorEventList
 
     public void onFinishClicked(View view){
 
+        stop();
+
+        new AlertDialog.Builder(this)
+                .setIcon(android.R.drawable.ic_dialog_alert)
+                .setTitle("Finish")
+                .setMessage("Do you want to save your result?")
+                .setPositiveButton("Yes", new DialogInterface.OnClickListener()
+                {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+
+
+                        finish();
+                    }
+                })
+                .setNegativeButton("No", null)
+                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+
+                    }
+                })
+                .show();
+
     }
+
+    private 
 }

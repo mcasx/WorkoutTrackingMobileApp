@@ -1,14 +1,10 @@
 package g11.muscle.Fragments;
 
-import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
+
 import android.graphics.Color;
-import android.graphics.RectF;
 import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Bundle;
@@ -19,21 +15,17 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.BaseAdapter;
 import android.widget.GridView;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.ArrayAdapter;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
-import android.widget.TextView;
 
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
-import com.github.mikephil.charting.charts.BarChart;
 import com.github.mikephil.charting.charts.HorizontalBarChart;
 import com.github.mikephil.charting.components.AxisBase;
 import com.github.mikephil.charting.components.Legend;
@@ -44,36 +36,25 @@ import com.github.mikephil.charting.data.BarDataSet;
 import com.github.mikephil.charting.data.BarEntry;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.formatter.IAxisValueFormatter;
-import com.github.mikephil.charting.formatter.IValueFormatter;
 import com.github.mikephil.charting.highlight.Highlight;
-import com.github.mikephil.charting.interfaces.datasets.IBarDataSet;
 import com.github.mikephil.charting.listener.OnChartValueSelectedListener;
-import com.github.mikephil.charting.utils.ColorTemplate;
-import com.github.mikephil.charting.utils.MPPointF;
-import com.github.mikephil.charting.utils.ViewPortHandler;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.lang.reflect.Array;
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import g11.muscle.Classes.MuscleProgressItem;
 import g11.muscle.DB.DBConnect;
-import g11.muscle.DB.MuscleDbContract;
 import g11.muscle.ExerciseActivity;
-import g11.muscle.GroupExercisesActivity;
-import g11.muscle.LoginActivity;
 import g11.muscle.PlanActivity;
 import g11.muscle.R;
 import g11.muscle.DB.VolleyProvider;
-
-import static g11.muscle.R.layout.muscle_progress_view;
 
 
 /**
@@ -261,15 +242,17 @@ public class HomeFragment extends Fragment implements OnChartValueSelectedListen
         float chartMax = -101f;
         float chartMin = 1000f;
 
-        for(int i = 0, k = 5;i<list.size();i++, k += 5){
+        for(int i = 0, k = 5;i<list.size();i++, k += 10){
             MuscleGroups[i] = list.get(i).getName();
             float tmp_value = (float) ((list.get(i).getVar()-1)*100);
+
             yValues.add(new BarEntry(k,tmp_value));
 
             if(chartMax < tmp_value)
                 chartMax = tmp_value;
             if(chartMin > tmp_value)
                 chartMin = tmp_value;
+
         }
 
         bChart.setOnChartValueSelectedListener(this);
@@ -278,6 +261,9 @@ public class HomeFragment extends Fragment implements OnChartValueSelectedListen
 
         // scaling can now only be done on x- and y-axis separately
         bChart.setPinchZoom(false);
+        bChart.setScaleEnabled(false);
+
+        //bChart.setHighlightPerTapEnabled(false);
 
         bChart.setDrawBarShadow(false);
         bChart.setDrawValueAboveBar(true);
@@ -285,8 +271,8 @@ public class HomeFragment extends Fragment implements OnChartValueSelectedListen
 
 
         bChart.getAxisLeft().setEnabled(false);
-        bChart.getAxisRight().setAxisMaximum(chartMax+5f);
-        bChart.getAxisRight().setAxisMinimum(chartMin-5f);
+        bChart.getAxisRight().setAxisMaximum(Math.round(chartMax) + 2f);
+        bChart.getAxisRight().setAxisMinimum(Math.round(chartMin) - 2f);
         bChart.getAxisRight().setDrawGridLines(false);
         bChart.getAxisRight().setDrawZeroLine(true);
         bChart.getAxisRight().setLabelCount(7, false);
@@ -322,27 +308,24 @@ public class HomeFragment extends Fragment implements OnChartValueSelectedListen
         l.setFormToTextSpace(4f);
         l.setXEntrySpace(6f);
 
-        BarDataSet set = new BarDataSet(yValues, "Age Distribution");
+        MyBarDataSet set = new MyBarDataSet(yValues, "Weekly Progress");
         set.setDrawIcons(false);
         set.setValueTextSize(7f);
         set.setAxisDependency(YAxis.AxisDependency.LEFT);
-        set.setColor(Color.rgb(67,67,72));
-        set.setColors(new int[] {Color.rgb(67,67,72), Color.rgb(124,181,236)});
+        set.setColors(new int[]{Color.rgb(230,56,56),Color.rgb(25,199,199)});
         set.setDrawValues(false);
-        set.setLabel("Label Here");
 
         BarData data = new BarData(set);
         data.setBarWidth(8.5f);
+        data.setHighlightEnabled(false);
         bChart.setData(data);
+
         bChart.invalidate();
     }
 
     @Override
     public void onValueSelected(Entry e, Highlight h) {
-
-        BarEntry entry = (BarEntry) e;
-        Log.i("VAL SELECTED",
-                "Value: " + Math.abs(entry.getYVals()[h.getStackIndex()]));
+        Log.i("VALUE SELECTED", "");
     }
 
     @Override
@@ -507,5 +490,22 @@ public class HomeFragment extends Fragment implements OnChartValueSelectedListen
 
         // Add the request to the RequestQueue
         VolleyProvider.getInstance(getActivity()).addRequest(StrHistReq);
+    }
+
+    private class MyBarDataSet extends BarDataSet {
+
+
+        private MyBarDataSet(List<BarEntry> yVals, String label) {
+            super(yVals, label);
+        }
+
+        @Override
+        public int getColor(int index) {
+            if(getEntryForIndex(index).getY() < 0) // less than 95 green
+                return Color.rgb(230,56,56);
+            else
+                return Color.rgb(25,199,199);
+        }
+
     }
 }
