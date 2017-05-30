@@ -3,6 +3,7 @@ package g11.muscle.Fragments;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -12,6 +13,7 @@ import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -20,6 +22,7 @@ import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.GridView;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.ArrayAdapter;
 import android.widget.ProgressBar;
@@ -65,6 +68,7 @@ import g11.muscle.DB.DBConnect;
 import g11.muscle.DB.MuscleDbContract;
 import g11.muscle.ExerciseActivity;
 import g11.muscle.GroupExercisesActivity;
+import g11.muscle.LoginActivity;
 import g11.muscle.PlanActivity;
 import g11.muscle.R;
 import g11.muscle.DB.VolleyProvider;
@@ -97,6 +101,7 @@ public class HomeFragment extends Fragment implements OnChartValueSelectedListen
     private GridView muscle_groupView;
     private HorizontalBarChart bChart;
 
+    private LinearLayout homeLinearLayout;
     // Chart font
     private Typeface mTfLight;
 
@@ -123,9 +128,13 @@ public class HomeFragment extends Fragment implements OnChartValueSelectedListen
                 "Recommended Exercises", "Recommended Plans"
         };
 
+
         muscle_groupView = (GridView)fView.findViewById(R.id.groups);
         progressBar = (ProgressBar)fView.findViewById(R.id.homeProgressBar);
+        homeLinearLayout = (LinearLayout)fView.findViewById(R.id.homeLinearLayout);
         progressBar.setVisibility(View.VISIBLE);
+        homeLinearLayout.setVisibility(View.INVISIBLE);
+
         recList = (ListView) fView.findViewById(R.id.home_rec_list);
 
         bChart = (HorizontalBarChart) fView.findViewById(R.id.home_bar_chart);
@@ -383,6 +392,8 @@ public class HomeFragment extends Fragment implements OnChartValueSelectedListen
                             }
                         });
                         progressBar.setVisibility(View.GONE);
+                        progressBar.setVisibility(View.INVISIBLE);
+                        homeLinearLayout.setVisibility(View.VISIBLE);
                     }
 
                 },
@@ -392,6 +403,17 @@ public class HomeFragment extends Fragment implements OnChartValueSelectedListen
                         //Handle error response
                         System.out.println(error.toString());
                         progressBar.setVisibility(View.GONE);
+                        AlertDialog alertDialog = new AlertDialog.Builder(getActivity()).create();
+                        alertDialog.setTitle("No Internet Connection");
+                        //"Please connect your device to the Internet and try again")
+                            alertDialog.setMessage(error.toString());
+                            alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
+                                new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
+                            }
+                        });
+                            alertDialog.show();
                     }
                 }
         ) {
@@ -463,6 +485,18 @@ public class HomeFragment extends Fragment implements OnChartValueSelectedListen
                     public void onErrorResponse(VolleyError error) {
                         //Handle error response
                         System.out.println(error.toString());
+                        progressBar.setVisibility(View.GONE);
+                        AlertDialog alertDialog = new AlertDialog.Builder(getActivity()).create();
+                        alertDialog.setTitle("No Internet Connection");
+                        //"Please connect your device to the Internet and try again")
+                        alertDialog.setMessage(error.toString());
+                        alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
+                                new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        dialog.dismiss();
+                                    }
+                                });
+                        alertDialog.show();
                     }
                 }
         ) {

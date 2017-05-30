@@ -1,10 +1,12 @@
 package g11.muscle.Fragments;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -28,6 +30,8 @@ import java.util.ArrayList;
 
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.LinearLayoutManager;
+import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.TextView;
 
@@ -66,6 +70,8 @@ public class MyPlanFragment extends Fragment {
     //GUI
     private RecyclerView recyclerView;
     private Spinner dropdown;
+    private ProgressBar myPlanProgressBar;
+    private LinearLayout content;
 
     public MyPlanFragment() {
         // Required empty public constructor
@@ -77,6 +83,8 @@ public class MyPlanFragment extends Fragment {
 
         plan_trainings = new ArrayList<>();
         training_data = new ArrayList<>();
+
+
 
         // get user email
         email = getActivity().getIntent().getStringExtra("email");
@@ -90,8 +98,15 @@ public class MyPlanFragment extends Fragment {
         // Fragment View
         View fView = inflater.inflate(R.layout.fragment_my_plan, container, false);
 
+
+
         //GUI elements
         dropdown = (Spinner)fView.findViewById(R.id.spinner);
+        content = (LinearLayout) fView.findViewById(R.id.myPlanContent);
+        myPlanProgressBar = (ProgressBar) fView.findViewById(R.id.myPlanProgressBar);
+        content.setVisibility(View.INVISIBLE);
+        myPlanProgressBar.setVisibility(View.VISIBLE);
+
         getTrainings();
 
         recyclerView = (RecyclerView) fView.findViewById(R.id.PE_recyclerview);
@@ -234,6 +249,9 @@ public class MyPlanFragment extends Fragment {
 
                         recyclerView.setAdapter(adapter);
                         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+
+                        content.setVisibility(View.VISIBLE);
+                        myPlanProgressBar.setVisibility(View.INVISIBLE);
                     }
                 },
                 new Response.ErrorListener() {
@@ -241,6 +259,18 @@ public class MyPlanFragment extends Fragment {
                     public void onErrorResponse(VolleyError error) {
                         //Handle error response
                         System.out.println(error.toString());
+                        myPlanProgressBar.setVisibility(View.GONE);
+                        AlertDialog alertDialog = new AlertDialog.Builder(getActivity()).create();
+                        alertDialog.setTitle("No Internet Connection");
+                        //"Please connect your device to the Internet and try again")
+                        alertDialog.setMessage(error.toString());
+                        alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
+                                new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        dialog.dismiss();
+                                    }
+                                });
+                        alertDialog.show();
                     }
                 }
         ){

@@ -275,6 +275,17 @@ public class DetailedExerciseHistoryActivity extends AppCompatActivity {
                     @Override
                     public void onErrorResponse(VolleyError error) {
                         //Handle error response
+                        AlertDialog alertDialog = new AlertDialog.Builder(DetailedExerciseHistoryActivity.this).create();
+                        alertDialog.setTitle("No Internet Connection");
+                        //"Please connect your device to the Internet and try again")
+                        alertDialog.setMessage(error.toString());
+                        alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
+                                new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        dialog.dismiss();
+                                    }
+                                });
+                        alertDialog.show();
                         System.out.println(error.toString());
                     }
                 }

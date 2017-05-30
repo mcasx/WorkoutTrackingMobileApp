@@ -11,7 +11,8 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:padding="16dp"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:id="@+id/homeLinearLayout">
 
         <Spinner
             android:id="@+id/home_spinner"
