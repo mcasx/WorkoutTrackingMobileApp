@@ -115,6 +115,8 @@ public class CardioActivity extends AppCompatActivity implements SensorEventList
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_cardio);
 
+        setTitle("Running");
+
         req_queue = VolleyProvider.getInstance(this);
         getHeight();
 
@@ -426,7 +428,6 @@ public class CardioActivity extends AppCompatActivity implements SensorEventList
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         saveExercise();
-
                     }
                 })
                 .setNegativeButton("No", null)
@@ -446,7 +447,7 @@ public class CardioActivity extends AppCompatActivity implements SensorEventList
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response){
-                        Log.e(TAG,"Posted exercise");
+                        Log.e(TAG,response);
                         saveSet(Integer.parseInt(response));
                     }
                 },
@@ -493,8 +494,7 @@ public class CardioActivity extends AppCompatActivity implements SensorEventList
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response){
-                        Log.e(TAG,"Posted exercise");
-                        finish();
+                        Log.e("Add Set",response);
                     }
                 },
                 new Response.ErrorListener() {
@@ -524,14 +524,14 @@ public class CardioActivity extends AppCompatActivity implements SensorEventList
                 Map<String, String>  params = new HashMap<>();
                 params.put("exercise_history_id", "" + exerciseID);
                 params.put("set_number", "" + 1);
-                params.put("repetitions", "" + Math.round(Float.valueOf(distance.getText().toString()) * 1000));
+                params.put("repetitions", "" + Math.round(Float.valueOf(distance.getText().toString().split(" ")[1]) * 1000));
                 params.put("weight", "null");
+                params.put("intensity", "null");
                 params.put("resting_time", "null");
                 params.put("intensity_deviation", "null");
                 return params;
             }
         };
         VolleyProvider.getInstance(this).addRequest(Add_Req);
-
     }
 }
