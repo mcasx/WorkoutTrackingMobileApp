@@ -14,6 +14,7 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.github.mikephil.charting.charts.BarChart;
+import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.components.AxisBase;
 import com.github.mikephil.charting.components.Legend;
 import com.github.mikephil.charting.components.MarkerView;
@@ -23,22 +24,31 @@ import com.github.mikephil.charting.data.BarDataSet;
 import com.github.mikephil.charting.data.BarData;
 import com.github.mikephil.charting.data.BarEntry;
 import com.github.mikephil.charting.data.Entry;
+import com.github.mikephil.charting.data.LineData;
+import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.formatter.IAxisValueFormatter;
 import com.github.mikephil.charting.formatter.LargeValueFormatter;
 import com.github.mikephil.charting.highlight.Highlight;
 import com.github.mikephil.charting.listener.OnChartValueSelectedListener;
+import com.github.mikephil.charting.utils.ColorTemplate;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import g11.muscle.DB.DBConnect;
 import g11.muscle.DetailedExerciseHistoryActivity;
 import g11.muscle.MPChartJava.HistRadarMarkerView;
+import g11.muscle.MPChartJava.LineMarkerView;
 import g11.muscle.R;
 import g11.muscle.DB.VolleyProvider;
 
@@ -48,6 +58,7 @@ public class DetailedExerciseHistoryGraphs extends Fragment implements OnChartVa
 
     // GUI
     private BarChart bChart;
+    private LineChart lChart;
 
     // chart font
     Typeface mTfLight;
@@ -88,62 +99,10 @@ public class DetailedExerciseHistoryGraphs extends Fragment implements OnChartVa
         View fView = inflater.inflate(R.layout.fragment_detailed_exercise_history_stats, container, false);
 
         bChart = (BarChart) fView.findViewById(R.id.bar_chart);
-        bChart.setOnChartValueSelectedListener(this);
-        bChart.getDescription().setEnabled(false);
+        lChart = (LineChart) fView.findViewById(R.id.detail_line_Chart);
 
-//        bChart.setDrawBorders(true);
-
-        // scaling can now only be done on x- and y-axis separately
-        bChart.setPinchZoom(false);
-
-        bChart.setDrawBarShadow(false);
-
-        bChart.setDrawGridBackground(false);
-
-        // create a custom MarkerView (extend MarkerView) and specify the layout
-        // to use for it
-        MarkerView mv = new HistRadarMarkerView(getActivity(), R.layout.custom_marker_view);
-        mv.setChartView(bChart); // For bounds control
-        bChart.setMarker(mv); // Set the marker to the chart
-
-
-        XAxis xAxis = bChart.getXAxis();
-        xAxis.setTypeface(mTfLight);
-        xAxis.setGranularity(1f);
-        xAxis.setCenterAxisLabels(true);
-        xAxis.setValueFormatter(new IAxisValueFormatter() {
-
-            private String[] mActivities = new String[]{"Repetitions", "Intensity", "Rest", "Weight", "Sets"};
-
-            @Override
-            public String getFormattedValue(float value, AxisBase axis) {
-                return mActivities[(int) Math.abs(value) % mActivities.length];
-            }
-        });
-        xAxis.setTextColor(Color.WHITE);
-
-        YAxis leftAxis = bChart.getAxisLeft();
-        leftAxis.setTypeface(mTfLight);
-        leftAxis.setValueFormatter(new LargeValueFormatter());
-        leftAxis.setDrawGridLines(false);
-        leftAxis.setSpaceTop(35f);
-        leftAxis.setTextColor(Color.WHITE);
-        leftAxis.setAxisMinimum(0f); // this replaces setStartAtZero(true)
-
-        bChart.getAxisRight().setEnabled(false);
-
-        Legend l = bChart.getLegend();
-        l.setVerticalAlignment(Legend.LegendVerticalAlignment.TOP);
-        l.setHorizontalAlignment(Legend.LegendHorizontalAlignment.LEFT);
-        l.setOrientation(Legend.LegendOrientation.VERTICAL);
-        l.setDrawInside(true);
-        l.setTypeface(mTfLight);
-        l.setYOffset(0f);
-        l.setXOffset(30f);
-        l.setYEntrySpace(0f);
-        l.setTextSize(8f);
-        l.setTextColor(Color.WHITE);
-
+        BarSetup();
+        LineSetup();
         // Inflate the layout for this fragment
         return fView;
     }
@@ -401,5 +360,209 @@ public class DetailedExerciseHistoryGraphs extends Fragment implements OnChartVa
         bChart.invalidate();
         
         bChart.invalidate();
+    }
+
+    private void BarSetup(){
+        bChart.setOnChartValueSelectedListener(this);
+        bChart.getDescription().setEnabled(false);
+
+//        bChart.setDrawBorders(true);
+
+        // scaling can now only be done on x- and y-axis separately
+        bChart.setPinchZoom(false);
+        bChart.setScaleEnabled(false);
+
+        bChart.setDrawBarShadow(false);
+
+        bChart.setDrawGridBackground(false);
+
+        // create a custom MarkerView (extend MarkerView) and specify the layout
+        // to use for it
+        MarkerView mv = new HistRadarMarkerView(getActivity(), R.layout.custom_marker_view);
+        mv.setChartView(bChart); // For bounds control
+        bChart.setMarker(mv); // Set the marker to the chart
+
+
+        XAxis xAxis = bChart.getXAxis();
+        xAxis.setTypeface(mTfLight);
+        xAxis.setGranularity(1f);
+        xAxis.setCenterAxisLabels(true);
+        xAxis.setValueFormatter(new IAxisValueFormatter() {
+
+            private String[] mActivities = new String[]{"Repetitions", "Intensity", "Rest", "Weight", "Sets"};
+
+            @Override
+            public String getFormattedValue(float value, AxisBase axis) {
+                return mActivities[(int) Math.abs(value) % mActivities.length];
+            }
+        });
+        xAxis.setTextColor(Color.WHITE);
+
+        YAxis leftAxis = bChart.getAxisLeft();
+        leftAxis.setTypeface(mTfLight);
+        leftAxis.setValueFormatter(new LargeValueFormatter());
+        leftAxis.setDrawGridLines(false);
+        leftAxis.setSpaceTop(35f);
+        leftAxis.setTextColor(Color.WHITE);
+        leftAxis.setAxisMinimum(0f); // this replaces setStartAtZero(true)
+
+        bChart.getAxisRight().setEnabled(false);
+
+        Legend l = bChart.getLegend();
+        l.setVerticalAlignment(Legend.LegendVerticalAlignment.TOP);
+        l.setHorizontalAlignment(Legend.LegendHorizontalAlignment.LEFT);
+        l.setOrientation(Legend.LegendOrientation.VERTICAL);
+        l.setDrawInside(true);
+        l.setTypeface(mTfLight);
+        l.setYOffset(0f);
+        l.setXOffset(30f);
+        l.setYEntrySpace(0f);
+        l.setTextSize(8f);
+        l.setTextColor(Color.WHITE);
+    }
+
+    private void LineSetup(){
+
+        // no description text
+        lChart.getDescription().setEnabled(false);
+
+        // enable touch gestures
+        lChart.setTouchEnabled(true);
+        lChart.setScaleEnabled(false);
+
+        lChart.setDragDecelerationFrictionCoef(0.9f);
+
+        // enable scaling and dragging
+        lChart.setDragEnabled(true);
+        lChart.setScaleEnabled(true);
+        lChart.setDrawGridBackground(false);
+        lChart.setHighlightPerDragEnabled(true);
+
+        // set an alternative background color
+        lChart.setBackgroundColor(Color.rgb(48,48,48));
+        lChart.setViewPortOffsets(0f, 0f, 0f, 0f);
+
+        // create a custom MarkerView (extend MarkerView) and specify the layout
+        // to use for it
+        MarkerView mv = new LineMarkerView(getActivity(), R.layout.custom_marker_view);
+        mv.setChartView(lChart); // For bounds control
+        lChart.setMarker(mv); // Set the marker to the chart
+
+        String url = DBConnect.serverURL + "/get_weight_history";
+        //Create the exercise history request
+
+        StringRequest StrHistReq = new StringRequest(Request.Method.POST,url,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        try {
+                            // Chart Array Values List
+                            ArrayList<Entry> values = new ArrayList<>();
+                            JSONArray jsonArray = new JSONArray(response);
+                            try {
+                                for (int i = 0; i < jsonArray.length(); i++) {
+                                    String tmpWeight = new JSONObject(jsonArray.getString(i)).getString("Weight");
+                                    String tmpDate = new JSONObject(jsonArray.getString(i)).getString("Date");
+                                    // parse String to Date - I don't know why but this adds an hour to the date
+                                    Date tmpDat = new SimpleDateFormat("EE, dd MMM yyyy HH:mm:ss z", Locale.UK).parse(tmpDate);
+                                    values.add(new Entry(tmpDat.getTime(),Float.parseFloat(tmpWeight)));
+                                }
+                            } catch (JSONException|ParseException jpe) {
+                                Log.e("WeightChartSetup", jpe.toString());
+                            }
+                            // create a dataset and give it a type
+                            LineDataSet set1 = new LineDataSet(values, "Weight");
+                            set1.setAxisDependency(YAxis.AxisDependency.LEFT);
+                            set1.setColor(ColorTemplate.getHoloBlue());
+                            set1.setValueTextColor(ColorTemplate.getHoloBlue());
+                            set1.setLineWidth(1.5f);
+                            set1.setDrawCircles(true);
+                            set1.setDrawValues(false);
+                            set1.setFillAlpha(65);
+                            set1.setFillColor(ColorTemplate.getHoloBlue());
+                            set1.setHighLightColor(Color.rgb(244, 117, 117));
+                            set1.setDrawCircleHole(false);
+
+                            // create a data object with the datasets
+                            LineData data = new LineData(set1);
+                            data.setValueTextColor(Color.WHITE);
+                            data.setValueTextSize(9f);
+
+                            // set data
+                            lChart.setData(data);
+
+                            lChart.invalidate();
+
+
+                            // get the legend (only possible after setting data)
+                            Legend l = lChart.getLegend();
+                            l.setEnabled(false);
+
+
+                            XAxis xAxis = lChart.getXAxis();
+                            xAxis.setPosition(XAxis.XAxisPosition.TOP_INSIDE);
+                            xAxis.setTypeface(mTfLight);
+                            xAxis.setTextSize(10f);
+                            xAxis.setTextColor(Color.WHITE);
+                            xAxis.setDrawAxisLine(false);
+                            xAxis.setDrawGridLines(true);
+                            xAxis.setTextColor(Color.rgb(255, 192, 56));
+                            xAxis.setCenterAxisLabels(true);
+                            xAxis.setGranularity(1f); // one hour
+
+                            xAxis.setValueFormatter(new IAxisValueFormatter() {
+
+                                private SimpleDateFormat mFormat = new SimpleDateFormat("EE, dd MMM",Locale.UK);
+
+                                @Override
+                                public String getFormattedValue(float value,  AxisBase axis) {
+
+                                    long millis = TimeUnit.HOURS.toMillis((long) value);
+                                    return mFormat.format(new Date(millis));
+                                }
+                            });
+
+                            YAxis leftAxis = lChart.getAxisLeft();
+                            leftAxis.setPosition(YAxis.YAxisLabelPosition.INSIDE_CHART);
+                            leftAxis.setTypeface(mTfLight);
+                            leftAxis.setTextColor(ColorTemplate.getHoloBlue());
+                            leftAxis.setDrawGridLines(true);
+                            leftAxis.setGranularityEnabled(true);
+
+                            leftAxis.setAxisMinimum(30f); // min max values
+                            leftAxis.setAxisMaximum(120f);
+
+                            leftAxis.setYOffset(-9f);
+                            leftAxis.setTextColor(Color.rgb(255, 192, 56));
+
+                            YAxis rightAxis = lChart.getAxisRight();
+                            rightAxis.setEnabled(false);
+
+
+                        }catch (JSONException e2){
+                            e2.printStackTrace();
+                        }
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        //Handle error response
+                        System.out.println(error.toString());
+                    }
+                }
+        ){
+            // use params are specified here
+            @Override
+            protected Map<String, String> getParams()
+            {
+                Map<String, String>  params = new HashMap<>();
+                params.put("user_email", email);
+                return params;
+            }
+        };
+
+        //Queue the request
+        VolleyProvider.getInstance(getActivity()).addRequest(StrHistReq);
     }
 }

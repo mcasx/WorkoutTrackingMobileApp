@@ -4,10 +4,58 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <com.github.mikephil.charting.charts.BarChart
-        android:layout_margin="10dp"
-        android:id="@+id/bar_chart"
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="300dp" />
+        android:layout_height="match_parent">
 
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/detail_bar_text"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textAlignment="center"
+                        android:textSize="18sp"
+                        android:text="TextView" />
+
+                    <com.github.mikephil.charting.charts.BarChart
+                        android:id="@+id/bar_chart"
+                        android:layout_width="match_parent"
+                        android:layout_height="250dp"
+                        android:layout_margin="10dp" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/detail_line_text"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textAlignment="center"
+                        android:textSize="18sp"
+                        android:text="TextView" />
+
+                    <com.github.mikephil.charting.charts.LineChart
+                        android:id="@+id/detail_line_Chart"
+                        android:layout_width="match_parent"
+                        android:layout_height="250dp" />
+                </LinearLayout>
+            </LinearLayout>
+        </LinearLayout>
+    </ScrollView>
 </RelativeLayout>
