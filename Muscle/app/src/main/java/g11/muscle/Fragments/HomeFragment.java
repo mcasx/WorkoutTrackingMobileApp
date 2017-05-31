@@ -214,6 +214,8 @@ public class HomeFragment extends Fragment implements OnChartValueSelectedListen
                             // set bar chart
                             barChartSetup();
                         }
+                    progressBar.setVisibility(View.INVISIBLE);
+                    homeLinearLayout.setVisibility(View.VISIBLE);
                     }
 
                 },
@@ -380,9 +382,8 @@ public class HomeFragment extends Fragment implements OnChartValueSelectedListen
                                 startActivity(intent);
                             }
                         });
-                        progressBar.setVisibility(View.GONE);
-                        progressBar.setVisibility(View.INVISIBLE);
-                        homeLinearLayout.setVisibility(View.VISIBLE);
+
+
                     }
 
                 },
