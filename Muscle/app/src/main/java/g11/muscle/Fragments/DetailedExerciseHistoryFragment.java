@@ -9,6 +9,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -16,6 +17,7 @@ import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
+import com.squareup.picasso.Picasso;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -42,9 +44,11 @@ public class DetailedExerciseHistoryFragment extends Fragment{
     private View fView;
     private LayoutInflater inflater;
     final ArrayList<JSONObject> sets = new ArrayList<>();
+    private ImageView image;
     public DetailedExerciseHistoryFragment() {
         // Required empty public constructor
     }
+
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -59,6 +63,20 @@ public class DetailedExerciseHistoryFragment extends Fragment{
         this.inflater = inflater;
 
         fView = inflater.inflate(R.layout.fragment_detailed_exercise_history, container, false);
+
+        image = (ImageView) fView.findViewById(R.id.exerciseImage);
+
+        Context context = image.getContext();
+        int id = 0;
+        try {
+            Log.e(TAG, DetailedExerciseHistoryActivity.exerciseHistoryItem.getString("Exercise_name").replace('-', '_').replace(' ','_').toLowerCase());
+            id = context.getResources().getIdentifier(DetailedExerciseHistoryActivity.exerciseHistoryItem.getString("Exercise_name").replace('-', '_').replace(' ','_').toLowerCase(), "drawable", context.getPackageName());
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        image.setImageResource(id);
+
 
         try {
             averageIntensityText = (TextView) fView.findViewById(R.id.repetitionsText);
