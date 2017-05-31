@@ -60,4 +60,7 @@
     <string name="share">Share</string>
     <string name="like">Bump</string>
 
+    <!-- Create Plan Activity-->
+    <string name="name_hint">Plan\'s name</string>
+
 </resources>

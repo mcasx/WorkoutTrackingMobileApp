@@ -17,14 +17,14 @@ android:layout_marginRight="10dp">
 
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:minHeight="?attr/listPreferredItemHeight">
 
         <ImageView
             android:padding="3dp"
-            android:layout_width="0px"
-            android:layout_height="match_parent"
+            android:layout_width="0dp"
+            android:layout_height="?attr/listPreferredItemHeight"
             android:layout_weight="1"
             android:src="@mipmap/default_avatar"
             android:id="@+id/user_pic"/>

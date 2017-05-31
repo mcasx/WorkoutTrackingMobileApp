@@ -85,6 +85,8 @@
         <activity
             android:name=".CardioActivity"
             android:theme="@style/Base.Theme.AppCompat" />
+        <activity android:name=".CreatePlanActivity"
+            android:theme="@style/Base.Theme.AppCompat" />
         <activity android:name=".DetailedRunningActivity" android:theme="@style/Base.Theme.AppCompat"/>
     </application>
 
