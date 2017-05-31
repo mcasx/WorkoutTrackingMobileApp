@@ -239,16 +239,20 @@ public class FeedBackActivity extends AppCompatActivity implements
                         strBuilder.delete(0,endOfLineIndex+1);
 
                         if(firstRep) {
-                            //saveExercise();
+                            if(!plan)
+                                saveExercise();
+                            else
+                                saveExerciseWithPlan();
                             firstRep = false;
                         }
 
                         if (jsonObj.has("stopped")) {
                             Log.e("FeedBack","Got Status");
 
-                            restTime = 0;
-                            //saveSet();
+                            Log.e("BEFORESAVE",intensities.toString());
+                            saveSet(new ArrayList<>(intensities),exercise_history_id,set_count,rep_count,weight,restTime);
 
+                            restTime = 0;
                             set_count += 1;
                             rep_count = 0;
 
@@ -624,8 +628,58 @@ public class FeedBackActivity extends AppCompatActivity implements
         final java.sql.Timestamp date = new java.sql.Timestamp(new java.util.Date().getTime());
 
         // add exercise to user history
-
         StringRequest Add_Req = new StringRequest(Request.Method.POST, DBConnect.serverURL + "/add_exercise_history",
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response){
+                        Log.e(TAG,response);
+                        exercise_history_id = Integer.parseInt(response);
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+
+                        android.app.AlertDialog alertDialog = new android.app.AlertDialog.Builder(FeedBackActivity.this).create();
+                        alertDialog.setTitle("No Internet Connection");
+                        // Please connect your device to the Internet and try again
+                        alertDialog.setMessage(error.toString());
+                        alertDialog.setButton(android.app.AlertDialog.BUTTON_NEUTRAL, "OK",
+                                new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        dialog.dismiss();
+                                    }
+                                });
+                        alertDialog.show();
+                    }
+                }
+        ){
+            // use params are specified here
+            // DoB, height, gender and weight are specified later, for now they have default values
+            // effin not nulls
+            @Override
+            protected Map<String, String> getParams()
+            {
+                Map<String, String>  params = new HashMap<>();
+                Log.e("VALUES",email + " " + ""+date + " " + exercise);
+                params.put("user", email);
+                params.put("date_time", ""+date);
+                params.put("exercise_name",exercise);
+                params.put("set_amount", "null");
+                params.put("average_intensity","null");
+                params.put("plan_id","null");
+                return params;
+            }
+        };
+        VolleyProvider.getInstance(this).addRequest(Add_Req);
+    }
+
+    private void saveExerciseWithPlan(){
+        // current date time
+        final java.sql.Timestamp date = new java.sql.Timestamp(new java.util.Date().getTime());
+
+        // add exercise to user history
+        StringRequest Add_Req = new StringRequest(Request.Method.POST, DBConnect.serverURL + "/add_exercise_history_with_plan",
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response){
@@ -661,15 +715,14 @@ public class FeedBackActivity extends AppCompatActivity implements
                 params.put("user", email);
                 params.put("date_time", ""+date);
                 params.put("exercise_name",exercise);
-                params.put("set_amount", "null");
-                params.put("average_intensity","null");
                 return params;
             }
         };
         VolleyProvider.getInstance(this).addRequest(Add_Req);
     }
 
-    private void saveSet(){
+    private void saveSet(final ArrayList<Double> intensities,final int exercise_history_id,final int set_count,final int rep_count,
+                         final double weight,final int restTime){
         // add exercise to user history
         StringRequest Add_Req = new StringRequest(Request.Method.POST, DBConnect.serverURL + "/add_set",
                 new Response.Listener<String>() {
@@ -703,6 +756,10 @@ public class FeedBackActivity extends AppCompatActivity implements
             protected Map<String, String> getParams()
             {
                 Map<String, String>  params = new HashMap<>();
+
+                Log.e("SAVESET",""+exercise_history_id + " - " + String.valueOf(set_count) + " - " + String.valueOf(rep_count) + " - "
+                            + " - " + String.valueOf((int)weight) + " - " + String.valueOf(intensities.get(intensities.size()-1)) +
+                            " - ");
                 params.put("exercise_history_id", ""+exercise_history_id);
                 params.put("set_number", String.valueOf(set_count));
                 params.put("repetitions", String.valueOf(rep_count));

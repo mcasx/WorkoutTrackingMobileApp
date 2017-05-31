@@ -90,7 +90,13 @@ public class MyPlanFragment extends Fragment {
         // get user email
         email = getActivity().getIntent().getStringExtra("email");
         countPlanExercises = 0;
-        currentExerciseCount = 0;
+    }
+
+    @Override
+    public void onResume(){
+        super.onResume();
+
+        getTrainings();
     }
 
     @Override
@@ -150,6 +156,8 @@ public class MyPlanFragment extends Fragment {
     // Get User Plan Trainings ( ID + Name )
     private void getTrainings(){
         String url = DBConnect.serverURL + "/get_user_plan_trainings";
+
+        currentExerciseCount = 0;
 
         //Create the exercise plan_group request
         StringRequest StrHistReq = new StringRequest(Request.Method.POST,url,
