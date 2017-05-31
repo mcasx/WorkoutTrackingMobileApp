@@ -247,13 +247,13 @@ public class FeedBackActivity extends AppCompatActivity implements
                             Log.e("FeedBack","Got Status");
 
                             restTime = 0;
-                            TimeCountstart();
-
                             //saveSet();
 
                             set_count += 1;
                             rep_count = 0;
-                            intensities.clear();
+
+                            if(!intensities.isEmpty())
+                                intensities.clear();
 
                             if(setSound.isPlaying()) {
                                 setSound.pause();
@@ -261,10 +261,30 @@ public class FeedBackActivity extends AppCompatActivity implements
                             }
                             setSound.start();
 
-                            timeAlert(plan_rest);
+                            if(plan)
+                                timeAlert(plan_rest);
+
+                            TimeCountstart();
                         }
                         else{
                             TimeCountstop();
+                            if(rep_count == 0 && !firstRep){
+                                repsTV.setText(String.valueOf(rep_count));
+                                progress.setProgress(rep_count*100);
+                                setsTV.setText(String.valueOf(set_count));
+
+                                if(plan) {
+                                    ObjectAnimator animation = ObjectAnimator.ofInt(progressSet, "progress", progressSet.getProgress(), set_count * 100);
+                                    animation.setDuration(850);
+                                    animation.setInterpolator(new DecelerateInterpolator());
+                                    animation.start();
+                                }else{
+                                    ObjectAnimator animation = ObjectAnimator.ofInt(progressSet, "progress", 0,100);
+                                    animation.setDuration(500);
+                                    animation.setInterpolator(new DecelerateInterpolator());
+                                    animation.start();
+                                }
+                            }
                             Log.e("RestTime",String.valueOf(restTime));
 
                             int checkPoint = Integer.parseInt(jsonObj.getString("checkpoint"));
@@ -327,6 +347,9 @@ public class FeedBackActivity extends AppCompatActivity implements
         @Override
         public void run() {
             restTime++;
+            if(!plan) {
+                alertDialog.setMessage(new Time((restTime+3)*1000).toString());
+            }
 
             if(started)
                 TimeCountstart();
@@ -338,11 +361,23 @@ public class FeedBackActivity extends AppCompatActivity implements
             started = false;
             handler.removeCallbacks(runnable);
         }
+        if(!plan)
+            CancelTimer();
     }
 
     public void TimeCountstart() {
         started = true;
         handler.postDelayed(runnable, 1000);
+
+        if(!plan){
+            alertDialog.setTitle("Rest Time");
+            alertDialog.setMessage(new Time((restTime+3)*1000).toString());
+
+            alertDialog.setCanceledOnTouchOutside(false); // set to false because it needs to call cancelTimer() when cancelled
+            // and this dismisses the alert without calling cancelTimer()
+
+            alertDialog.show();
+        }
     }
 
     @Override
@@ -433,12 +468,12 @@ public class FeedBackActivity extends AppCompatActivity implements
                 set = createSet();
 
                 // turn on values when sets == 1
-                if(set_count == 1)
+                /*if(set_count == 1)
                     set.setDrawValues(true);
                 else{
                     ILineDataSet tmpSet = data.getDataSetByIndex(0);
                     tmpSet.setDrawValues(false);
-                }
+                }*/
 
                 data.addDataSet(set);
             }
@@ -524,7 +559,7 @@ public class FeedBackActivity extends AppCompatActivity implements
         new CountDownTimer(convertedDate.getTime() - 3000, 1000) {
             @Override
             public void onTick(long millisUntilFinished) {
-                alertDialog.setMessage("00:"+ (millisUntilFinished/1000)); //TODO minutes not working correctly
+                alertDialog.setMessage(new Time(millisUntilFinished).toString()); //TODO minutes not working correctly
             }
 
             @Override
@@ -536,22 +571,6 @@ public class FeedBackActivity extends AppCompatActivity implements
 
     private void CancelTimer(){
         alertDialog.dismiss();
-
-        repsTV.setText(String.valueOf(rep_count));
-        progress.setProgress(rep_count);
-        setsTV.setText(String.valueOf(set_count));
-
-        if(plan) {
-            ObjectAnimator animation = ObjectAnimator.ofInt(progressSet, "progress", progressSet.getProgress(), set_count * 100);
-            animation.setDuration(850);
-            animation.setInterpolator(new DecelerateInterpolator());
-            animation.start();
-        }else{
-            ObjectAnimator animation = ObjectAnimator.ofInt(progressSet, "progress", 0,100);
-            animation.setDuration(850);
-            animation.setInterpolator(new DecelerateInterpolator());
-            animation.start();
-        }
     }
 
     @Override
