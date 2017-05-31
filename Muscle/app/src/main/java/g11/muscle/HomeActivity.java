@@ -40,6 +40,7 @@ public class HomeActivity extends AppCompatActivity implements PickExerciseFragm
     private Fragment yourFeedFragment;
     private Fragment historyFragment;
     private Fragment exerciseListFragment;
+    private String email;
 
 
 
@@ -83,6 +84,10 @@ public class HomeActivity extends AppCompatActivity implements PickExerciseFragm
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        SharedPreferences sp = getSharedPreferences("UserData", 0);
+        email = getIntent().getStringExtra("email");
+        if(!sp.contains("email"))
+            sp.edit().putString("email", email).apply();
 
         setContentView(R.layout.activity_home);
         manager = getSupportFragmentManager();
@@ -224,14 +229,14 @@ public class HomeActivity extends AppCompatActivity implements PickExerciseFragm
 
             case R.id.profile:
                 Intent profileIntent = new Intent(HomeActivity.this, ProfileActivity.class);
-                profileIntent.putExtra("user_email", getIntent().getStringExtra("email"));
-                profileIntent.putExtra("profile_email", getIntent().getStringExtra("email"));
+                profileIntent.putExtra("user_email", email);
+                profileIntent.putExtra("profile_email", email);
                 startActivity(profileIntent);
                 return true;
 
             case R.id.settings:
                 Intent settingsIntent = new Intent(HomeActivity.this, SettingsActivity.class);
-                settingsIntent.putExtra("email", getIntent().getStringExtra("email"));
+                settingsIntent.putExtra("email", email);
                 settingsIntent.putExtra("context", "home");
                 startActivity(settingsIntent);
                 return true;
