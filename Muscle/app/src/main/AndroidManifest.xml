@@ -2,10 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="g11.muscle">
 
-
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-
     <uses-permission android:name="android.permission.INTERNET" />
     <!-- Bluetooth Permissions -->
     <uses-permission android:name="android.permission.BLUETOOTH" />
@@ -17,10 +15,10 @@
     <uses-feature android:name="android.hardware.sensor.stepcounter" />
     <uses-feature android:name="android.hardware.sensor.stepdetector" />
     <uses-feature android:name="android.hardware.sensor.linearacelaration" />
-    <uses-permission android:name="android.permission.WAKE_LOCK" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
 
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
     <application
         android:allowBackup="true"
@@ -40,7 +38,6 @@
         <activity
             android:name=".PickExerciseActivity"
             android:theme="@style/Theme.AppCompat.NoActionBar" />
-
         <activity
             android:name=".LoginActivity"
             android:theme="@style/Theme.AppCompat.NoActionBar">
@@ -77,17 +74,19 @@
         <activity
             android:name=".GroupExercisesActivity"
             android:theme="@style/Theme.AppCompat" />
-
         <activity
             android:name=".PlanActivity"
             android:theme="@style/Theme.AppCompat.NoActionBar" />
 
         <!-- android:theme="@style/Theme.AppCompat" was added for hot fix, fell free to change it -->
-        <activity android:name="com.theartofdev.edmodo.cropper.CropImageActivity"
-            android:theme="@style/Base.Theme.AppCompat"/>
-
-        <activity android:name=".CardioActivity" android:theme="@style/Base.Theme.AppCompat"/>
-
+        <activity
+            android:name="com.theartofdev.edmodo.cropper.CropImageActivity"
+            android:theme="@style/Base.Theme.AppCompat" />
+        <activity
+            android:name=".CardioActivity"
+            android:theme="@style/Base.Theme.AppCompat" />
+        <activity android:name=".CreatePlanActivity"
+            android:theme="@style/Base.Theme.AppCompat" />
     </application>
 
 </manifest>
