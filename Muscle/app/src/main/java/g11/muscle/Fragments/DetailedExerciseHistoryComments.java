@@ -49,6 +49,7 @@ public class DetailedExerciseHistoryComments extends Fragment {
     private LayoutInflater inflater;
     private LinearLayout commentsBaseLayout;
     private HashMap<String,Bitmap> userProfilePicture = new HashMap<>();
+    private View fview;
 
     public DetailedExerciseHistoryComments() {
         // Required empty public constructor
@@ -64,7 +65,7 @@ public class DetailedExerciseHistoryComments extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View fview = inflater.inflate(R.layout.fragment_detailed_exercise_history_comments, container, false);
+        fview = inflater.inflate(R.layout.fragment_detailed_exercise_history_comments, container, false);
         this.inflater = inflater;
         commentsBaseLayout = (LinearLayout)fview.findViewById(R.id.commentsBaseLayout);
 
@@ -182,9 +183,8 @@ public class DetailedExerciseHistoryComments extends Fragment {
 
     public void onClickSend(){
 
-
         String url = DBConnect.serverURL + "/add_comment_to_exercise";
-        EditText et = ((EditText)getActivity().findViewById(R.id.commentInput));
+        EditText et = ((EditText)fview.findViewById(R.id.commentInput));
         et.setEnabled(false);
 
         if(et.getText().toString().trim().equals("")){
@@ -229,7 +229,7 @@ public class DetailedExerciseHistoryComments extends Fragment {
                 Map<String, String>  params = new HashMap<>();
                 try {
                     params.put("exercise_id", DetailedExerciseHistoryActivity.exerciseHistoryItem.getString("ID"));
-                    params.put("comment", ((EditText)getActivity().findViewById(R.id.commentInput)).getText().toString());
+                    params.put("comment", ((EditText)fview.findViewById(R.id.commentInput)).getText().toString());
                     params.put("email", getActivity().getSharedPreferences("UserData", 0).getString("email", null));
                 }catch(JSONException je){Log.e(TAG, "No Exercise History ID");}
                 return params;
