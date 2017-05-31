@@ -11,6 +11,7 @@ import android.support.v7.app.AlertDialog;
 import android.util.Base64;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -18,6 +19,7 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.PopupMenu;
 import android.widget.TextView;
 
 import com.android.volley.Request;
@@ -75,6 +77,7 @@ public class DetailedExerciseHistoryComments extends Fragment {
             @Override
             public void onClick(View v) {
                 onClickSend();
+
             }
         });
 
@@ -89,7 +92,7 @@ public class DetailedExerciseHistoryComments extends Fragment {
                 new Response.Listener<String>() {
                     @RequiresApi(api = Build.VERSION_CODES.M)
                     @Override
-                    public void onResponse(String response) {
+                    public void onResponse(final String response) {
 
                         // Initialization of sets array
 
@@ -124,7 +127,7 @@ public class DetailedExerciseHistoryComments extends Fragment {
                                 ImageView userPicture = (ImageView) commentView.findViewById(R.id.userCommentImage);
                                 TextView userName = (TextView)commentView.findViewById(R.id.commentsUserName);
                                 TextView commentText = (TextView)commentView.findViewById(R.id.commentText);
-                                JSONObject obj = new JSONObject(comments.getString(i));
+                                final JSONObject obj = new JSONObject(comments.getString(i));
 
                                 String user_name = obj.getString("Name");
 
@@ -140,7 +143,30 @@ public class DetailedExerciseHistoryComments extends Fragment {
                                 commentText.setText(obj.getString("Comment"));
                                 commentText.setKeyListener(null);
 
+                                commentView.setOnLongClickListener(new View.OnLongClickListener() {
+                                    @Override
+                                    public boolean onLongClick(View v) {
+                                        return false;
+                                    }
+                                });
+
+                                ((Button)commentView.findViewById(R.id.trash)).setOnClickListener(new View.OnClickListener() {
+                                    @Override
+                                    public void onClick(View v) {
+                                        try {
+                                            deleteComment(obj.getInt("ID"));
+                                            v.setEnabled(false);
+                                        } catch (JSONException e) {
+                                            e.printStackTrace();
+                                        }
+
+                                        
+                                    }
+                                });
+                                if(!obj.getString("User_email").equals(getActivity().getSharedPreferences("UserData", 0).getString("email", null)))
+                                    ((Button)commentView.findViewById(R.id.trash)).setVisibility(View.GONE);
                                 commentsBaseLayout.addView(commentView);
+                                Log.e(TAG, obj.toString());
 
                                 //createCardViewProgrammatically(new JSONObject(jsonArray.getString(i)));
 
@@ -239,4 +265,45 @@ public class DetailedExerciseHistoryComments extends Fragment {
         // Add the request to the RequestQueue
         req_queue.addRequest(StrHistReq);
     }
+
+    private void deleteComment(final int id){
+        String url = DBConnect.serverURL + "/rm_comment";
+
+        //Create the exercise history request
+        StringRequest StrHistReq = new StringRequest(Request.Method.POST,url,
+                new Response.Listener<String>() {
+                    @RequiresApi(api = Build.VERSION_CODES.M)
+                    @Override
+                    public void onResponse(String response) {
+                        setCommentCards();
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        //Handle error response
+                        new AlertDialog.Builder(getContext())
+                                .setIcon(android.R.drawable.ic_dialog_alert)
+                                .setTitle("Can't delete comment")
+                                .setMessage("An error occurred and your comment could not be deleted")
+                                .setPositiveButton("Ok", null)
+                                .show();
+                        Log.e(TAG, error.toString());
+                    }
+                }
+        ){
+            // use params are specified here
+            @Override
+            protected Map<String, String> getParams()
+            {
+                Map<String, String>  params = new HashMap<>();
+                params.put("comment", id + "");
+                return params;
+            }
+        };
+
+        // Add the request to the RequestQueue
+        req_queue.addRequest(StrHistReq);
+    }
+
 }

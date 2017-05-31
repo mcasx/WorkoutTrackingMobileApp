@@ -61,6 +61,16 @@
                 app:layout_constraintLeft_toRightOf="@+id/userCommentImage"
                 app:layout_constraintTop_toBottomOf="@+id/commentsUserName" />
 
+            <Button
+                android:id="@+id/trash"
+                android:layout_width="50dp"
+                android:layout_height="wrap_content"
+                android:drawableStart="@drawable/ic_delete_black_24dp"
+
+                android:src="@drawable/ic_delete_black_24dp"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
         </android.support.constraint.ConstraintLayout>
     </android.support.v7.widget.CardView>
 </LinearLayout>

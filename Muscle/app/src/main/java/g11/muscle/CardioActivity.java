@@ -496,6 +496,7 @@ public class CardioActivity extends AppCompatActivity implements SensorEventList
                 params.put("exercise_name", "Running");
                 params.put("set_amount", String.valueOf(1));
                 params.put("average_intensity", averageSpeed.getText().toString().split(" ")[2]);
+                params.put("plan_id", "null");
                 Log.e(TAG, averageSpeed.getText().toString().split(" ")[2]);
                 return params;
             }
