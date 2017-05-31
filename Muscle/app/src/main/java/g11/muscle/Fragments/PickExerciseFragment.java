@@ -28,6 +28,7 @@ import org.json.JSONObject;
 import java.util.HashMap;
 import java.util.Map;
 
+import g11.muscle.CardioActivity;
 import g11.muscle.DB.DBConnect;
 import g11.muscle.ExerciseActivity;
 import g11.muscle.GroupExercisesActivity;
@@ -167,7 +168,8 @@ public class PickExerciseFragment extends Fragment {
                         groupsView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                             public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
                                 //Go to exercise page
-                                Intent intent = new Intent(getActivity(), GroupExercisesActivity.class);
+                                Intent intent;
+                                intent = new Intent(getActivity(), GroupExercisesActivity.class);
                                 intent.putExtra("group", groups[position]);
                                 intent.putExtra("email", email);
                                 startActivity(intent);
@@ -230,7 +232,11 @@ public class PickExerciseFragment extends Fragment {
                             public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
                                 //Go to exercise page
                                 String exercise_name = (String) parent.getAdapter().getItem(position);
-                                Intent intent = new Intent(getActivity(), ExerciseActivity.class);
+                                Intent intent;
+                                if(exercise_name.equals("Running"))
+                                    intent = new Intent(getActivity(), CardioActivity.class);
+                                else
+                                    intent = new Intent(getActivity(), ExerciseActivity.class);
                                 intent.putExtra("exercise_name", exercise_name);
                                 intent.putExtra("email", email);
                                 startActivity(intent);

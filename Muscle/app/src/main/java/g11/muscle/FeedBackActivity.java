@@ -12,6 +12,8 @@ import android.content.Intent;
 import android.os.Handler;
 import android.util.Log;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -34,20 +36,26 @@ import com.github.mikephil.charting.highlight.Highlight;
 import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
 import com.github.mikephil.charting.listener.OnChartValueSelectedListener;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.w3c.dom.Text;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
+import java.sql.Time;
+import java.text.DecimalFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.Locale;
 import java.util.Set;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.UUID;
+
+import android.media.MediaPlayer;
 
 import android.graphics.Typeface;
 
@@ -58,6 +66,7 @@ import android.os.CountDownTimer;
 import java.text.SimpleDateFormat;
 import java.text.ParseException;
 
+import g11.muscle.Classes.MuscleProgressItem;
 import g11.muscle.DB.DBConnect;
 import g11.muscle.DB.VolleyProvider;
 
@@ -84,12 +93,26 @@ public class FeedBackActivity extends AppCompatActivity implements
     private int rep_count;
     private int set_count;
     // sum of all intensities values  (devide by rep_count to get average intensity)
-    private double total_intensity;
+    private ArrayList<Double> intensities;
+
+    private int restTime;
+
+    private boolean firstRep;
+
+    private boolean started = false;
+    private Handler handler = new Handler();
+
+    private int last_checkpoint;
+
+    private int exercise_history_id;
 
     //Plan information
     private String plan_rest;
     private int plan_reps, plan_sets, plan_weight;
     private boolean plan;
+
+    private static final int[] Chart_Colors = {Color.rgb(57,106,177), Color.rgb(218,124,48), Color.rgb(62,150,81),
+            Color.rgb(204,37,41), Color.rgb(83,81,84), Color.rgb(107,76,154), Color.rgb(146,36,40), Color.rgb(148,139,61)};;
 
     //GUI
     private LineChart mChart;
@@ -101,9 +124,6 @@ public class FeedBackActivity extends AppCompatActivity implements
 
     private ProgressBar progress;
     private ProgressBar progressSet;
-
-    // multi adds chart thread
-    private Thread chTread;
 
     //Handler
     private static Handler mHandler;
@@ -140,7 +160,18 @@ public class FeedBackActivity extends AppCompatActivity implements
             plan = false;
         }
 
+        //Sounds
+        final MediaPlayer repSound = MediaPlayer.create(this, R.raw.boop);
+        final MediaPlayer setSound = MediaPlayer.create(this, R.raw.waterdrop);
+
         alertDialog = new AlertDialog.Builder(this).create();
+
+        restTime = 0;
+
+        firstRep = true;
+
+        intensities = new ArrayList<>();
+        last_checkpoint = 10;
 
         // for bluetooth data
         strBuilder = new StringBuilder();
@@ -160,22 +191,28 @@ public class FeedBackActivity extends AppCompatActivity implements
         progressSet = (ProgressBar) findViewById(R.id.progressSet);
 
         rep_count = 0;
+        set_count = 1;
 
         nameTV.setText(exercise);
         repsTV.setText(String.valueOf(0));
 
+        setsTV.setText(String.valueOf(set_count));
+
         if(plan){
             progress.setMax(plan_reps * 100);
-            progress.setProgress(0);
+            progress.setProgress(rep_count*100);
 
             repsTotalTV.setVisibility(View.VISIBLE);
             repsTotalTV.setText(String.valueOf(plan_reps));
 
-            set_count = 1;
-            setsTV.setText(String.valueOf(set_count));
-
             progressSet.setMax(plan_sets * 100);
             progressSet.setProgress(set_count*100);
+        }else{
+            progressSet.setMax(100);
+            progressSet.setProgress(100);
+
+            progress.setMax(100);
+            progress.setProgress(100);
         }
 
         // start chart
@@ -193,38 +230,103 @@ public class FeedBackActivity extends AppCompatActivity implements
                     readMessage = readMessage.split("\0")[0];
                     strBuilder.append(readMessage);
 
+                    //getExpectedSetResults();
+
                     int endOfLineIndex = strBuilder.indexOf("}");
 
                     if( endOfLineIndex >= 0){
                         JSONObject jsonObj = new JSONObject(strBuilder.substring(0,endOfLineIndex+1));
                         strBuilder.delete(0,endOfLineIndex+1);
 
-                        //rep_count = Integer.parseInt(jsonObj.getString("rep"));
-                        weight = Double.parseDouble(jsonObj.getString("weight"));
-                        weightTV.setText(String.valueOf((int)weight));
-
-                        rep_count += 1;
-
-                        repsTV.setText(String.valueOf(rep_count));
-
-                        if(plan) {
-                            ObjectAnimator animation = ObjectAnimator.ofInt(progress, "progress", progress.getProgress(), rep_count * 100);
-                            animation.setDuration(500);
-                            animation.setInterpolator(new DecelerateInterpolator());
-                            animation.start();
+                        if(firstRep) {
+                            //saveExercise();
+                            firstRep = false;
                         }
 
-                        total_intensity += Double.parseDouble(jsonObj.getString("meanAcc"));
-                        addEntry(Double.parseDouble(jsonObj.getString("meanAcc")));
+                        if (jsonObj.has("stopped")) {
+                            Log.e("FeedBack","Got Status");
 
-                        if(rep_count == plan_reps){
+                            restTime = 0;
+                            //saveSet();
 
-                            rep_count = 0;
                             set_count += 1;
+                            rep_count = 0;
 
-                            timeAlert(plan_rest);
+                            if(!intensities.isEmpty())
+                                intensities.clear();
+
+                            if(setSound.isPlaying()) {
+                                setSound.pause();
+                                setSound.seekTo(0);
+                            }
+                            setSound.start();
+
+                            if(plan)
+                                timeAlert(plan_rest);
+
+                            TimeCountstart();
                         }
+                        else{
+                            TimeCountstop();
+                            if(rep_count == 0 && !firstRep){
+                                repsTV.setText(String.valueOf(rep_count));
+                                progress.setProgress(rep_count*100);
+                                setsTV.setText(String.valueOf(set_count));
 
+                                if(plan) {
+                                    ObjectAnimator animation = ObjectAnimator.ofInt(progressSet, "progress", progressSet.getProgress(), set_count * 100);
+                                    animation.setDuration(850);
+                                    animation.setInterpolator(new DecelerateInterpolator());
+                                    animation.start();
+                                }else{
+                                    ObjectAnimator animation = ObjectAnimator.ofInt(progressSet, "progress", 0,100);
+                                    animation.setDuration(500);
+                                    animation.setInterpolator(new DecelerateInterpolator());
+                                    animation.start();
+                                }
+                            }
+                            Log.e("RestTime",String.valueOf(restTime));
+
+                            int checkPoint = Integer.parseInt(jsonObj.getString("checkpoint"));
+
+                            if(checkPoint <= last_checkpoint){
+                                last_checkpoint = checkPoint;
+
+                                weight = Double.parseDouble(jsonObj.getString("weight"));
+                                weightTV.setText(String.valueOf((int)weight));
+
+                                rep_count += 1;
+                                repsTV.setText(String.valueOf(rep_count));
+
+                                if(plan) {
+                                    ObjectAnimator animation = ObjectAnimator.ofInt(progress, "progress", progress.getProgress(), rep_count * 100);
+                                    animation.setDuration(500);
+                                    animation.setInterpolator(new DecelerateInterpolator());
+                                    animation.start();
+                                    progress.setProgress(rep_count*100);
+                                }else{ // 'Free' Mode
+                                    ObjectAnimator animation = ObjectAnimator.ofInt(progress, "progress", 0, 100);
+                                    animation.setDuration(500);
+                                    animation.setInterpolator(new DecelerateInterpolator());
+                                    animation.start();
+                                }
+
+                                if(repSound.isPlaying()){
+                                    repSound.pause();
+                                    repSound.seekTo(0);
+                                }
+                                repSound.start();
+
+                                intensities.add(Double.parseDouble(jsonObj.getString("speed")));
+                                addEntry(intensities.get(intensities.size()-1));
+                            }
+                            else{
+                                last_checkpoint = checkPoint;
+                                intensities.add(Double.parseDouble(jsonObj.getString("speed")));
+                                removeLastEntry();
+                                addEntry(intensities.get(intensities.size()-1));
+                            }
+                        }
                         System.out.println("Get Data from bluetooth");
                     }
                 } catch (JSONException je){
@@ -236,9 +338,46 @@ public class FeedBackActivity extends AppCompatActivity implements
                 }
             }
         };
-
         // Get a handle on the bluetooth radio
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+    }
+
+
+    private Runnable runnable = new Runnable() {
+        @Override
+        public void run() {
+            restTime++;
+            if(!plan) {
+                alertDialog.setMessage(new Time((restTime+3)*1000).toString());
+            }
+
+            if(started)
+                TimeCountstart();
+        }
+    };
+
+    public void TimeCountstop() {
+        if(started){
+            started = false;
+            handler.removeCallbacks(runnable);
+        }
+        if(!plan)
+            CancelTimer();
+    }
+
+    public void TimeCountstart() {
+        started = true;
+        handler.postDelayed(runnable, 1000);
+
+        if(!plan){
+            alertDialog.setTitle("Rest Time");
+            alertDialog.setMessage(new Time((restTime+3)*1000).toString());
+
+            alertDialog.setCanceledOnTouchOutside(false); // set to false because it needs to call cancelTimer() when cancelled
+            // and this dismisses the alert without calling cancelTimer()
+
+            alertDialog.show();
+        }
     }
 
     @Override
@@ -247,9 +386,6 @@ public class FeedBackActivity extends AppCompatActivity implements
         //pushExercise();
         req_queue.cancelAll(this);
         if(mConnectedThread != null) mConnectedThread.cancel();
-        if (chTread != null) {
-            chTread.interrupt();
-        }
         super.onStop();
     }
 
@@ -270,7 +406,6 @@ public class FeedBackActivity extends AppCompatActivity implements
         mChart.getDescription().setEnabled(true);
         mChart.getDescription().setText("Intensity/Reps");
         mChart.getDescription().setTextColor(Color.WHITE);
-
 
         // enable touch gestures
         mChart.setTouchEnabled(true);
@@ -310,7 +445,7 @@ public class FeedBackActivity extends AppCompatActivity implements
         YAxis leftAxis = mChart.getAxisLeft();
         leftAxis.setTypeface(mTfLight);
         leftAxis.setTextColor(Color.WHITE);
-        leftAxis.setAxisMaximum(2f);
+        //leftAxis.setAxisMaximum(4f);
         leftAxis.setAxisMinimum(0f);
         leftAxis.setDrawGridLines(true);
 
@@ -326,48 +461,80 @@ public class FeedBackActivity extends AppCompatActivity implements
         LineData data = mChart.getData();
 
         if (data != null) {
-
-            ILineDataSet set = data.getDataSetByIndex(0);
+            ILineDataSet set = data.getDataSetByIndex(set_count-1);
             // set.addEntry(...); // can be called as well
 
             if (set == null) {
                 set = createSet();
+
+                // turn on values when sets == 1
+                /*if(set_count == 1)
+                    set.setDrawValues(true);
+                else{
+                    ILineDataSet tmpSet = data.getDataSetByIndex(0);
+                    tmpSet.setDrawValues(false);
+                }*/
+
                 data.addDataSet(set);
             }
 
-            data.addEntry(new Entry(set.getEntryCount(), (float) x),0);
+            data.addEntry(new Entry(set.getEntryCount(), (float) x),set_count-1);
             data.notifyDataChanged();
 
             // let the chart know it's data has changed
             mChart.notifyDataSetChanged();
 
             // limit the number of visible entries
-            mChart.setVisibleXRangeMaximum(120);
+            mChart.setVisibleXRangeMaximum(30);
             //mChart.setVisibleYRange(30, AxisDependency.LEFT);
 
             // move to the latest entry
-            mChart.moveViewToX(data.getEntryCount());
+            mChart.moveViewToX(set.getEntryCount());
 
             // this automatically refreshes the chart (calls invalidate())
             //mChart.moveViewTo(data.getXValCount()-7, 55f,AxisDependency.LEFT);
         }
     }
 
+    private void removeLastEntry() {
+
+        LineData data = mChart.getData();
+
+        if (data != null) {
+            ILineDataSet set = data.getDataSetByIndex(set_count-1);
+
+            if (set != null) {
+                Entry e = set.getEntryForXValue(set.getEntryCount() - 1, Float.NaN);
+
+                data.removeEntry(e, set_count-1);
+                // or remove by index
+                // mData.removeEntryByXValue(xIndex, dataSetIndex);
+                data.notifyDataChanged();
+                mChart.notifyDataSetChanged();
+                mChart.invalidate();
+            }
+        }
+    }
+
     private LineDataSet createSet() {
-        LineDataSet set = new LineDataSet(null, "SET "+set_count);
+        LineDataSet set = new LineDataSet(null, "Set "+set_count);
         set.setAxisDependency(YAxis.AxisDependency.LEFT);
-        set.setColor(Color.rgb(235,57,20));     // LINE COLOR - RED
+        //Chart_Colors[set_count % Chart_Colors.length]
+        set.setColor(Chart_Colors[set_count % Chart_Colors.length]); // LINE COLOR
+
         set.setCircleColor(Color.rgb(29,31,34));
         set.setCircleColorHole(Color.rgb(29,31,34));
-        //set.setDrawCircles(false);   KEEP CIRCLES ???
+        set.setDrawCircles(false);   // KEEP CIRCLES ???
+
         set.setLineWidth(2f);
-        set.setCircleRadius(4f);
+        set.setCircleRadius(3f);
         set.setFillAlpha(65);
         set.setFillColor(Color.rgb(235,57,20));
         set.setHighLightColor(Color.rgb(244, 117, 117));
+
         set.setValueTextColor(Color.WHITE);
-        set.setValueTextSize(9f);
-        set.setDrawValues(true);
+        set.setValueTextSize(8f);
+        set.setDrawValues(false);
         return set;
     }
 
@@ -378,18 +545,21 @@ public class FeedBackActivity extends AppCompatActivity implements
         try {
             convertedDate = dateFormat.parse(time);
         } catch (ParseException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            Log.e("FeedBackAc","Convert Time error:\n" + e.toString());
         }
 
         alertDialog.setTitle("Rest Time");
         alertDialog.setMessage(time);
+
+        alertDialog.setCanceledOnTouchOutside(false); // set to false because it needs to call cancelTimer() when cancelled
+                                                      // and this dismisses the alert without calling cancelTimer()
+
         alertDialog.show();
 
-        new CountDownTimer(5000, 1000) {
+        new CountDownTimer(convertedDate.getTime() - 3000, 1000) {
             @Override
             public void onTick(long millisUntilFinished) {
-                alertDialog.setMessage("00:"+ (millisUntilFinished/1000));
+                alertDialog.setMessage(new Time(millisUntilFinished).toString()); //TODO minutes not working correctly
             }
 
             @Override
@@ -401,15 +571,6 @@ public class FeedBackActivity extends AppCompatActivity implements
 
     private void CancelTimer(){
         alertDialog.dismiss();
-
-        repsTV.setText(String.valueOf(rep_count));
-        progress.setProgress(rep_count);
-
-        setsTV.setText(String.valueOf(set_count));
-        ObjectAnimator animation = ObjectAnimator.ofInt(progressSet, "progress", progressSet.getProgress(), set_count * 100);
-        animation.setDuration(1000);
-        animation.setInterpolator(new DecelerateInterpolator());
-        animation.start();
     }
 
     @Override
@@ -422,30 +583,65 @@ public class FeedBackActivity extends AppCompatActivity implements
         Log.i("Nothing selected", "Nothing selected.");
     }
 
+    private void getExpectedSetResults(){
+        String url = DBConnect.serverURL + "/get_expected_exercise_result";
 
-    private void pushExercise() {
+        //Create the exercise plan_group request
+        StringRequest StrHistReq = new StringRequest(Request.Method.POST, url,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        Log.e("ExpectedResponse",response);
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        //Handle error response
+                        System.out.println(error.toString());
+                        //progressBar.setVisibility(View.GONE);
+                    }
+                }
+        ) {
+            // use params are specified here
+            @Override
+            protected Map<String, String> getParams() {
+                Map<String, String> params = new HashMap<>();
+                params.put("user_email", email);
+                params.put("exercise_name", exercise);
+                params.put("weight", String.valueOf(weight));
+                params.put("set_number", String.valueOf(set_count));
+                return params;
+            }
+        };
 
+        // Add the request to the RequestQueue
+        VolleyProvider.getInstance(this).addRequest(StrHistReq);
+    }
+
+    private void saveExercise(){
         // current date time
         final java.sql.Timestamp date = new java.sql.Timestamp(new java.util.Date().getTime());
 
         // add exercise to user history
+
         StringRequest Add_Req = new StringRequest(Request.Method.POST, DBConnect.serverURL + "/add_exercise_history",
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response){
-                        Log.e(TAG,"Posted exercise");
-                        // TODO idk what to do here
+                        Log.e(TAG,response);
+                        exercise_history_id = Integer.parseInt(response);
                     }
                 },
                 new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
 
-                        AlertDialog alertDialog = new AlertDialog.Builder(FeedBackActivity.this).create();
+                        android.app.AlertDialog alertDialog = new android.app.AlertDialog.Builder(FeedBackActivity.this).create();
                         alertDialog.setTitle("No Internet Connection");
                         // Please connect your device to the Internet and try again
                         alertDialog.setMessage(error.toString());
-                        alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
+                        alertDialog.setButton(android.app.AlertDialog.BUTTON_NEUTRAL, "OK",
                                 new DialogInterface.OnClickListener() {
                                     public void onClick(DialogInterface dialog, int which) {
                                         dialog.dismiss();
@@ -463,14 +659,81 @@ public class FeedBackActivity extends AppCompatActivity implements
             {
                 Map<String, String>  params = new HashMap<>();
                 params.put("user", email);
-                params.put("date_time", String.valueOf(date));
-                params.put("exercise_name", exercise);
-                params.put("set_amount", String.valueOf(rep_count));
-                params.put("average_intensity", String.valueOf(total_intensity/rep_count));
+                params.put("date_time", ""+date);
+                params.put("exercise_name",exercise);
+                params.put("set_amount", "null");
+                params.put("average_intensity","null");
                 return params;
             }
         };
         VolleyProvider.getInstance(this).addRequest(Add_Req);
+    }
+
+    private void saveSet(){
+        // add exercise to user history
+        StringRequest Add_Req = new StringRequest(Request.Method.POST, DBConnect.serverURL + "/add_set",
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response){
+                        Log.e("Add Set",response);
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+
+                        android.app.AlertDialog alertDialog = new android.app.AlertDialog.Builder(FeedBackActivity.this).create();
+                        alertDialog.setTitle("No Internet Connection");
+                        // Please connect your device to the Internet and try again
+                        alertDialog.setMessage(error.toString());
+                        alertDialog.setButton(android.app.AlertDialog.BUTTON_NEUTRAL, "OK",
+                                new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        dialog.dismiss();
+                                    }
+                                });
+                        alertDialog.show();
+                    }
+                }
+        ){
+            // use params are specified here
+            // DoB, height, gender and weight are specified later, for now they have default values
+            // effin not nulls
+            @Override
+            protected Map<String, String> getParams()
+            {
+                Map<String, String>  params = new HashMap<>();
+                params.put("exercise_history_id", ""+exercise_history_id);
+                params.put("set_number", String.valueOf(set_count));
+                params.put("repetitions", String.valueOf(rep_count));
+                params.put("weight", String.valueOf((int)weight));
+                Log.e("INTENSITIES",intensities.toString());
+                params.put("intensity", String.valueOf(intensities.get(intensities.size()-1)));
+                Time timeRest = new Time((restTime+3)*1000);
+                params.put("resting_time", String.valueOf(timeRest));
+
+                double intensityAvg = calculateAverage(intensities);
+                double stdDeviation = 0;
+                for(Double x : intensities){
+                    stdDeviation += Math.pow((x-intensityAvg),2);
+                }
+                stdDeviation /= intensities.size();
+                params.put("intensity_deviation", ""+stdDeviation);
+                return params;
+            }
+        };
+        VolleyProvider.getInstance(this).addRequest(Add_Req);
+    }
+
+    private double calculateAverage(ArrayList <Double> marks) {
+        double sum = 0;
+        if(!marks.isEmpty()) {
+            for (Double mark : marks) {
+                sum += mark;
+            }
+            return sum / marks.size();
+        }
+        return sum;
     }
 
     /****************************
@@ -572,7 +835,6 @@ public class FeedBackActivity extends AppCompatActivity implements
                 // until it succeeds or throws an exception.
 
                 mmSocket.connect();
-
             } catch (IOException connectException) {
                 // Unable to connect; close the socket and return.
                 try {
@@ -628,7 +890,6 @@ public class FeedBackActivity extends AppCompatActivity implements
             byte[] buffer = new byte[1024];     // buffer store for the stream
             int bytes;                          // bytes returned from read()
 
-            write("start_sensors");
             // Keep listening to the InputStream until an exception occurs
             while (true) {
                 try {
@@ -655,7 +916,6 @@ public class FeedBackActivity extends AppCompatActivity implements
         /* Call this from the main activity to shutdown the connection */
         public void cancel() {
             try {
-                write("stop_sensors");
                 mmSocket.close();
             } catch (IOException e) {
                 Log.e(TAG, "Error during connectedThread cancel", e);

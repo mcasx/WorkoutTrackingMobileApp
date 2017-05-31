@@ -67,9 +67,11 @@ public class CardioActivity extends AppCompatActivity implements SensorEventList
     private TextView maximumSpeed;
     private float height = 0.0f;
     private VolleyProvider req_queue;
+    private int secs;
     DecimalFormat df;
     Button startButton;
     Button finishButton;
+    boolean isSaved = false;
 
 
     private Runnable runnable = new Runnable() {
@@ -87,6 +89,7 @@ public class CardioActivity extends AppCompatActivity implements SensorEventList
             else
                 sec++;
 
+            secs = sec + min * 60;
             DecimalFormat df = new DecimalFormat("0.00");
 
             counter.setText((min < 10 ? "0" + min : min) + ":" + (sec < 10 ? "0" + sec : sec));
@@ -282,27 +285,27 @@ public class CardioActivity extends AppCompatActivity implements SensorEventList
     };
 
 
-        public void onStatusChanged(String provider, int status, Bundle extras) {
-            //final TextView view_gsm = (TextView) findViewById(R.id.display_gsm_status);
-            String str = "Status ("+provider+"): ";
-            if(status == LocationProvider.TEMPORARILY_UNAVAILABLE){
-                str += "temporarily unavailable";
-            }else if(status == LocationProvider.OUT_OF_SERVICE) {
-                str += "out of service";
-            }else if(status == LocationProvider.AVAILABLE) {
-                str += "available";
-            }else{
-                str += "unknown";
-            }
-            //view_gsm.setText(str);
-
+    public void onStatusChanged(String provider, int status, Bundle extras) {
+        //final TextView view_gsm = (TextView) findViewById(R.id.display_gsm_status);
+        String str = "Status ("+provider+"): ";
+        if(status == LocationProvider.TEMPORARILY_UNAVAILABLE){
+            str += "temporarily unavailable";
+        }else if(status == LocationProvider.OUT_OF_SERVICE) {
+            str += "out of service";
+        }else if(status == LocationProvider.AVAILABLE) {
+            str += "available";
+        }else{
+            str += "unknown";
         }
+        //view_gsm.setText(str);
 
-        public void onProviderEnabled(String provider) {
-        }
+    }
 
-        public void onProviderDisabled(String provider) {
-        }
+    public void onProviderEnabled(String provider) {
+    }
+
+    public void onProviderDisabled(String provider) {
+    }
 
     public void getHeight(){
         String url = DBConnect.serverURL + "/get_user_height";
@@ -391,8 +394,11 @@ public class CardioActivity extends AppCompatActivity implements SensorEventList
 
     @Override
     public void onBackPressed() {
-        if(counter.getText().toString().equals("00:00"))
+        if(counter.getText().toString().equals("00:00") || isSaved) {
             finish();
+            return;
+        }
+
 
 
         new AlertDialog.Builder(this)
@@ -414,6 +420,8 @@ public class CardioActivity extends AppCompatActivity implements SensorEventList
 
         stop();
         startButton.setText("Start");
+        startButton.setEnabled(false);
+        finishButton.setEnabled(false);
 
         if(finishButton.getText().toString().equals("Restart")){
             startActivity(new Intent(this, CardioActivity.class));
@@ -430,7 +438,15 @@ public class CardioActivity extends AppCompatActivity implements SensorEventList
                         saveExercise();
                     }
                 })
-                .setNegativeButton("No", null)
+                .setNegativeButton("No", new DialogInterface.OnClickListener()
+                {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        startButton.setEnabled(true);
+                        finishButton.setEnabled(true);
+
+                    }
+                })
                 .show();
 
     }
@@ -438,9 +454,8 @@ public class CardioActivity extends AppCompatActivity implements SensorEventList
     private void saveExercise(){
         // current date time
         final java.sql.Timestamp date = new java.sql.Timestamp(new java.util.Date().getTime());
-        startButton.setEnabled(false);
-        finishButton.setEnabled(false);
-        finishButton.setText("Restart");
+
+        //finishButton.setText("Restart");
         // add exercise to user history
 
         StringRequest Add_Req = new StringRequest(Request.Method.POST, DBConnect.serverURL + "/add_exercise_history",
@@ -480,7 +495,8 @@ public class CardioActivity extends AppCompatActivity implements SensorEventList
                 params.put("date_time", String.valueOf(date));
                 params.put("exercise_name", "Running");
                 params.put("set_amount", String.valueOf(1));
-                params.put("average_intensity", averageSpeed.getText().toString().split(" ")[1]);
+                params.put("average_intensity", averageSpeed.getText().toString().split(" ")[2]);
+                Log.e(TAG, averageSpeed.getText().toString().split(" ")[2]);
                 return params;
             }
         };
@@ -494,7 +510,7 @@ public class CardioActivity extends AppCompatActivity implements SensorEventList
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response){
-                        Log.e("Add Set",response);
+                        isSaved = true;
                     }
                 },
                 new Response.ErrorListener() {
@@ -525,7 +541,7 @@ public class CardioActivity extends AppCompatActivity implements SensorEventList
                 params.put("exercise_history_id", "" + exerciseID);
                 params.put("set_number", "" + 1);
                 params.put("repetitions", "" + Math.round(Float.valueOf(distance.getText().toString().split(" ")[1]) * 1000));
-                params.put("weight", "null");
+                params.put("weight", "" + secs);
                 params.put("intensity", "null");
                 params.put("resting_time", "null");
                 params.put("intensity_deviation", "null");

@@ -167,7 +167,7 @@ public class PlanListFragment extends Fragment {
                                 startActivity(intent);
                             }
                         });
-
+                        planListProgressBar.setVisibility(View.GONE);
                     }
                 },
                 new Response.ErrorListener() {

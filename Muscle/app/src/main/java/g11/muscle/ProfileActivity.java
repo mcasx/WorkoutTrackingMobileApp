@@ -62,6 +62,7 @@ import com.github.mikephil.charting.data.RadarEntry;
 import com.github.mikephil.charting.formatter.IAxisValueFormatter;
 import com.github.mikephil.charting.interfaces.datasets.IRadarDataSet;
 import com.github.mikephil.charting.utils.ColorTemplate;
+import com.google.gson.Gson;
 import com.squareup.picasso.Picasso;
 import com.theartofdev.edmodo.cropper.CropImage;
 import com.theartofdev.edmodo.cropper.CropImageActivity;
@@ -78,6 +79,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -758,8 +760,9 @@ public class ProfileActivity extends AppCompatActivity {
     private boolean validWeight(String weight){
         if(!TextUtils.isEmpty(weight)) {
             try {
-                Double.parseDouble(weight);
-                return true;
+                Double weight_value = Double.parseDouble(weight);
+                return weight_value <= 300;
+
             } catch (NumberFormatException e) {
                 return false;
             }
@@ -883,10 +886,39 @@ public class ProfileActivity extends AppCompatActivity {
                     public void onResponse(String response) {
                         try {
 
-                            JSONArray jsonArray = new JSONArray(response);
+                            JSONArray retrieved_jsonArray = new JSONArray(response);
                             // Chart Array Values List
                             ArrayList<RadarEntry> entries = new ArrayList<>();
-                            final String[] MuscleGroups = new String[jsonArray.length()];
+                            // not all muscles are returned here
+                            //final String[] MuscleGroups = new String[jsonArray.length()];
+                            // pre initialization
+                            JSONArray jsonArray = new JSONArray();
+
+                            final String[] MuscleGroups = {"Back","Biceps","Cardio","Chest","Legs","Shoulders","Triceps"};
+
+                            Map<String,Integer> mGroupDict = new HashMap<>();
+
+                            for (int i = 0; i < retrieved_jsonArray.length(); i++) {
+                                JSONObject muscleGroupElement = retrieved_jsonArray.getJSONObject(i);
+
+                                String muscleName = muscleGroupElement.getString("Muscle_name");
+                                Integer muscleCount = muscleGroupElement.getInt("count");
+
+                                Log.i("HELP","Muscle_name: "+muscleName +"\n"+"Muscle_count: "+muscleCount);
+
+                                mGroupDict.put(muscleName,muscleCount);
+                            }
+
+                            for(String muscleGroup : MuscleGroups) {
+                                JSONObject jsonObj = new JSONObject();
+                                jsonObj.put("Muscle_name", muscleGroup);
+                                Integer count = mGroupDict.get(muscleGroup);
+                                if(count != null)
+                                    jsonObj.put("count",count);
+                                else
+                                    jsonObj.put("count",0);
+                                jsonArray.put(jsonObj);
+                            }
                             Float[] MuscleCnt = new Float[jsonArray.length()];
                             Float sum = 0f;
                             try {
@@ -1058,6 +1090,7 @@ public class ProfileActivity extends AppCompatActivity {
                                 }
                             } catch (JSONException|ParseException jpe) {
                                 Log.e("WeightChartSetup", jpe.toString());
+                                return;
                             }
                             // create a dataset and give it a type
                             LineDataSet set1 = new LineDataSet(values, "Weight");
