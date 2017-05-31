@@ -107,7 +107,7 @@ public class HomeFragment extends Fragment implements OnChartValueSelectedListen
         fView = inflater.inflate(R.layout.fragment_home, container, false);
 
         this.arraySpinner = new String[] {
-                "Recommended Exercises", "Recommended Plans"
+                "Recommended Plans","Recommended Exercises"
         };
 
 
@@ -130,10 +130,16 @@ public class HomeFragment extends Fragment implements OnChartValueSelectedListen
         spinner.setAdapter(adapter);
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
-                if(pos == 0)
-                    getRecommendedExercises();
-                else
+                if(pos == 0){
+                    ArrayAdapter<String> adapter = new ArrayAdapter<>(getActivity(), android.R.layout.simple_list_item_1,new String[0]);
+                    recList.setAdapter(adapter);
                     getRecommendedPlans();
+                }
+                else {
+                    ArrayAdapter<String> adapter = new ArrayAdapter<>(getActivity(), android.R.layout.simple_list_item_1, new String[0]);
+                    recList.setAdapter(adapter);
+                    getRecommendedExercises();
+                }
             }
             public void onNothingSelected(AdapterView<?> parent) {
             }
