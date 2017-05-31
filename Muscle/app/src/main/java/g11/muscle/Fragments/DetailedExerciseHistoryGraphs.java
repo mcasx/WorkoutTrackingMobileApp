@@ -448,7 +448,7 @@ public class DetailedExerciseHistoryGraphs extends Fragment implements OnChartVa
         mv.setChartView(lChart); // For bounds control
         lChart.setMarker(mv); // Set the marker to the chart
 
-        String url = DBConnect.serverURL + "/get_weight_history";
+        String url = DBConnect.serverURL + "/get_exercise_weight_history";
         //Create the exercise history request
 
         StringRequest StrHistReq = new StringRequest(Request.Method.POST,url,
@@ -459,16 +459,17 @@ public class DetailedExerciseHistoryGraphs extends Fragment implements OnChartVa
                             // Chart Array Values List
                             ArrayList<Entry> values = new ArrayList<>();
                             JSONArray jsonArray = new JSONArray(response);
+                            Log.i("RESPONSE",response);
                             try {
                                 for (int i = 0; i < jsonArray.length(); i++) {
                                     String tmpWeight = new JSONObject(jsonArray.getString(i)).getString("Weight");
-                                    String tmpDate = new JSONObject(jsonArray.getString(i)).getString("Date");
+                                    String tmpDate = new JSONObject(jsonArray.getString(i)).getString("Date_Time");
                                     // parse String to Date - I don't know why but this adds an hour to the date
-                                    Date tmpDat = new SimpleDateFormat("EE, dd MMM yyyy HH:mm:ss z", Locale.UK).parse(tmpDate);
+                                    Date tmpDat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.UK).parse(tmpDate);
                                     values.add(new Entry(tmpDat.getTime(),Float.parseFloat(tmpWeight)));
                                 }
                             } catch (JSONException|ParseException jpe) {
-                                Log.e("WeightChartSetup", jpe.toString());
+                                Log.i("WeightChartSetup", jpe.toString());
                             }
                             // create a dataset and give it a type
                             LineDataSet set1 = new LineDataSet(values, "Weight");
@@ -540,7 +541,9 @@ public class DetailedExerciseHistoryGraphs extends Fragment implements OnChartVa
 
 
                         }catch (JSONException e2){
-                            e2.printStackTrace();
+                            Log.i("OUTER",e2.toString());
+                        }catch (Exception ee){
+                            Log.i("EXECEPTION",ee.toString());
                         }
                     }
                 },
@@ -557,7 +560,10 @@ public class DetailedExerciseHistoryGraphs extends Fragment implements OnChartVa
             protected Map<String, String> getParams()
             {
                 Map<String, String>  params = new HashMap<>();
-                params.put("user_email", email);
+                try {
+                    params.put("exercise_id", DetailedExerciseHistoryActivity.exerciseHistoryItem.getString("ID"));
+                }catch(JSONException je){Log.e(TAG, "No Exercise History ID");}
+
                 return params;
             }
         };
