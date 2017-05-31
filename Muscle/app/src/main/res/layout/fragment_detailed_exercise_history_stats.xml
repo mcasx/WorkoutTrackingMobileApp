@@ -28,7 +28,7 @@
                         android:layout_height="wrap_content"
                         android:textAlignment="center"
                         android:textSize="18sp"
-                        android:text="TextView" />
+                        android:text="Exercise Stats" />
 
                     <com.github.mikephil.charting.charts.BarChart
                         android:id="@+id/bar_chart"
@@ -48,7 +48,7 @@
                         android:layout_height="wrap_content"
                         android:textAlignment="center"
                         android:textSize="18sp"
-                        android:text="TextView" />
+                        android:text="Exercise Weight Progress" />
 
                     <com.github.mikephil.charting.charts.LineChart
                         android:id="@+id/detail_line_Chart"
