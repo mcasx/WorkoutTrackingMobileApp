@@ -88,31 +88,35 @@ public class FeedBackActivity extends AppCompatActivity implements
     private final static int MESSAGE_READ = 2; // used in bluetooth handler to identify message update
     private final static int CONNECTING_STATUS = 3; // used in bluetooth handler to identify message status
 
-    //Information to save
+    //Current Information
     private double weight;
     private int rep_count;
     private int set_count;
-    // sum of all intensities values  (devide by rep_count to get average intensity)
     private ArrayList<Double> intensities;
-
     private int restTime;
 
+    // first rep of the exercise
     private boolean firstRep;
 
-    private boolean started = false;
+    private boolean firstStopped;
+
+    // Timers stuff
+    private boolean startedTimer = false;
     private Handler handler = new Handler();
+    private SimpleDateFormat outFmt = new SimpleDateFormat("mm:ss",Locale.ENGLISH);
 
     private int last_checkpoint;
 
     private int exercise_history_id;
 
-    //Plan information
+    //Plan information (Intent)
     private String plan_rest;
     private int plan_reps, plan_sets, plan_weight;
     private boolean plan;
 
+    // Chart set colors
     private static final int[] Chart_Colors = {Color.rgb(57,106,177), Color.rgb(218,124,48), Color.rgb(62,150,81),
-            Color.rgb(204,37,41), Color.rgb(83,81,84), Color.rgb(107,76,154), Color.rgb(146,36,40), Color.rgb(148,139,61)};;
+            Color.rgb(204,37,41), Color.rgb(83,81,84), Color.rgb(107,76,154), Color.rgb(146,36,40), Color.rgb(148,139,61)};
 
     //GUI
     private LineChart mChart;
@@ -121,7 +125,6 @@ public class FeedBackActivity extends AppCompatActivity implements
     private TextView repsTV;
     private TextView repsTotalTV;
     private TextView nameTV;
-
     private ProgressBar progress;
     private ProgressBar progressSet;
 
@@ -165,10 +168,21 @@ public class FeedBackActivity extends AppCompatActivity implements
         final MediaPlayer setSound = MediaPlayer.create(this, R.raw.waterdrop);
 
         alertDialog = new AlertDialog.Builder(this).create();
+        alertDialog.setTitle("Rest Time");
+        alertDialog.setCanceledOnTouchOutside(true);
+        alertDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
+            @Override
+            public void onCancel(DialogInterface dialog) {
+                //do whatever you want the back key to do
+                alertDialog.dismiss();
+            }
+        });
 
         restTime = 0;
 
         firstRep = true;
+
+        firstStopped = false; // don't want to count the first Stop if any rep was done
 
         intensities = new ArrayList<>();
         last_checkpoint = 10;
@@ -199,20 +213,32 @@ public class FeedBackActivity extends AppCompatActivity implements
         setsTV.setText(String.valueOf(set_count));
 
         if(plan){
-            progress.setMax(plan_reps * 100);
-            progress.setProgress(rep_count*100);
-
             repsTotalTV.setVisibility(View.VISIBLE);
             repsTotalTV.setText(String.valueOf(plan_reps));
 
+            progress.setMax(plan_reps * 100);
+            progress.setProgress(rep_count*100);
+
+
             progressSet.setMax(plan_sets * 100);
+            ObjectAnimator Animation = ObjectAnimator.ofInt(progressSet, "progress", progressSet.getProgress(), set_count * 100);
+            Animation.setDuration(500);
+            Animation.setInterpolator(new DecelerateInterpolator());
+            Animation.start();
             progressSet.setProgress(set_count*100);
         }else{
             progressSet.setMax(100);
-            progressSet.setProgress(100);
-
             progress.setMax(100);
-            progress.setProgress(100);
+
+            ObjectAnimator animation = ObjectAnimator.ofInt(progress, "progress", 0, 100);
+            animation.setDuration(500);
+            animation.setInterpolator(new DecelerateInterpolator());
+            animation.start();
+
+            ObjectAnimator Animation = ObjectAnimator.ofInt(progressSet, "progress", 0,100);
+            Animation.setDuration(500);
+            Animation.setInterpolator(new DecelerateInterpolator());
+            Animation.start();
         }
 
         // start chart
@@ -223,8 +249,6 @@ public class FeedBackActivity extends AppCompatActivity implements
             public void handleMessage(android.os.Message msg){
                 String readMessage;
                 try {
-                    alertDialog.cancel(); //Closes time alert dialog if opened
-
                     // Send the obtained bytes to the UI activity
                     readMessage = new String((byte[]) msg.obj, "UTF-8");
                     readMessage = readMessage.split("\0")[0];
@@ -238,7 +262,7 @@ public class FeedBackActivity extends AppCompatActivity implements
                         JSONObject jsonObj = new JSONObject(strBuilder.substring(0,endOfLineIndex+1));
                         strBuilder.delete(0,endOfLineIndex+1);
 
-                        if(firstRep) {
+                        if(firstRep && set_count == 1) {
                             if(!plan)
                                 saveExercise();
                             else
@@ -247,17 +271,12 @@ public class FeedBackActivity extends AppCompatActivity implements
                         }
 
                         if (jsonObj.has("stopped")) {
-                            Log.e("FeedBack","Got Status");
+                            if(!firstStopped)
+                                return;
 
-                            Log.e("BEFORESAVE",intensities.toString());
-                            saveSet(new ArrayList<>(intensities),exercise_history_id,set_count,rep_count,weight,restTime);
+                            firstStopped = false;
 
-                            restTime = 0;
-                            set_count += 1;
-                            rep_count = 0;
-
-                            if(!intensities.isEmpty())
-                                intensities.clear();
+                            restTime = 3; // stopped is received after 3 sec
 
                             if(setSound.isPlaying()) {
                                 setSound.pause();
@@ -265,21 +284,36 @@ public class FeedBackActivity extends AppCompatActivity implements
                             }
                             setSound.start();
 
-                            if(plan)
+                            /*
+                            if(plan) {
                                 timeAlert(plan_rest);
-
-                            TimeCountstart();
+                            }
+                            else*/
+                            TimeCountStart();
                         }
                         else{
-                            TimeCountstop();
-                            if(rep_count == 0 && !firstRep){
+                            firstStopped = true;
+
+                            if(restTime != 0) { // save old Set and reset
+                                TimeCountStop();
+                                saveSet(new ArrayList<>(intensities),exercise_history_id,set_count,rep_count,weight,restTime);
+
+                                set_count += 1; // new set
+
+                                // Clear values
+                                restTime = 0;
+                                rep_count = 0;
+                                if(!intensities.isEmpty())
+                                    intensities.clear();
+
                                 repsTV.setText(String.valueOf(rep_count));
-                                progress.setProgress(rep_count*100);
+                                progress.setProgress(rep_count*100); // reset Reps progress bar
+
                                 setsTV.setText(String.valueOf(set_count));
 
-                                if(plan) {
+                                if(plan) { // set animation
                                     ObjectAnimator animation = ObjectAnimator.ofInt(progressSet, "progress", progressSet.getProgress(), set_count * 100);
-                                    animation.setDuration(850);
+                                    animation.setDuration(500);
                                     animation.setInterpolator(new DecelerateInterpolator());
                                     animation.start();
                                 }else{
@@ -289,7 +323,6 @@ public class FeedBackActivity extends AppCompatActivity implements
                                     animation.start();
                                 }
                             }
-                            Log.e("RestTime",String.valueOf(restTime));
 
                             int checkPoint = Integer.parseInt(jsonObj.getString("checkpoint"));
 
@@ -345,49 +378,9 @@ public class FeedBackActivity extends AppCompatActivity implements
         // Get a handle on the bluetooth radio
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
     }
-
-
-    private Runnable runnable = new Runnable() {
-        @Override
-        public void run() {
-            restTime++;
-            if(!plan) {
-                alertDialog.setMessage(new Time((restTime+3)*1000).toString());
-            }
-
-            if(started)
-                TimeCountstart();
-        }
-    };
-
-    public void TimeCountstop() {
-        if(started){
-            started = false;
-            handler.removeCallbacks(runnable);
-        }
-        if(!plan)
-            CancelTimer();
-    }
-
-    public void TimeCountstart() {
-        started = true;
-        handler.postDelayed(runnable, 1000);
-
-        if(!plan){
-            alertDialog.setTitle("Rest Time");
-            alertDialog.setMessage(new Time((restTime+3)*1000).toString());
-
-            alertDialog.setCanceledOnTouchOutside(false); // set to false because it needs to call cancelTimer() when cancelled
-            // and this dismisses the alert without calling cancelTimer()
-
-            alertDialog.show();
-        }
-    }
-
+    
     @Override
     protected void onStop(){
-        //Send exercise to history of user
-        //pushExercise();
         req_queue.cancelAll(this);
         if(mConnectedThread != null) mConnectedThread.cancel();
         super.onStop();
@@ -397,6 +390,86 @@ public class FeedBackActivity extends AppCompatActivity implements
     protected void onStart(){
         super.onStart();
         enableAdapter();
+    }
+
+    @Override
+    public void onBackPressed() {
+        if(restTime != 0) {
+            saveSet(new ArrayList<>(intensities),exercise_history_id,set_count,rep_count,weight,restTime);
+            TimeCountStop();
+        }
+
+        super.onBackPressed();
+    }
+
+    @Override
+    protected void onDestroy()
+    {
+        super.onDestroy();
+    }
+
+    
+    private Runnable runnableTimer = new Runnable() {
+        @Override
+        public void run() {
+            if(!plan)
+                alertDialog.setMessage(outFmt.format(new Date((restTime)*1000)));
+            else
+                alertDialog.setMessage(outFmt.format(new Date((restTime)*1000)) + "    (" + plan_rest.substring(2) + ")");
+
+            if(startedTimer){
+                restTime++;
+                handler.postDelayed(runnableTimer, 1000);
+            }
+        }
+    };
+
+    public void TimeCountStop() {
+        if(startedTimer){
+            handler.removeCallbacksAndMessages(runnableTimer);
+            startedTimer = false;
+            alertDialog.cancel();
+        }
+    }
+
+    public void TimeCountStart() {
+        startedTimer = true;
+        handler.postDelayed(runnableTimer, 1000);
+
+        if(!plan)
+            alertDialog.setMessage(outFmt.format(new Date((restTime)*1000)));
+        else
+            alertDialog.setMessage(outFmt.format(new Date((restTime)*1000)) + "    (" + plan_rest.substring(2) + ")");
+        alertDialog.show();
+        restTime++;
+    }
+
+    private void timeAlert(String time){
+        SimpleDateFormat dateFormat = new SimpleDateFormat("hh:mm:ss", Locale.UK);
+        Date convertedDate = new Date();
+
+        try {
+            convertedDate = dateFormat.parse(time);
+        } catch (ParseException e) {
+            Log.e("FeedBackAc","Convert Time error:\n" + e.toString());
+        }
+
+        alertDialog.setMessage(time);
+        alertDialog.show();
+
+        new CountDownTimer(convertedDate.getTime() - 3000, 1000) { //stopped is received after 3 sec
+            @Override
+            public void onTick(long millisUntilFinished) {
+                restTime++;
+                alertDialog.setMessage(outFmt.format(new Date(millisUntilFinished)));
+            }
+
+            @Override
+            public void onFinish() {
+                alertDialog.cancel();
+                TimeCountStart();
+            }
+        }.start();
     }
 
     private void chartSetup() {
@@ -460,7 +533,7 @@ public class FeedBackActivity extends AppCompatActivity implements
     }
 
     private void addEntry(double x) {
-        CancelTimer();
+        alertDialog.dismiss();
 
         LineData data = mChart.getData();
 
@@ -540,41 +613,6 @@ public class FeedBackActivity extends AppCompatActivity implements
         set.setValueTextSize(8f);
         set.setDrawValues(false);
         return set;
-    }
-
-    private void timeAlert(String time){
-        SimpleDateFormat dateFormat = new SimpleDateFormat("hh:mm:ss", Locale.UK);
-        Date convertedDate = new Date();
-
-        try {
-            convertedDate = dateFormat.parse(time);
-        } catch (ParseException e) {
-            Log.e("FeedBackAc","Convert Time error:\n" + e.toString());
-        }
-
-        alertDialog.setTitle("Rest Time");
-        alertDialog.setMessage(time);
-
-        alertDialog.setCanceledOnTouchOutside(false); // set to false because it needs to call cancelTimer() when cancelled
-                                                      // and this dismisses the alert without calling cancelTimer()
-
-        alertDialog.show();
-
-        new CountDownTimer(convertedDate.getTime() - 3000, 1000) {
-            @Override
-            public void onTick(long millisUntilFinished) {
-                alertDialog.setMessage(new Time(millisUntilFinished).toString()); //TODO minutes not working correctly
-            }
-
-            @Override
-            public void onFinish() {
-                CancelTimer();
-            }
-        }.start();
-    }
-
-    private void CancelTimer(){
-        alertDialog.dismiss();
     }
 
     @Override
@@ -766,7 +804,7 @@ public class FeedBackActivity extends AppCompatActivity implements
                 params.put("weight", String.valueOf((int)weight));
                 Log.e("INTENSITIES",intensities.toString());
                 params.put("intensity", String.valueOf(intensities.get(intensities.size()-1)));
-                Time timeRest = new Time((restTime+3)*1000);
+                Time timeRest = new Time((restTime)*1000);
                 params.put("resting_time", String.valueOf(timeRest));
 
                 double intensityAvg = calculateAverage(intensities);
@@ -892,6 +930,13 @@ public class FeedBackActivity extends AppCompatActivity implements
                 // until it succeeds or throws an exception.
 
                 mmSocket.connect();
+                FeedBackActivity.this.runOnUiThread(new Runnable()
+                {
+                    public void run()
+                    {
+                        Toast.makeText(FeedBackActivity.this, "Bluetooth Connected", Toast.LENGTH_SHORT).show();
+                    }
+                });
             } catch (IOException connectException) {
                 // Unable to connect; close the socket and return.
                 try {
