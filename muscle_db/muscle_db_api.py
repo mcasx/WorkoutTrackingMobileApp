@@ -7,9 +7,29 @@ import sys
 import base64 
 import json
 import os.path
+from flask_jsondash.charts_builder import charts
+import c3pyo as c3
+from itertools import accumulate
+
+
 
 
 app = Flask(__name__)
+# Config examples.
+
+app.register_blueprint(charts)
+app.config['SECRET_KEY'] = 'SECURE'
+
+def _get_username():
+    return 'anonymous'
+
+# Config examples.
+charts_config = dict(
+    metadata=dict(
+        created_by=_get_username,
+    ),
+)
+app.config['JSONDASH'] = charts_config
 
 
 @app.route('/hello', methods = ['GET', 'POST'])
@@ -21,6 +41,185 @@ def hello():
         return "Hello World"
 
 
+@app.route('/pietest')
+def pietest():
+
+
+        return json.dumps({
+            "data d": 16,
+            "data e": 77,
+            "data b": 87,
+            "data c": 41,
+            "data a": 15
+            })
+
+#################
+####DASHBOARD####
+"""SELECT DAYNAME(Date_Time) AS dt,SUM(S.repetitions) AS Reps FROM EXE
+                      184.105.139.70 - - [08/Jun/2017 05:05:53] "GET / HTTP/1.1" 404 -           │RCISE_HISTORY AS EH JOIN SETS AS S ON EH.id = S.Exercise_history_id GROUP
+                      ^Croot@phpmyadmin-512mb-lon1-01:~/muscle_db#         """                     """ │BY dt;"""
+
+#################
+
+@app.route('/muscle_chart')
+def muscle_chart():
+
+        conn = MySQLdb.connect(host='localhost', user='muscle', password='some_pass')
+        c = conn.cursor(MySQLdb.cursors.DictCursor)
+        c.execute('USE muscle2')
+        c.execute("""
+                SELECT count(*) AS count, Muscle_name
+                FROM (SELECT Muscle_Name,Exercise_name FROM MUSCLES_WORKED) AS m_w
+                JOIN EXERCISE_HISTORY AS e_h
+                ON m_w.Exercise_name = e_h.Exercise_name
+                GROUP BY Muscle_name
+                """)
+        fetched = c.fetchall()
+        r = { row["Muscle_name"] : row["count"]  for row in fetched }
+        c.close()
+        conn.close()
+        return jsonify(r)
+
+@app.route('/male_female_chart')
+def male_female_chart():
+
+    conn = MySQLdb.connect(host='localhost', user='muscle', password='some_pass')
+    c = conn.cursor(MySQLdb.cursors.DictCursor)
+    c.execute('USE muscle2')
+    c.execute("""
+            SELECT (CASE WHEN U.Gender = 0 THEN "Male" ELSE "Female" END) AS Gender, count(*) AS count
+            FROM USER AS U
+            GROUP BY U.Gender
+            """)
+    fetched = c.fetchall()
+    print(fetched)
+    c.close()
+    conn.close()
+
+    r = {"data": {
+    "values": [
+      {
+        "Gender": "Male",
+        "b": [ row["count"] for row in fetched if row["Gender"] == "Male"][0]
+      },
+      {
+        "Gender": "Female",
+        "b": [ row["count"] for row in fetched if row["Gender"] == "Female"][0]
+      }
+    ]
+  },
+  "mark": "bar",
+  "encoding": {
+    "x": {
+      "field": "Gender",
+      "title":" ",
+      "type": "ordinal",
+      "axis": {
+        "labelAngle": 0
+      }
+    },
+    "y": {
+      "field": "b",
+      "title": " ",
+      "type": "quantitative"
+    },
+    "color": {"field": "Gender", "type": "nominal", "scale": {"domain": ["Male", "Female"], "range": ["teal","#ff0000"]}}
+  }
+  }
+
+    return jsonify(r)
+
+@app.route('/user_signup_history')
+def user_signup_history():
+    conn = MySQLdb.connect(host='localhost', user='muscle', password='some_pass')
+    c = conn.cursor(MySQLdb.cursors.DictCursor)
+    c.execute('USE muscle2')
+    c.execute("""
+            SELECT DISTINCT UWH.ID, MIN(CAST(UWH.Date AS DATE)) AS `Date`
+            FROM USER_WEIGHT_HISTORY AS UWH
+            GROUP BY UWH.Date
+            """)
+    fetched = c.fetchall()
+    c.close()
+    conn.close()
+
+    users = [ row['ID'] for row in fetched ]
+    users = list(accumulate(users))
+
+    for i in range(len(fetched)):
+        fetched[i]['ID'] = users[i]
+
+    values = [ {"date":str(row['Date']),"users":row['ID']} for row in fetched ]
+
+    r = {   "data": {
+                "values": values
+            },
+            "mark": "line",
+            "encoding": {
+                "x": {
+                  "field":"date",
+                  "title":" ",
+                  "type": "temporal"
+                },
+                "y": {
+                  "field": "users",
+                  "title": " ",
+                  "type": "quantitative"
+                }
+
+            }
+        }
+    return jsonify(r)
+
+@app.route('/avg_weekly_exercises_chart')
+def avg_weekly_exercises_chart():
+    conn = MySQLdb.connect(host='localhost', user='muscle', password='some_pass')
+    c = conn.cursor(MySQLdb.cursors.DictCursor)
+    c.execute('USE muscle2')
+    c.execute("""
+            SELECT weekday, CAST(AVG(set_count) AS UNSIGNED) AS avg_weekday_sets
+            FROM(
+                SELECT DAYNAME(Date_Time) AS weekday,
+                       DAYOFWEEK(Date_Time) AS day_num,
+                       TO_DAYS(Date_Time) AS date,
+                       COUNT(S.Set_number) AS  set_count
+
+                FROM EXERCISE_HISTORY AS EH
+                JOIN SETS AS S
+                  ON EH.id = S.Exercise_history_id
+                GROUP BY date
+                ) AS helper_table
+
+            GROUP BY weekday
+            ORDER BY day_num;
+            """)
+    fetched = c.fetchall()
+
+    r = {
+        "data": {
+            "values": fetched
+        },
+        "mark": "bar",
+        "encoding": {
+            "x": {
+                "field": "weekday",
+                "title":"Weekday",
+                "type": "nominal",
+                "axis": {
+                    "labelAngle": 0
+                }
+            },
+            "y": {
+                "field": "avg_weekday_sets",
+                "title": "Number of Sets",
+                "type": "quantitative"
+            }
+        }
+    }
+    return jsonify(r)
+    c.close()
+    conn.close()
+
 
 #@app.route('/add_user/<email>/<password>/<name>/<height>/<weight>/<profile_image>/<gender>/<date_of_birth>')
 
@@ -30,58 +229,52 @@ def add_user():
 
     try:
 
-	    email = request.form['email']
-	    password = request.form['password']
-	    name = request.form['name']
-	    height = request.form['height']
-	    weight = request.form['weight']
+        email = request.form['email']
+        password = request.form['password']
+        name = request.form['name']
+        height = request.form['height']
+        weight = request.form['weight']
 
-	    if 'profile_image_name' and 'profile_image'in request.args:
-	        profile_image_name = request.form['profile_image_name']
-	        profile_image = request.form['profile_image']
-	    else:
-	        profile_image_name = ""
-	        profile_image = ""
+        if 'profile_image_name' and 'profile_image'in request.args:
+            profile_image_name = request.form['profile_image_name']
+            profile_image = request.form['profile_image']
+        else:
+            profile_image_name = ""
+            profile_image = ""
 
-	    gender = request.form['gender']
-	    date_of_birth = datetime.strptime(request.form['date_of_birth'], "%d-%m-%Y").date()
+        gender = request.form['gender']
+        date_of_birth = datetime.strptime(request.form['date_of_birth'], "%d-%m-%Y").date()
 
-	    print(email)
-	    conn = MySQLdb.connect(host='localhost', user='muscle', password='some_pass')
-	    c = conn.cursor()
+        print(email)
+        conn = MySQLdb.connect(host='localhost', user='muscle', password='some_pass')
+        c = conn.cursor()
 
-	    c.execute('USE muscle2')
-	    
-	    c.execute("SELECT * FROM USER WHERE Email = %s", [email])
+        c.execute('USE muscle2')
 
-	    password = pbkdf2_sha256.encrypt(password, rounds=200000, salt_size=16)
+        c.execute("SELECT * FROM USER WHERE Email = %s", [email])
 
-	    if c.fetchall():
-	        return "User already Registered"
-	    
+        password = pbkdf2_sha256.encrypt(password, rounds=200000, salt_size=16)
 
-	    if profile_image != "":
-	        c.execute('''INSERT INTO USER (Email, Password, Name, Height, Weight, Date_of_birth, Profile_image, Gender) VALUES (%s, %s, %s , %s, %s, %s, %s, %s)''', (email, password, name, height, weight, date_of_birth, profile_image_name, gender))
-	        
-	        """
-	        Para: David
-	        Mudei cenas
-	        """
-	        
-	            #else:
-	        f = file("./img/profiles/" + profile_image_name, 'wb')
-	        f.write(profile_image)
-	        f.close()
-	    else:
-	        c.execute('''INSERT INTO USER (Email, Password, Name, Height, Weight, Date_of_birth, Gender) VALUES (%s, %s, %s , %s, %s, %s, %s)''', (email, password, name, height, weight, date_of_birth, gender))
+        if c.fetchall():
+            return "User already Registered"
 
-	    u_id = c.lastrowid
-	    conn.commit()
 
-	    c.close()
-	    conn.close()
+        if profile_image != "":
+            c.execute('''INSERT INTO USER (Email, Password, Name, Height, Weight, Date_of_birth, Profile_image, Gender) VALUES (%s, %s, %s , %s, %s, %s, %s, %s)''', (email, password, name, height, weight, date_of_birth, profile_image_name, gender))
 
-	    return "User added"
+            f = file("./img/profiles/" + profile_image_name, 'wb')
+            f.write(profile_image)
+            f.close()
+        else:
+            c.execute('''INSERT INTO USER (Email, Password, Name, Height, Weight, Date_of_birth, Gender) VALUES (%s, %s, %s , %s, %s, %s, %s)''', (email, password, name, height, weight, date_of_birth, gender))
+
+        u_id = c.lastrowid
+        conn.commit()
+
+        c.close()
+        conn.close()
+
+        return "User added"
     except Exception as e:
         return  str(e)
 
@@ -109,6 +302,26 @@ def rm_user():
         conn.close()
 
         return "User Removed"
+    except Exception as e:
+        return str(e)
+
+#FIELDS REQUIRED: rm comment
+@app.route('/rm_comment', methods = ['POST'])
+def rm_comment():
+    try:
+        comment = request.form['comment']
+        conn = MySQLdb.connect(host='localhost', user='muscle', password='some_pass')
+        c = conn.cursor()
+
+        c.execute('USE muscle2')
+
+        c.execute("DELETE FROM COMMENTS WHERE ID = %s", [comment])
+
+        conn.commit()
+        c.close()
+        conn.close()
+
+        return "Comment Removed"
     except Exception as e:
         return str(e)
 
@@ -319,7 +532,7 @@ def get_my_training_exercises():
         
         fetched = c.fetchall()
 
-        c.execute("""CALL GET_MY_PLAN_EXERCISE_COUNT(%s)""",[user])	
+        c.execute("""CALL GET_MY_PLAN_EXERCISE_COUNT(%s)""",[user])
 
         fetched += c.fetchall()
         #Date time in string
@@ -411,22 +624,45 @@ def add_exercise_history():
         date_time = request.form['date_time']
         user = request.form['user']
         exercise_name = request.form['exercise_name']
-        set_amount = request.form['set_amount']
-        average_intensity = request.form['average_intensity']
-
+        set_amount = request.form['set_amount'] if request.form['set_amount'] != 'null' else None
+        average_intensity = request.form['average_intensity'] if request.form['average_intensity'] != "null" else None
+        plan_id = int(request.form['plan_id']) if request.form['plan_id'] != "null" else None
 
         conn = MySQLdb.connect(host='localhost', user='muscle', password='some_pass')
         c = conn.cursor()
         c.execute('USE muscle2')
-        c.execute("INSERT INTO EXERCISE_HISTORY (Date_Time, User_email, Exercise_name, Set_amount, Average_intensity) VALUES (%s, %s, %s, %s, %s)", [date_time, user, exercise_name, set_amount, average_intensity])
+        c.execute("INSERT INTO EXERCISE_HISTORY (Date_Time, User_email, Exercise_name, Set_amount, Average_intensity, Plan_id,Shared) VALUES (%s, %s, %s, %s, %s, %s,0)", [date_time, user, exercise_name, set_amount, average_intensity, plan_id])
         conn.commit()
         id = c.lastrowid
         c.close()
         conn.close()
-        return "Exercise History " + str(id)
+        return str(id)
     except Exception as e:
         return str(e)
 
+#FIELDS REQUIRED: date_time, user, exercise_name, set_amount, average_intensity
+@app.route('/add_exercise_history_with_plan', methods = ['POST'])
+def add_exercise_history_with_plan():
+    try:
+        date_time = request.form['date_time']
+        user = request.form['user']
+        exercise_name = request.form['exercise_name']
+
+        conn = MySQLdb.connect(host='localhost', user='muscle', password='some_pass')
+        c = conn.cursor()
+        c.execute('USE muscle2')
+        c.execute("CALL SAVE_EX_WITH_PLAN(%s,%s,%s)",[user,date_time,exercise_name])
+
+        c.execute("SELECT ID FROM EXERCISE_HISTORY WHERE User_email = %s order by Date_Time DESC LIMIT 1",[user])
+
+        fetched = c.fetchall()
+
+        conn.commit()
+        c.close()
+        conn.close()
+        return str(fetched[0][0])
+    except Exception as e:
+        return str(e)
 
 #FIELDS REQUIRED: id
 @app.route('/rm_exercise_history', methods = ['POST'])
@@ -449,13 +685,13 @@ def rm_exercise_history():
 @app.route('/add_set', methods = ['POST'])
 def add_set():
     try:
-	exercise_history_id = int(request.form['exercise_history_id'])
+        exercise_history_id = int(request.form['exercise_history_id'])
         set_number = int(request.form['set_number'])
         repetition = int(request.form['repetitions'])
         weight = int(request.form['weight']) if request.form['weight'] != "null" else None
         intensity = float(request.form['intensity']) if request.form['intensity'] != "null" else None
-	resting_time = request.form['resting_time'] if request.form['resting_time'] != "null" else None
-	intensity_deviation = request.form['intensity_deviation'] if request.form['intensity_deviation'] != "null" else None
+        resting_time = request.form['resting_time'] if request.form['resting_time'] != "null" else None
+        intensity_deviation = request.form['intensity_deviation'] if request.form['intensity_deviation'] != "null" else None
 
         conn = MySQLdb.connect(host='localhost', user='muscle', password='some_pass')
         c = conn.cursor()
@@ -562,46 +798,48 @@ def user_login():
 
 @app.route('/get_is_shared', methods=['POST'])
 def get_is_shared():
-	try:
-		exercise_id = request.form['exercise_id']
-		conn = MySQLdb.connect(host='localhost', user='muscle', password='some_pass')
-		c = conn.cursor(MySQLdb.cursors.DictCursor)
-		c.execute('USE muscle2')
+    try:
+        exercise_id = request.form['exercise_id']
+        conn = MySQLdb.connect(host='localhost', user='muscle', password='some_pass')
+        c = conn.cursor(MySQLdb.cursors.DictCursor)
+        c.execute('USE muscle2')
  
  
-		c.execute("SELECT Shared FROM EXERCISE_HISTORY WHERE ID = %s", [exercise_id])
-		fetched = c.fetchall();
-		c.close()
-		conn.close()
-		return jsonify(fetched)
+        c.execute("SELECT Shared FROM EXERCISE_HISTORY WHERE ID = %s", [exercise_id])
+        fetched = c.fetchall();
+        c.close()
+        conn.close()
+        return jsonify(fetched)
  
-	except Exception as e:
-		return str(e)
+    except Exception as e:
+        return str(e)
 
 @app.route('/set_shared', methods=['POST'])
 def set_shared():
-	try:
-		exercise_id = request.form['exercise_id']
-		conn = MySQLdb.connect(host='localhost', user='muscle', password='some_pass')
-		c = conn.cursor(MySQLdb.cursors.DictCursor)
-		c.execute('USE muscle2')
-		c.execute("UPDATE EXERCISE_HISTORY SET Shared = 1 WHERE ID = %s", [exercise_id])
-		conn.commit()
-		c.close()
-		conn.close()
-		return "Set shared: " + exercise_id
+    try:
+        exercise_id = request.form['exercise_id']
+        conn = MySQLdb.connect(host='localhost', user='muscle', password='some_pass')
+        c = conn.cursor(MySQLdb.cursors.DictCursor)
+        c.execute('USE muscle2')
+        c.execute("UPDATE EXERCISE_HISTORY SET Shared = 1 WHERE ID = %s", [exercise_id])
+        conn.commit()
+        c.close()
+        conn.close()
+        return "Set shared: " + exercise_id
  
-	except Exception as e:
-		return str(e)
+    except Exception as e:
+        return str(e)
 
 #FIELDS REQUIRED: email, gender, other user chars are opt
 #email will later be replaced by ID
 @app.route('/update_user_char', methods=['POST'])
 def update_user_char():
     try:
+        conn = MySQLdb.connect(host='localhost', user='muscle', password='some_pass')
+        c = conn.cursor(MySQLdb.cursors.DictCursor)
+        c.execute('USE muscle2')
 
         email = request.form['email']
-
 
         # used to aid variable size sql update  
         height_substring = ""
@@ -621,7 +859,21 @@ def update_user_char():
 
         if 'weight' in request.form:
             weight_substring = "Weight = %s, "
-            var_insert_tuple += (request.form['weight'],)
+            weight = request.form['weight']
+            var_insert_tuple += (weight,)
+
+            c.execute('''INSERT INTO USER_WEIGHT_HISTORY(
+                            User_email,
+                            Weight,
+                            Date)
+                        VALUES(
+                            %s,
+                            %s,
+                            NOW())''',[ email,
+                                        weight,
+                            ])
+
+
 
         if 'date_of_birth' in request.form:
             dob_substring = "Date_of_birth = %s, "
@@ -640,18 +892,6 @@ def update_user_char():
                 f.write(base64.b64decode(request.form['profile_pic']))
         
         gender = request.form['gender']
-
-        conn = MySQLdb.connect(host='localhost', user='muscle', password='some_pass')
-        c = conn.cursor(MySQLdb.cursors.DictCursor)
-        c.execute('USE muscle2')
-
-        print("UPDATE USER SET " + 
-            name_substring +
-            height_substring + 
-            weight_substring + 
-            dob_substring + 
-            profile_pic_substring +
-            "Gender = %s WHERE Email = %s", var_insert_tuple + (gender, email))
         
         c.execute("UPDATE USER SET " + 
             name_substring + 
@@ -705,6 +945,18 @@ def update_user_weight():
         c.execute('USE muscle2')
         
         c.execute("UPDATE USER SET Weight= %s WHERE Email = %s", (weight, email))
+
+        c.execute('''INSERT INTO USER_WEIGHT_HISTORY(
+                        User_email,
+                        Weight,
+                        Date)
+                    VALUES(
+                        %s,
+                        %s,
+                        NOW())''',[ email,
+                                    weight,
+                        ])
+
 
         conn.commit()
         c.close()
@@ -794,7 +1046,7 @@ def get_user_plan_trainings():
                      FROM (SELECT * FROM TRAINING) AS T
                            JOIN (SELECT Plan,Email FROM USER) AS U
                            ON T.Plan_id = U.Plan AND U.Email = %s;""",[email])
-		
+
         fetched = c.fetchall()
         tmp = c.fetchall()
         c.close()
@@ -814,8 +1066,8 @@ def get_plan_trainings():
 
         c.execute("""SELECT ID,Name
                      FROM TRAINING
-		     WHERE Plan_id  = %s;""",[plan])
-		
+             WHERE Plan_id  = %s;""",[plan])
+
         fetched = c.fetchall()
         tmp = c.fetchall()
         c.close()
@@ -886,7 +1138,6 @@ def get_exercises_by_muscle_group():
         return str(e)
 
 
-
 @app.route('/get_exercise_history_of_user', methods=['POST'])
 def get_exercise_history_of_user():
     try:
@@ -897,7 +1148,25 @@ def get_exercise_history_of_user():
         c.execute('USE muscle2')
 
 
-        c.execute("SELECT * FROM EXERCISE_HISTORY WHERE User_email = %s ORDER BY Date_time DESC", [email])
+        c.execute("SELECT * FROM EXERCISE_HISTORY WHERE User_email = %s ORDER BY Date_time DESC LIMIT 100", [email])
+        fetched = c.fetchall()
+        c.close()
+        conn.close()
+        return jsonify(fetched)
+    except Exception as e:
+        return str(e)
+
+@app.route('/get_distinct_exercise_history_of_user', methods=['POST'])
+def get_distinct_exercise_history_of_user():
+    try:
+
+        email = request.form['email']
+        conn = MySQLdb.connect(host='localhost', user='muscle', password='some_pass')
+        c = conn.cursor(MySQLdb.cursors.DictCursor)
+        c.execute('USE muscle2')
+
+
+        c.execute("SELECT DISTINCT * FROM EXERCISE_HISTORY WHERE User_email = %s  ORDER BY Date_time DESC LIMIT 100 GROUP BY Exercise_name ", [email])
         fetched = c.fetchall()
         c.close()
         conn.close()
@@ -945,25 +1214,25 @@ def get_exercise_types_stats_of_user():
 
 @app.route('/get_exercise_muscle_stats_of_user', methods=['POST'])
 def get_exercise_muscle_stats_of_user():
-	try:
-		user_email = request.form['User_email']
-		conn = MySQLdb.connect(host='localhost', user='muscle', password='some_pass')
-		c = conn.cursor(MySQLdb.cursors.DictCursor)
-		c.execute('USE muscle2')                  
-		c.execute("""
-				SELECT count(*) AS count, Muscle_name
-				FROM (SELECT Muscle_Name, Exercise_name FROM MUSCLES_WORKED) AS m_w
-				JOIN (SELECT Exercise_name, User_email FROM EXERCISE_HISTORY) AS e_h
-				ON m_w.Exercise_name = e_h.Exercise_name AND e_h.User_email = %s
-				GROUP BY Muscle_name
-				""", [user_email])
-		fetched = c.fetchall()
-		c.close()
-		conn.close()
-		return jsonify(fetched)
+    try:
+        user_email = request.form['User_email']
+        conn = MySQLdb.connect(host='localhost', user='muscle', password='some_pass')
+        c = conn.cursor(MySQLdb.cursors.DictCursor)
+        c.execute('USE muscle2')
+        c.execute("""
+                SELECT count(*) AS count, Muscle_name
+                FROM (SELECT Muscle_Name, Exercise_name FROM MUSCLES_WORKED) AS m_w
+                JOIN (SELECT Exercise_name, User_email FROM EXERCISE_HISTORY) AS e_h
+                ON m_w.Exercise_name = e_h.Exercise_name AND e_h.User_email = %s
+                GROUP BY Muscle_name
+                """, [user_email])
+        fetched = c.fetchall()
+        c.close()
+        conn.close()
+        return jsonify(fetched)
 
-	except Exception as e:
-		return str(e)
+    except Exception as e:
+        return str(e)
 
 @app.route('/get_muscle_groups', methods=['POST'])
 def get_muscle_groups():
@@ -982,18 +1251,40 @@ def get_muscle_groups():
 
 @app.route('/get_weight_history', methods=['POST'])
 def get_weight_history():
-	try:
-		user_email = request.form['user_email']
-		conn = MySQLdb.connect(host='localhost', user='muscle', password='some_pass')
-		c = conn.cursor(MySQLdb.cursors.DictCursor)
-		c.execute('USE muscle2')
-		c.execute("SELECT Weight, Date FROM USER_WEIGHT_HISTORY WHERE User_email = %s", [user_email])
-		fetched = c.fetchall()
-		c.close()
-		conn.close()
-		return jsonify(fetched)
-	except Exception as e:
-		return str(e)
+    try:
+        user_email = request.form['user_email']
+        conn = MySQLdb.connect(host='localhost', user='muscle', password='some_pass')
+        c = conn.cursor(MySQLdb.cursors.DictCursor)
+        c.execute('USE muscle2')
+        c.execute("SELECT Weight, Date FROM USER_WEIGHT_HISTORY WHERE User_email = %s", [user_email])
+        fetched = c.fetchall()
+        c.close()
+        conn.close()
+        return jsonify(fetched)
+    except Exception as e:
+        return str(e)
+
+@app.route('/get_exercise_weight_history', methods=['POST'])
+def get_exercise_weight_history():
+    try:
+        exercise_id = request.form['exercise_id']
+        conn = MySQLdb.connect(host='localhost', user='muscle', password='some_pass')
+        c = conn.cursor(MySQLdb.cursors.DictCursor)
+        c.execute('USE muscle2')
+        c.execute("""SELECT Weight, Date_Time
+             FROM (SELECT ID, Date_Time
+               FROM EXERCISE_HISTORY
+               WHERE ID = %s) AS EH
+               JOIN (SELECT Exercise_history_id, avg(Weight) AS Weight
+                 FROM SETS
+                 WHERE Exercise_history_id = %s) AS S
+               ON EH.ID = S.Exercise_history_id""", [exercise_id,exercise_id])
+        fetched = c.fetchall()
+        c.close()
+        conn.close()
+        return jsonify(fetched)
+    except Exception as e:
+        return str(e)
 
 @app.route('/get_local_db', methods=['POST'])
 def get_local_db():
@@ -1176,27 +1467,27 @@ def get_user_profile():
 
 @app.route('/get_users_like', methods=['POST'])
 def get_users_like():
-	try:
-		user_email = request.form['email']
-		
-		conn = MySQLdb.connect(host='localhost', user='muscle', password='some_pass', database='muscle')
-		c = conn.cursor(MySQLdb.cursors.DictCursor)
-		
-		c.execute('USE muscle2')
-		c.execute("""
-			SELECT Email
-			FROM USER
-			WHERE Email LIKE %s
-			LIMIT 20
-			""", ['%'+user_email+'%'])
+    try:
+        user_email = request.form['email']
 
-		r = c.fetchall()
-		c.close()
-		conn.close()
-		return jsonify(r)
+        conn = MySQLdb.connect(host='localhost', user='muscle', password='some_pass', database='muscle2')
+        c = conn.cursor(MySQLdb.cursors.DictCursor)
 
-	except Exception as e:
-		return str(e)
+        c.execute('USE muscle2')
+        c.execute("""
+            SELECT Email
+            FROM USER
+            WHERE Email LIKE %s
+            LIMIT 20
+            """, ['%'+user_email+'%'])
+
+        r = c.fetchall()
+        c.close()
+        conn.close()
+        return jsonify(r)
+
+    except Exception as e:
+        return str(e)
 
 #####################
 ##  HISTORY STATS  ##
@@ -1207,19 +1498,19 @@ def get_this_ex_avg_stats():
     try:
         exercise_id = request.form['id']
 
-        conn = MySQLdb.connect(host='localhost', user='muscle', password='some_pass', database='muscle')
+        conn = MySQLdb.connect(host='localhost', user='muscle', password='some_pass', database='muscle2')
         c = conn.cursor(MySQLdb.cursors.DictCursor)
         
         c.execute('USE muscle2')
         c.execute("""
             SELECT AVG(Set_amount) AS avg_sets,AVG(Repetitions) AS avg_reps, AVG(Weight) AS avg_weight, AVG(Intensity) AS avg_int, SEC_TO_TIME(AVG(TIME_TO_SEC(Resting_Time))) AS avg_rest
-			FROM (SELECT ID,Exercise_name, Set_amount
+            FROM (SELECT ID,Exercise_name, Set_amount
                   FROM EXERCISE_HISTORY
                   WHERE ID = %s) AS EH
             JOIN (SELECT * FROM SETS) AS S
             ON S.Exercise_history_id = EH.ID
             GROUP BY Exercise_name;
-			""", [exercise_id])
+            """, [exercise_id])
 
         fetched = c.fetchall()
         #Parse value to  string
@@ -1242,19 +1533,19 @@ def get_user_avg_stats_ex():
         user_email = request.form['user_email']
         exercise = request.form['exercise']
 
-        conn = MySQLdb.connect(host='localhost', user='muscle', password='some_pass', database='muscle')
+        conn = MySQLdb.connect(host='localhost', user='muscle', password='some_pass', database='muscle2')
         c = conn.cursor(MySQLdb.cursors.DictCursor)
         
         c.execute('USE muscle2')
         c.execute("""
             SELECT AVG(Set_amount) AS avg_sets,AVG(Repetitions) AS avg_reps, AVG(Weight) AS avg_weight, AVG(Intensity) AS avg_int, SEC_TO_TIME(AVG(TIME_TO_SEC(Resting_Time))) AS avg_rest
-			FROM (SELECT ID,Exercise_name, Set_amount
+            FROM (SELECT ID,Exercise_name, Set_amount
                   FROM EXERCISE_HISTORY
                   WHERE User_email = %s AND Exercise_name = %s) AS EH
             JOIN (SELECT * FROM SETS) AS S
             ON S.Exercise_history_id = EH.ID
             GROUP BY Exercise_name;
-			""", [user_email, exercise])
+            """, [user_email, exercise])
 
         fetched = c.fetchall()
         #Parse value to  string
@@ -1276,19 +1567,19 @@ def get_avg_stats_ex():
     try:
         exercise = request.form['exercise']
 
-        conn = MySQLdb.connect(host='localhost', user='muscle', password='some_pass', database='muscle')
+        conn = MySQLdb.connect(host='localhost', user='muscle', password='some_pass', database='muscle2')
         c = conn.cursor(MySQLdb.cursors.DictCursor)
         
         c.execute('USE muscle2')
         c.execute("""
             SELECT AVG(Set_amount) AS avg_sets,AVG(Repetitions) AS avg_reps, AVG(Weight) AS avg_weight, AVG(Intensity) AS avg_int, SEC_TO_TIME(AVG(TIME_TO_SEC(Resting_Time))) AS avg_rest
-			FROM (SELECT ID,Exercise_name, Set_amount
+            FROM (SELECT ID,Exercise_name, Set_amount
                   FROM EXERCISE_HISTORY
                   WHERE Exercise_name = %s) AS EH
             JOIN (SELECT * FROM SETS) AS S
             ON S.Exercise_history_id = EH.ID
             GROUP BY Exercise_name;
-			""", [exercise])
+            """, [exercise])
 
         fetched = c.fetchall()
         #Parse value to  string
@@ -1308,85 +1599,85 @@ def get_avg_stats_ex():
 
 @app.route('/does_user_bump', methods=['POST'])
 def does_user_bump():
-	try:
-		user_email = request.form['email']
-		exercise_id = int(request.form['exercise_id'])
-		
-		conn = MySQLdb.connect(host='localhost', user='muscle', password='some_pass', database='muscle')
-		c = conn.cursor(MySQLdb.cursors.DictCursor)
-		
-		c.execute('USE muscle2')
-		c.execute("""
-			SELECT *
-			FROM BUMPS
-			WHERE User_email = %s
-			and Exercise = %s
-			""", [user_email, exercise_id])
+    try:
+        user_email = request.form['email']
+        exercise_id = int(request.form['exercise_id'])
 
-		r = c.fetchall()		
-		c.close()		
-		conn.close()			
+        conn = MySQLdb.connect(host='localhost', user='muscle', password='some_pass', database='muscle2')
+        c = conn.cursor(MySQLdb.cursors.DictCursor)
 
-		if(len(r) == 0):
-			return "false"
-		else:
-			return "true"
-			
-		
+        c.execute('USE muscle2')
+        c.execute("""
+            SELECT *
+            FROM BUMPS
+            WHERE User_email = %s
+            and Exercise = %s
+            """, [user_email, exercise_id])
 
-	except Exception as e:
-		return str(e)
+        r = c.fetchall()
+        c.close()
+        conn.close()
+
+        if(len(r) == 0):
+            return "false"
+        else:
+            return "true"
+
+
+
+    except Exception as e:
+        return str(e)
 
 
 @app.route('/delete_user_bump', methods=['POST'])
 def delete_user_bump():
-	try:
-		user_email = request.form['email']
-		exercise_id = request.form['exercise_id']
-		
-		conn = MySQLdb.connect(host='localhost', user='muscle', password='some_pass', database='muscle')
-		c = conn.cursor(MySQLdb.cursors.DictCursor)
-		
-		c.execute('USE muscle2')
-		c.execute("""
-			DELETE
-			FROM BUMPS
-			WHERE (User_email = %s
-			and Exercise = %s)
-			""", [user_email, exercise_id])
+    try:
+        user_email = request.form['email']
+        exercise_id = request.form['exercise_id']
 
-		conn.commit()
-		c.close()		
-		conn.close()
+        conn = MySQLdb.connect(host='localhost', user='muscle', password='some_pass', database='muscle2')
+        c = conn.cursor(MySQLdb.cursors.DictCursor)
 
-		return "Sou obrigado a returnar uma resposta senao app crasha"
-		
-	except Exception as e:
-		return str(e)
+        c.execute('USE muscle2')
+        c.execute("""
+            DELETE
+            FROM BUMPS
+            WHERE (User_email = %s
+            and Exercise = %s)
+            """, [user_email, exercise_id])
+
+        conn.commit()
+        c.close()
+        conn.close()
+
+        return "Sou obrigado a returnar uma resposta senao app crasha"
+
+    except Exception as e:
+        return str(e)
 
 
 @app.route('/add_user_bump', methods=['POST'])
 def add_user_bump():
-	try:
-		user_email = request.form['email']
-		exercise_id = int(request.form['exercise_id'])
-		
-		conn = MySQLdb.connect(host='localhost', user='muscle', password='some_pass', database='muscle')
-		c = conn.cursor(MySQLdb.cursors.DictCursor)
-		
-		c.execute('USE muscle2')
-		c.execute("""
-			INSERT INTO BUMPS VALUES (%s, %s)
-			""", [user_email, exercise_id])
+    try:
+        user_email = request.form['email']
+        exercise_id = int(request.form['exercise_id'])
 
-		conn.commit()
-		c.close()		
-		conn.close()
-		
-		return "Sou obrigado a returnar uma resposta sena a app crasha"			
+        conn = MySQLdb.connect(host='localhost', user='muscle', password='some_pass', database='muscle2')
+        c = conn.cursor(MySQLdb.cursors.DictCursor)
 
-	except Exception as e:
-		return str(e)
+        c.execute('USE muscle2')
+        c.execute("""
+            INSERT INTO BUMPS VALUES (%s, %s)
+            """, [user_email, exercise_id])
+
+        conn.commit()
+        c.close()
+        conn.close()
+
+        return "Sou obrigado a returnar uma resposta sena a app crasha"
+
+    except Exception as e:
+        return str(e)
 
 
 
@@ -1396,233 +1687,233 @@ def add_user_bump():
 
 @app.route('/get_user_feed', methods=['POST'])
 def get_user_feed():
-	try:
-		user_email = request.form['user_email']
-		amount = int(request.form['amount'])
+    try:
+        user_email = request.form['user_email']
+        amount = int(request.form['amount'])
 
-		conn = MySQLdb.connect(host='localhost', user='muscle', password='some_pass', database='muscle')
-		c = conn.cursor(MySQLdb.cursors.DictCursor)
-		
-		c.execute('USE muscle2')
-		c.execute("""
-			SELECT *
-			FROM EXERCISE_HISTORY
-			JOIN (SELECT Following FROM FOLLOWERS WHERE User_email = %s) AS f
-			ON EXERCISE_HISTORY.User_email = f.Following AND EXERCISE_HISTORY.Shared = 1
-			ORDER BY Date_Time
-			LIMIT %s
-			""", [user_email, amount])
+        conn = MySQLdb.connect(host='localhost', user='muscle', password='some_pass', database='muscle2')
+        c = conn.cursor(MySQLdb.cursors.DictCursor)
 
-		r = c.fetchall()
-		c.close()
-		conn.close()
-		return jsonify(r)
+        c.execute('USE muscle2')
+        c.execute("""
+            SELECT *
+            FROM EXERCISE_HISTORY
+            JOIN (SELECT Following FROM FOLLOWERS WHERE User_email = %s) AS f
+            ON EXERCISE_HISTORY.User_email = f.Following AND EXERCISE_HISTORY.Shared = 1
+            ORDER BY Date_Time
+            LIMIT %s
+            """, [user_email, amount])
 
-	except Exception as e:
-		return str(e)
+        r = c.fetchall()
+        c.close()
+        conn.close()
+        return jsonify(r)
+
+    except Exception as e:
+        return str(e)
 
 @app.route('/get_user_feed_and_pictures', methods=['POST'])
 def get_user_feed_and_pictures():
-	try:
-		user_email = request.form['user_email']
-		amount = int(request.form['amount'])
+    try:
+        user_email = request.form['user_email']
+        amount = int(request.form['amount'])
 
-		conn = MySQLdb.connect(host='localhost', user='muscle', password='some_pass', database='muscle')
-		c = conn.cursor(MySQLdb.cursors.DictCursor)
-		
-		c.execute('USE muscle2')
-		c.execute("""
-			SELECT *
-			FROM EXERCISE_HISTORY
-			JOIN (SELECT Following FROM FOLLOWERS WHERE User_email = %s) AS f
-			  ON EXERCISE_HISTORY.User_email = f.Following AND EXERCISE_HISTORY.Shared = 1
-			JOIN (SELECT Profile_image, Email FROM USER) AS p
-			  ON f.Following = p.Email
-			ORDER BY Date_Time DESC
-			LIMIT %s
-			""", [user_email, amount])
+        conn = MySQLdb.connect(host='localhost', user='muscle', password='some_pass', database='muscle2')
+        c = conn.cursor(MySQLdb.cursors.DictCursor)
 
-		r = c.fetchall()
+        c.execute('USE muscle2')
+        c.execute("""
+            SELECT *
+            FROM EXERCISE_HISTORY
+            JOIN (SELECT Following FROM FOLLOWERS WHERE User_email = %s) AS f
+              ON EXERCISE_HISTORY.User_email = f.Following AND EXERCISE_HISTORY.Shared = 1
+            JOIN (SELECT Profile_image, Email FROM USER) AS p
+              ON f.Following = p.Email
+            ORDER BY Date_Time DESC
+            LIMIT %s
+            """, [user_email, amount])
 
-		#get image in user_profile_pics
-		profile_dict = {row['Email']:row['Profile_image'] for row in r}
-		
-		img_dir = "user_profile_pics/"
-		
-		for email, img_path in profile_dict.items():
-			if img_path != None and os.path.isfile(img_dir + img_path):
-				with open(img_dir + img_path, "rb") as image_file:
-					profile_dict[email] = base64.b64encode(image_file.read()).decode()
-			else:
-				profile_dict[email] = None
+        r = c.fetchall()
 
-		c.close()
-		conn.close()
-		return jsonify(feed = r, pictures = profile_dict)
+        #get image in user_profile_pics
+        profile_dict = {row['Email']:row['Profile_image'] for row in r}
 
-	except Exception as e:
-		return str(e)
+        img_dir = "user_profile_pics/"
 
-	
+        for email, img_path in profile_dict.items():
+            if img_path != None and os.path.isfile(img_dir + img_path):
+                with open(img_dir + img_path, "rb") as image_file:
+                    profile_dict[email] = base64.b64encode(image_file.read()).decode()
+            else:
+                profile_dict[email] = None
+
+        c.close()
+        conn.close()
+        return jsonify(feed = r, pictures = profile_dict)
+
+    except Exception as e:
+        return str(e)
+
+
 @app.route('/get_comments_exercise', methods=['POST'])
 def get_comments_exercise():
-	try:
-		exercise_id = request.form['exercise_id']
+    try:
+        exercise_id = request.form['exercise_id']
 
-		conn = MySQLdb.connect(host='localhost', user='muscle', password='some_pass', database='muscle')
-		c = conn.cursor(MySQLdb.cursors.DictCursor)
-		
-		c.execute('USE muscle2')
-		c.execute("""
-			SELECT User_email, Comment, Name, Profile_image
-			FROM COMMENTS JOIN USER on COMMENTS.User_email = USER.Email
-			WHERE Exercise = %s ORDER BY ID DESC
-			""", [exercise_id])
-		r = c.fetchall()
+        conn = MySQLdb.connect(host='localhost', user='muscle', password='some_pass', database='muscle2')
+        c = conn.cursor(MySQLdb.cursors.DictCursor)
+
+        c.execute('USE muscle2')
+        c.execute("""
+            SELECT COMMENTS.ID, User_email, Comment, Name, Profile_image
+            FROM COMMENTS JOIN USER on COMMENTS.User_email = USER.Email
+            WHERE Exercise = %s ORDER BY ID DESC
+            """, [exercise_id])
+        r = c.fetchall()
 
 
-		img_dir = "user_profile_pics/"
+        img_dir = "user_profile_pics/"
 
-		profile_dict = {row['User_email']:row['Profile_image'] for row in r}
+        profile_dict = {row['User_email']:row['Profile_image'] for row in r}
 
-		for email, img_path in profile_dict.items():
-			if img_path != None and os.path.isfile(img_dir + img_path):
-				with open(img_dir + img_path, "rb") as image_file:
-					profile_dict[email] = base64.b64encode(image_file.read()).decode()
-			else:
-				profile_dict[email] = None
+        for email, img_path in profile_dict.items():
+            if img_path != None and os.path.isfile(img_dir + img_path):
+                with open(img_dir + img_path, "rb") as image_file:
+                    profile_dict[email] = base64.b64encode(image_file.read()).decode()
+            else:
+                profile_dict[email] = None
 
-		c.close()
-		conn.close()
-		return jsonify(comments = r, pictures = profile_dict)
+        c.close()
+        conn.close()
+        return jsonify(comments = r, pictures = profile_dict)
 
-	except Exception as e:
-		return str(e)
+    except Exception as e:
+        return str(e)
 
 
 @app.route('/add_comment_to_exercise', methods=['POST'])
 def add_comment_to_exercise():
-	try:
-		email = request.form['email']
-		exercise_id = int(request.form['exercise_id'])
-		comment = request.form['comment']
+    try:
+        email = request.form['email']
+        exercise_id = int(request.form['exercise_id'])
+        comment = request.form['comment']
 
-		conn = MySQLdb.connect(host='localhost', user='muscle', password='some_pass', database='muscle')
-		c = conn.cursor(MySQLdb.cursors.DictCursor)
-		
-		c.execute('USE muscle2')
-		c.execute("""
-			INSERT INTO COMMENTS (User_email, Exercise, Comment) VALUES (%s, %s, %s)
-			""", [email, exercise_id, comment])
+        conn = MySQLdb.connect(host='localhost', user='muscle', password='some_pass', database='muscle2')
+        c = conn.cursor(MySQLdb.cursors.DictCursor)
 
-		r = c.fetchall()
-		c.close()
-		conn.commit()
-		conn.close()
-		return jsonify(r)
+        c.execute('USE muscle2')
+        c.execute("""
+            INSERT INTO COMMENTS (User_email, Exercise, Comment) VALUES (%s, %s, %s)
+            """, [email, exercise_id, comment])
 
-	except Exception as e:
-		return str(e)
+        r = c.fetchall()
+        c.close()
+        conn.commit()
+        conn.close()
+        return jsonify(r)
+
+    except Exception as e:
+        return str(e)
 
 
 @app.route('/get_bumps_exercise', methods=['POST'])
 def get_bumps_exercise():
-	try:
-		exercise_id = request.form['exercise_id']
+    try:
+        exercise_id = request.form['exercise_id']
 
-		conn = MySQLdb.connect(host='localhost', user='muscle', password='some_pass', database='muscle')
-		c = conn.cursor(MySQLdb.cursors.DictCursor)
-		
-		c.execute('USE muscle2')
-		c.execute("""
-			SELECT COUNT(*) as bumps
-			FROM BUMPS
-			WHERE Exercise = %s
-			""", [exercise_id])
+        conn = MySQLdb.connect(host='localhost', user='muscle', password='some_pass', database='muscle2')
+        c = conn.cursor(MySQLdb.cursors.DictCursor)
 
-		r = c.fetchall()
-		c.close()
-		conn.close()
-		return jsonify(r)
+        c.execute('USE muscle2')
+        c.execute("""
+            SELECT COUNT(*) as bumps
+            FROM BUMPS
+            WHERE Exercise = %s
+            """, [exercise_id])
 
-	except Exception as e:
-		return str(e)
+        r = c.fetchall()
+        c.close()
+        conn.close()
+        return jsonify(r)
+
+    except Exception as e:
+        return str(e)
 
 @app.route('/get_users_bumped_exercise', methods=['POST'])
 def get_users_bumped_exercise():
-	try:
-		exercise_id = request.form['exercise_id']
+    try:
+        exercise_id = request.form['exercise_id']
 
-		conn = MySQLdb.connect(host='localhost', user='muscle', password='some_pass', database='muscle')
-		c = conn.cursor(MySQLdb.cursors.DictCursor)
-		
-		c.execute('USE muscle2')
-		c.execute("""
-			SELECT User_email
-			FROM BUMPS
-			WHERE Exercise = %s
-			""", [exercise_id])
+        conn = MySQLdb.connect(host='localhost', user='muscle', password='some_pass', database='muscle2')
+        c = conn.cursor(MySQLdb.cursors.DictCursor)
 
-		r = c.fetchall()
-		c.close()
-		conn.close()
-		return jsonify(r)
+        c.execute('USE muscle2')
+        c.execute("""
+            SELECT User_email
+            FROM BUMPS
+            WHERE Exercise = %s
+            """, [exercise_id])
 
-	except Exception as e:
-		return str(e)
+        r = c.fetchall()
+        c.close()
+        conn.close()
+        return jsonify(r)
+
+    except Exception as e:
+        return str(e)
 
 @app.route('/get_user_following_amount', methods=['POST'])
 def get_user_following_amount():
-	try:
-		email = request.form['user_email']
+    try:
+        email = request.form['user_email']
 
-		conn = MySQLdb.connect(host='localhost', user='muscle', password='some_pass', database='muscle')
-		c = conn.cursor(MySQLdb.cursors.DictCursor)
-		
-		c.execute('USE muscle2')
-		c.execute("""
-			SELECT COUNT(*) as Amount
-			FROM FOLLOWERS
-			WHERE User_email = %s
-			""", [email])
+        conn = MySQLdb.connect(host='localhost', user='muscle', password='some_pass', database='muscle2')
+        c = conn.cursor(MySQLdb.cursors.DictCursor)
 
-		r = c.fetchall()
-		c.close()
-		conn.close()
-		return jsonify(r)
+        c.execute('USE muscle2')
+        c.execute("""
+            SELECT COUNT(*) as Amount
+            FROM FOLLOWERS
+            WHERE User_email = %s
+            """, [email])
 
-	except Exception as e:
-		return str(e)
+        r = c.fetchall()
+        c.close()
+        conn.close()
+        return jsonify(r)
+
+    except Exception as e:
+        return str(e)
 
 @app.route('/get_user_following', methods=['POST'])
 def get_user_following():
-	try:
-		email = request.form['user_email']
+    try:
+        email = request.form['user_email']
 
-		conn = MySQLdb.connect(host='localhost', user='muscle', password='some_pass', database='muscle')
-		c = conn.cursor(MySQLdb.cursors.DictCursor)
-		
-		c.execute('USE muscle2')
-		c.execute("""
-			SELECT Following
-			FROM FOLLOWERS
-			WHERE User_email = %s
-			""", [email])
+        conn = MySQLdb.connect(host='localhost', user='muscle', password='some_pass', database='muscle2')
+        c = conn.cursor(MySQLdb.cursors.DictCursor)
 
-		r = c.fetchall()
-		c.close()
-		conn.close()
-		return jsonify(r)
+        c.execute('USE muscle2')
+        c.execute("""
+            SELECT Following
+            FROM FOLLOWERS
+            WHERE User_email = %s
+            """, [email])
 
-	except Exception as e:
-		return str(e)
+        r = c.fetchall()
+        c.close()
+        conn.close()
+        return jsonify(r)
+
+    except Exception as e:
+        return str(e)
 
 @app.route('/get_follow_info', methods=['POST'])
 def get_follow_info():
     try:
         user_email = request.form['user_email']
 
-        conn = MySQLdb.connect(host='localhost', user='muscle', password='some_pass', database='muscle')
+        conn = MySQLdb.connect(host='localhost', user='muscle', password='some_pass', database='muscle2')
         c = conn.cursor(MySQLdb.cursors.DictCursor)
         
         c.execute('USE muscle2')
@@ -1648,7 +1939,7 @@ def add_to_following():
         follower = request.form['follower_email']
         following = request.form['following_email']
 
-        conn = MySQLdb.connect(host='localhost', user='muscle', password='some_pass', database='muscle')
+        conn = MySQLdb.connect(host='localhost', user='muscle', password='some_pass', database='muscle2')
         c = conn.cursor(MySQLdb.cursors.DictCursor)
         
         c.execute('USE muscle2')
@@ -1670,7 +1961,7 @@ def rm_from_following():
         unfollower = request.form['unfollower']
         unfollowed = request.form['unfollowed']
 
-        conn = MySQLdb.connect(host='localhost', user='muscle', password='some_pass', database='muscle')
+        conn = MySQLdb.connect(host='localhost', user='muscle', password='some_pass', database='muscle2')
         c = conn.cursor(MySQLdb.cursors.DictCursor)
         
         c.execute('USE muscle2')
@@ -1691,127 +1982,128 @@ def rm_from_following():
 
 @app.route('/get_expected_exercise_result', methods=['POST'])
 def get_expected_exercise_result():
-	try:
-		user_email = request.form['user_email']
-		exercise_name = request.form['exercise_name']
-		weight = request.form['weight']
-		repetitions = request.form['repetitions']
-		set_number = request.form['set_number']
-		
-		conn = MySQLdb.connect(host='localhost', user='muscle', password='some_pass', database='muscle')
-		c = conn.cursor(MySQLdb.cursors.DictCursor)
+    try:
+        user_email = request.form['user_email']
+        exercise_name = request.form['exercise_name']
+        weight = request.form['weight']
+        set_number = request.form['set_number']
 
-		c.execute('USE muscle2')
-		c.execute("""
-			SELECT Gender, Weight 
-			FROM (SELECT * FROM USER WHERE Email = %s) AS u
-			JOIN EXERCISE_HISTORY
-			ON u.Email = EXERCISE_HISTORY.User_email
-			ORDER BY Date_time DESC""", [user_email])
+        conn = MySQLdb.connect(host='localhost', user='muscle', password='some_pass', database='muscle2')
+        c = conn.cursor(MySQLdb.cursors.DictCursor)
 
-		r = c.fetchall()[0]
-		gender, u_weight = r["Gender"], r["Weight"]
-		weight_min = u_weight - 5
-		weight_max = u_weight + 5
-			
-		c.execute("""
-			SELECT Objective 
-			FROM (SELECT * FROM USER WHERE Email = %s) AS u 
-			JOIN PLAN 
-			ON u.Plan = PLAN.ID""", [user_email])
+        c.execute('USE muscle2')
+        c.execute("""
+            SELECT Gender, Weight
+            FROM (SELECT * FROM USER WHERE Email = %s) AS u
+            JOIN EXERCISE_HISTORY
+            ON u.Email = EXERCISE_HISTORY.User_email
+            ORDER BY Date_time DESC""", [user_email])
 
-		objective = c.fetchall()[0]['Objective']
-		
-		c.execute("""
-			SELECT AVG(Intensity) AS avg_int, AVG(Intensity_deviation) AS avg_deviation, AVG(Resting_Time) as avg_rest
-			FROM USER 
-			JOIN (SELECT User_email, Intensity, Intensity_deviation, Resting_Time
-				FROM (SELECT * FROM SETS WHERE Repetitions = %s AND Weight = %s AND Set_number = %s) AS s
-				JOIN (SELECT * FROM EXERCISE_HISTORY WHERE Exercise_name = %s) AS e_h
-				ON s.Exercise_history_id = e_h.ID) AS temp
-			ON USER.Email = temp.User_email
-			WHERE Gender = %s AND Weight BETWEEN %s AND %s""", [repetitions, weight, set_number, exercise_name, gender, weight_min, weight_max])
-		
-		r = c.fetchall()
-		c.close()
-		conn.close()
-		
-		return jsonify(r)
+        r = c.fetchall()[0]
+        gender, u_weight = r["Gender"], r["Weight"]
+        weight_min = u_weight - 5
+        weight_max = u_weight + 5
 
-	except Exception as e:
-		return str(e)
+        c.execute("""
+            SELECT Objective
+            FROM (SELECT * FROM USER WHERE Email = %s) AS u
+            JOIN PLAN
+            ON u.Plan = PLAN.ID""", [user_email])
+
+        objective = c.fetchall()[0]['Objective']
+
+        c.execute("""
+            SELECT AVG(Intensity) AS avg_int, AVG(Intensity_deviation) AS avg_deviation, AVG(Resting_Time) as avg_rest
+            FROM USER
+            JOIN (SELECT User_email, Intensity, Intensity_deviation, Resting_Time
+                FROM (SELECT * FROM SETS WHERE Weight = %s AND Set_number = %s) AS s
+                JOIN (SELECT * FROM EXERCISE_HISTORY WHERE Exercise_name = %s) AS e_h
+                ON s.Exercise_history_id = e_h.ID) AS temp
+            ON USER.Email = temp.User_email
+            WHERE Gender = %s AND Weight BETWEEN %s AND %s""", [weight, set_number, exercise_name, gender, weight_min, weight_max])
+
+        r = c.fetchall()
+        c.close()
+        conn.close()
+
+        return jsonify(r)
+
+    except Exception as e:
+        return str(e)
 
 
 @app.route('/get_recommended_exercises', methods=['POST'])
 def get_recommended_exercises():
-	try:
-		user_email = request.form['user_email']
-		conn = MySQLdb.connect(host='localhost', user='muscle', password='some_pass', database='muscle')
-		c = conn.cursor(MySQLdb.cursors.DictCursor)
-		
-		c.execute('USE muscle2')
-		c.execute("""
-			SELECT Exercise_name, COUNT(Email) as count
-			FROM ( SELECT DISTINCT u.Email, e.Exercise_name
-				FROM ( SELECT Email
-					FROM USER
-					JOIN (SELECT * 
-						FROM EXERCISE_HISTORY
-						WHERE Exercise_name IN (Select Exercise_name FROM EXERCISE_HISTORY WHERE User_email = %s) ) AS e_h
-						ON USER.Email = e_h.User_email) AS u
-				JOIN ( SELECT Exercise_name, User_email
-					FROM EXERCISE_HISTORY ) AS e
-				ON u.Email = e.User_email ) AS temp
-			GROUP BY Exercise_name
-			ORDER BY count DESC
-			LIMIT 3
-			""", [user_email])
-		r = c.fetchall()
-		c.close()
-		conn.close()
-		return jsonify(r)
+    try:
+        user_email = request.form['user_email']
+        conn = MySQLdb.connect(host='localhost', user='muscle', password='some_pass', database='muscle2')
+        c = conn.cursor(MySQLdb.cursors.DictCursor)
 
-	except Exception as e:
-		return str(e)
+        c.execute('USE muscle2')
+        c.execute("""
+            SELECT Exercise_name, COUNT(Email) as count
+            FROM ( SELECT DISTINCT u.Email, e.Exercise_name
+                FROM ( SELECT Email
+                    FROM USER
+                    JOIN (SELECT *
+                        FROM EXERCISE_HISTORY
+                        WHERE Exercise_name IN (Select Exercise_name FROM EXERCISE_HISTORY WHERE User_email = %s) ) AS e_h
+                        ON USER.Email = e_h.User_email) AS u
+                JOIN ( SELECT Exercise_name, User_email
+                    FROM EXERCISE_HISTORY ) AS e
+                ON u.Email = e.User_email ) AS temp
+            GROUP BY Exercise_name
+            ORDER BY count DESC
+            LIMIT 3
+            """, [user_email])
+        r = c.fetchall()
+        c.close()
+        conn.close()
+        return jsonify(r)
+
+    except Exception as e:
+        return str(e)
 
 @app.route('/get_recommended_plans', methods=['POST'])
 def get_recommended_plans():
-	try:
-		user_email = request.form['user_email']
-		conn = MySQLdb.connect(host='localhost', user='muscle', password='some_pass', database='muscle')
-		c = conn.cursor(MySQLdb.cursors.DictCursor)
-		
-		c.execute('USE muscle2')
-		c.execute("""
-			SELECT Plan_id AS ID, COUNT(Email) as count
-			FROM ( SELECT DISTINCT u.Email, e.Plan_id
-				FROM ( SELECT Email
-					FROM USER
-					JOIN (SELECT * 
-						FROM EXERCISE_HISTORY
-						WHERE Exercise_name IN (Select Exercise_name FROM EXERCISE_HISTORY WHERE User_email = %s) ) AS e_h
-					ON USER.Email = e_h.User_email) AS u
-				JOIN ( SELECT Plan_id, User_email
-					FROM PLAN_HISTORY ) AS e
-				ON u.Email = e.User_email ) AS temp
-			GROUP BY ID
-			ORDER BY count DESC
-			LIMIT 3""", [user_email])
+    try:
+        user_email = request.form['user_email']
+        conn = MySQLdb.connect(host='localhost', user='muscle', password='some_pass', database='muscle2')
+        c = conn.cursor(MySQLdb.cursors.DictCursor)
 
-		r = c.fetchall()
-		c.close()
-		conn.close()
-		return jsonify(r)
+        c.execute('USE muscle2')
+        c.execute("""
+            SELECT Plan_id AS ID, Name, COUNT(Email) as count
+            FROM ( SELECT DISTINCT u.Email, e.Plan_id
+                FROM ( SELECT Email
+                    FROM USER
+                    JOIN (SELECT *
+                        FROM EXERCISE_HISTORY
+                        WHERE Exercise_name IN (Select Exercise_name FROM EXERCISE_HISTORY WHERE User_email = %s) ) AS e_h
+                    ON USER.Email = e_h.User_email) AS u
+                JOIN ( SELECT Plan_id, User_email
+                    FROM PLAN_HISTORY ) AS e
+                ON u.Email = e.User_email ) AS temp
+        JOIN PLAN
+        ON PLAN.ID = temp.Plan_id
+            GROUP BY ID
+            ORDER BY count DESC
+            LIMIT 3""", [user_email])
 
-	except Exception as e:
-		return str(e)
+        r = c.fetchall()
+        c.close()
+        conn.close()
+        return jsonify(r)
+
+    except Exception as e:
+        return str(e)
     
     
 @app.route('/get_sets_of_exercise_history', methods=['POST'])
 def get_sets_of_exercise_history():
-	#try:
+    #try:
     id = int(request.form['id'])
-    conn = MySQLdb.connect(host='localhost', user='muscle', password='some_pass', database='muscle')
+    conn = MySQLdb.connect(host='localhost', user='muscle', password='some_pass', database='muscle2')
     c = conn.cursor(MySQLdb.cursors.DictCursor)
     
     c.execute('USE muscle2')
@@ -1825,158 +2117,158 @@ def get_sets_of_exercise_history():
     conn.close()
     return jsonify(r) 
 
-	#except Exception as e:
-	#	return str(e)
+    #except Exception as e:
+    #   return str(e)
     
     
 @app.route('/get_recommended_follows', methods=['POST'])
 def get_recommended_follows():
-	try:
-		email = request.form['email_user']
-		limit = int(request.form['limit'])
-		conn = MySQLdb.connect(host='localhost', user='muscle', password='some_pass', database='muscle')
-		c = conn.cursor(MySQLdb.cursors.DictCursor)
-		
-		c.execute('USE muscle2')
-		c.execute("""
-				SELECT FOLLOWERS.Following, count(FOLLOWERS.Following) AS count
-				FROM FOLLOWERS
-				JOIN (SELECT Following
-					FROM FOLLOWERS
-					WHERE User_email = %s) AS t
-				ON FOLLOWERS.User_email = t.Following
-				GROUP BY FOLLOWERS.Following
-				ORDER BY count DESC
-				LIMIT %s
-				""", [email, limit])
+    try:
+        email = request.form['email_user']
+        limit = int(request.form['limit'])
+        conn = MySQLdb.connect(host='localhost', user='muscle', password='some_pass', database='muscle2')
+        c = conn.cursor(MySQLdb.cursors.DictCursor)
 
-		r = c.fetchall()
-		c.close()
-		conn.close()
-		return jsonify(r) 
+        c.execute('USE muscle2')
+        c.execute("""
+                SELECT FOLLOWERS.Following, count(FOLLOWERS.Following) AS count
+                FROM FOLLOWERS
+                JOIN (SELECT Following
+                    FROM FOLLOWERS
+                    WHERE User_email = %s) AS t
+                ON FOLLOWERS.User_email = t.Following
+                GROUP BY FOLLOWERS.Following
+                ORDER BY count DESC
+                LIMIT %s
+                """, [email, limit])
 
-	except Exception as e:
-		return str(e)
+        r = c.fetchall()
+        c.close()
+        conn.close()
+        return jsonify(r)
+
+    except Exception as e:
+        return str(e)
 
 
 
 @app.route('/is_exercise_history_shared', methods=['POST'])
 def is_exercise_history_shared():
-	try:
-		id = request.form['exercise_id']
-		conn = MySQLdb.connect(host='localhost', user='muscle', password='some_pass', database='muscle')
-		c = conn.cursor(MySQLdb.cursors.DictCursor)
-		
-		c.execute('USE muscle2')
-		c.execute("""SELECT Shared from EXERCISE_HISTORY WHERE ID = %s""", [id])
+    try:
+        id = request.form['exercise_id']
+        conn = MySQLdb.connect(host='localhost', user='muscle', password='some_pass', database='muscle2')
+        c = conn.cursor(MySQLdb.cursors.DictCursor)
 
-		r = c.fetchall()
-		c.close()
-		conn.close()
-		return jsonify(r) 
+        c.execute('USE muscle2')
+        c.execute("""SELECT Shared from EXERCISE_HISTORY WHERE ID = %s""", [id])
 
-	except Exception as e:
-		return str(e)
+        r = c.fetchall()
+        c.close()
+        conn.close()
+        return jsonify(r)
+
+    except Exception as e:
+        return str(e)
 
 @app.route('/set_exercise_history_shared', methods=['POST'])
 def set_exercise_history_shared():
-	try:
-		id = int(request.form['exercise_id'])
-		shared = int(request.form['shared']);
-		conn = MySQLdb.connect(host='localhost', user='muscle', password='some_pass', database='muscle')
-		c = conn.cursor(MySQLdb.cursors.DictCursor)
-		
-		print("UPDATE EXERCISE_HISTORY SET Shared = {} where ID = {}""".format(shared, id))
-		c.execute('USE muscle2')
-		c.execute("""UPDATE EXERCISE_HISTORY SET Shared = %s where ID = %s""", [shared, id])
+    try:
+        id = int(request.form['exercise_id'])
+        shared = int(request.form['shared']);
+        conn = MySQLdb.connect(host='localhost', user='muscle', password='some_pass', database='muscle2')
+        c = conn.cursor(MySQLdb.cursors.DictCursor)
 
-		r = c.fetchall()
-		c.close()
-		conn.commit()
-		conn.close()
-		return jsonify(r) 
+        print("UPDATE EXERCISE_HISTORY SET Shared = {} where ID = {}""".format(shared, id))
+        c.execute('USE muscle2')
+        c.execute("""UPDATE EXERCISE_HISTORY SET Shared = %s where ID = %s""", [shared, id])
 
-	except Exception as e:
-		return str(e)
+        r = c.fetchall()
+        c.close()
+        conn.commit()
+        conn.close()
+        return jsonify(r)
+
+    except Exception as e:
+        return str(e)
 
 @app.route('/get_muscle_progress', methods=['POST'])
 def get_muscle_progress():
-	try:
-		email = request.FORM['user_email']
-		conn = MySQLdb.connect(host='localhost', user='muscle', password='some_pass', database='muscle')
-		c = conn.cursor(MySQLdb.cursors.DictCursor)
+    try:
+        email = request.form['user_email']
+        conn = MySQLdb.connect(host='localhost', user='muscle', password='some_pass', database='muscle2')
+        c = conn.cursor(MySQLdb.cursors.DictCursor)
 
-		c.execute('USE muscle2')
-		progress = { "Abs":1, "Back":1, "Biceps":1, "Chest":1, "Legs":1, "Shoulders":1, "Triceps":1 }
-		
-		for muscle in progress:
-			c.execute('SELECT EXERCISE_PER_MUSCLE_ON_DATE_BLOCK(%s,%s,%s,%s)', [email, muscle, 7,0])
-			temp = [ x for x in list(c.fetchall()[0].values()) if x != None ]
-			if temp != []:	
-				exercises = { e:0 for e in temp[0].split('|') }
-				inComparison = { e:0 for e in temp[0].split('|') }
-				
-				for exercise in exercises:
-					avg = 0
-					i = 10
-					while i > 0:
-						c.execute('SELECT AVG_WEIGHT_DATE_BLOCK(%s,%s,%s,%s)', [email, exercise, 7*(i+1), 7*i])
-						a = list(c.fetchall()[0].values())[0]
-						if a: 
-							avg = a * 0.7 + avg * 0.3 if avg != 0 else a
-						i-=1
+        c.execute('USE muscle2')
+        progress = { "Back":1, "Biceps":1, "Chest":1, "Legs":1, "Shoulders":1, "Triceps":1 }
 
-					exercises[exercise] = avg
+        for muscle in progress:
+            c.execute('SELECT EXERCISE_PER_MUSCLE_ON_DATE_BLOCK(%s,%s,%s,%s)', [email, muscle, 7,0])
+            temp = [ x for x in list(c.fetchall()[0].values()) if x != None ]
+            if temp != []:
+                exercises = { e:0 for e in temp[0].split('|') }
+                inComparison = { e:0 for e in temp[0].split('|') }
 
-					c.execute('SELECT AVG_WEIGHT_DATE_BLOCK(%s,%s,%s,%s)', [email, exercise, 7, 0])
-					a = list(c.fetchall()[0].values())[0]
-					if a:
-						inComparison[exercise] = a
-				
-				l = [ inComparison[x]/exercises[x] for x in exercises if exercises[x] != 0 ]
-				if l != []:
-					progress[muscle] = sum(l) / len(l)
+                for exercise in exercises:
+                    avg = 0
+                    i = 0
+                    while i < 10:
+                        c.execute('SELECT AVG_WEIGHT_DATE_BLOCK(%s,%s,%s,%s)', [email, exercise, 7*(i+1), 7*i])
+                        a = list(c.fetchall()[0].values())[0]
+                        if a:
+                            avg = a * 0.7 + avg * 0.3 if avg != 0 else a
+                        i+=1
 
-		return progress
+                    exercises[exercise] = avg
 
-	except Exception as e:
-		return str(e)
+                    c.execute('SELECT AVG_WEIGHT_DATE_BLOCK(%s,%s,%s,%s)', [email, exercise, 7, 0])
+                    a = list(c.fetchall()[0].values())[0]
+                    if a:
+                        inComparison[exercise] = a
+
+                l = [ inComparison[x]/exercises[x] for x in exercises if exercises[x] != 0 ]
+                if l != []:
+                    progress[muscle] = sum(l) / len(l)
+
+        return jsonify(progress)
+
+    except Exception as e:
+        return str(e)
 
 @app.route('/get_user_height', methods=['POST'])
 def get_user_height():
-	try:
-		id = request.form['email']
-		conn = MySQLdb.connect(host='localhost', user='muscle', password='some_pass', database='muscle')
-		c = conn.cursor(MySQLdb.cursors.DictCursor)
-		
-		c.execute('USE muscle2')
-		c.execute("""SELECT Height from USER WHERE Email = %s""", [id])
+    try:
+        id = request.form['email']
+        conn = MySQLdb.connect(host='localhost', user='muscle', password='some_pass', database='muscle2')
+        c = conn.cursor(MySQLdb.cursors.DictCursor)
 
-		r = c.fetchall()
-		c.close()
-		conn.close()
-		return jsonify(r[0]) 
+        c.execute('USE muscle2')
+        c.execute("""SELECT Height from USER WHERE Email = %s""", [id])
 
-	except Exception as e:
-		return str(e)
+        r = c.fetchall()
+        c.close()
+        conn.close()
+        return jsonify(r[0])
+
+    except Exception as e:
+        return str(e)
 
 @app.route('/get_exercise_image_name', methods=['POST'])
 def get_exercise_image_name():
-	try:
-		id = request.form['exercise_name']
-		conn = MySQLdb.connect(host='localhost', user='muscle', password='some_pass', database='muscle')
-		c = conn.cursor(MySQLdb.cursors.DictCursor)
-		
-		c.execute('USE muscle2')
-		c.execute("""SELECT Image from EXERCISE WHERE Name = %s""", [id])
+    try:
+        id = request.form['exercise_name']
+        conn = MySQLdb.connect(host='localhost', user='muscle', password='some_pass', database='muscle2')
+        c = conn.cursor(MySQLdb.cursors.DictCursor)
 
-		r = c.fetchall()
-		c.close()
-		conn.close()
-		return r[0]["Image"] 
+        c.execute('USE muscle2')
+        c.execute("""SELECT Image from EXERCISE WHERE Name = %s""", [id])
 
-	except Exception as e:
-		return str(e)
+        r = c.fetchall()
+        c.close()
+        conn.close()
+        return r[0]["Image"]
+
+    except Exception as e:
+        return str(e)
 
 if __name__ == '__main__':
     context = ssl.SSLContext(ssl.PROTOCOL_TLSv1_2)
