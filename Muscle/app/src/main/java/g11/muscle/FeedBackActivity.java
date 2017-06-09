@@ -254,8 +254,6 @@ public class FeedBackActivity extends AppCompatActivity implements
                     readMessage = readMessage.split("\0")[0];
                     strBuilder.append(readMessage);
 
-                    //getExpectedSetResults();
-
                     int endOfLineIndex = strBuilder.indexOf("}");
 
                     if( endOfLineIndex >= 0){
@@ -273,6 +271,8 @@ public class FeedBackActivity extends AppCompatActivity implements
                         if (jsonObj.has("stopped")) {
                             if(!firstStopped)
                                 return;
+
+                            //getExpectedSetResults();
 
                             firstStopped = false;
 
@@ -444,7 +444,7 @@ public class FeedBackActivity extends AppCompatActivity implements
         restTime++;
     }
 
-    private void timeAlert(String time){
+    /*private void timeAlert(String time){
         SimpleDateFormat dateFormat = new SimpleDateFormat("hh:mm:ss", Locale.UK);
         Date convertedDate = new Date();
 
@@ -470,7 +470,7 @@ public class FeedBackActivity extends AppCompatActivity implements
                 TimeCountStart();
             }
         }.start();
-    }
+    }*/
 
     private void chartSetup() {
         // Font for chart text
@@ -617,12 +617,12 @@ public class FeedBackActivity extends AppCompatActivity implements
 
     @Override
     public void onValueSelected(Entry e, Highlight h) {
-        Log.i("Entry selected", e.toString());
+        Log.e("Entry selected", e.toString());
     }
 
     @Override
     public void onNothingSelected() {
-        Log.i("Nothing selected", "Nothing selected.");
+        Log.e("Nothing selected", "Nothing selected.");
     }
 
     private void getExpectedSetResults(){
@@ -649,6 +649,7 @@ public class FeedBackActivity extends AppCompatActivity implements
             @Override
             protected Map<String, String> getParams() {
                 Map<String, String> params = new HashMap<>();
+                Log.e("GET_EXPECTED",email + " " + exercise + " " + String.valueOf(weight) + " " + String.valueOf(set_count));
                 params.put("user_email", email);
                 params.put("exercise_name", exercise);
                 params.put("weight", String.valueOf(weight));
@@ -805,7 +806,8 @@ public class FeedBackActivity extends AppCompatActivity implements
                 Log.e("INTENSITIES",intensities.toString());
                 params.put("intensity", String.valueOf(intensities.get(intensities.size()-1)));
                 Time timeRest = new Time((restTime)*1000);
-                params.put("resting_time", String.valueOf(timeRest));
+                // in Android 7.0+ new Time start at 1h
+                params.put("resting_time", "00" + String.valueOf(timeRest).substring(2));
 
                 double intensityAvg = calculateAverage(intensities);
                 double stdDeviation = 0;
@@ -1000,7 +1002,7 @@ public class FeedBackActivity extends AppCompatActivity implements
                     mHandler.obtainMessage(MESSAGE_READ, bytes, 0, buffer).sendToTarget();
                     buffer = new byte[1024];
                 } catch (Exception e) {
-                    Log.i(TAG,e.toString());
+                    Log.e(TAG,e.toString());
                 }
             }
         }
