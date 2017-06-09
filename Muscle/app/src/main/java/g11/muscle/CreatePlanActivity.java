@@ -70,6 +70,7 @@ public class CreatePlanActivity extends AppCompatActivity {
                         spinner.getSelectedItemPosition();
                     }
                 })
+                
                 .setNegativeButton("Cancel", null).show();
     }
 }
