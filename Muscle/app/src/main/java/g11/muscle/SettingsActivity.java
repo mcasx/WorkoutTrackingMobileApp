@@ -39,11 +39,14 @@ import org.json.JSONObject;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
+import g11.muscle.Classes.MuscleProgressItem;
 import g11.muscle.DB.DBConnect;
 import g11.muscle.DB.VolleyProvider;
 
@@ -72,6 +75,7 @@ public class SettingsActivity  extends AppCompatActivity {
 
     //Boolean imageChosen = false;
     Button saveButton;
+    Button fitbitButton;
     ImageView pickImage;
     //ImageView imgView;
     ProgressBar progressBar;
@@ -88,6 +92,7 @@ public class SettingsActivity  extends AppCompatActivity {
         name_output_layout = ((TextView) findViewById(R.id.textView5));
         progressBar = (ProgressBar) findViewById(R.id.progressBar2);
         saveButton = ((Button) findViewById(R.id.save_button));
+        fitbitButton = ((Button) findViewById(R.id.fitbit_button));
 
         // get email
         Intent in= getIntent();
@@ -291,6 +296,18 @@ public class SettingsActivity  extends AppCompatActivity {
         };
 
         VolleyProvider.getInstance(this).addRequest(saveRequest);
+    }
+
+    public void onClickFitbit(View view) {
+        String inURL= "https://www.fitbit.com/oauth2/authorize?response_type=token";
+        inURL += "&client_id=228KV8";
+        inURL += "&redirect_uri=https%3A%2F%2F138.68.158.127%2Fadd_fitbit_user";
+        inURL += "&scope=activity%20heartrate%20profile%20weight";
+        inURL += "&expires_in=31536000";
+
+        Intent browse = new Intent( Intent.ACTION_VIEW , Uri.parse( inURL ) );
+
+        startActivity( browse );
     }
 
     public void onClickPickDate(View v) {
