@@ -1,6 +1,7 @@
 package g11.muscle;
 
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.graphics.Color;
 import android.support.v7.app.AppCompatActivity;
@@ -141,10 +142,14 @@ public class FeedBackActivity extends AppCompatActivity implements
     private String email;
     private String exercise;
 
+    ProgressDialog loadingDialog;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_feed_back);
+
+        //loadingDialog = ProgressDialog.show(FeedBackActivity.this, "", "Connecting. Please wait...", true);
 
         // Information from previous activity
         final Intent intent = getIntent();
@@ -939,6 +944,7 @@ public class FeedBackActivity extends AppCompatActivity implements
                 {
                     public void run()
                     {
+                        //loadingDialog.dismiss();
                         Toast.makeText(FeedBackActivity.this, "Bluetooth Connected", Toast.LENGTH_SHORT).show();
                     }
                 });
