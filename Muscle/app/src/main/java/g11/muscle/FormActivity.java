@@ -144,7 +144,7 @@ public class FormActivity extends AppCompatActivity {
         height  = ((TextInputEditText) findViewById(R.id.height_input)).getText().toString();
         weight = ((TextInputEditText) findViewById((R.id.weight_input))).getText().toString();
         name = ((TextInputEditText) findViewById((R.id.name_input))).getText().toString().trim();
-        dob = ((TextView) findViewById((R.id.textView))).getText().toString();
+        dob = ((Button) findViewById((R.id.button_bod_picker))).getText().toString();
 
 
         if(!validFields())
@@ -228,8 +228,12 @@ public class FormActivity extends AppCompatActivity {
                 if(!TextUtils.isEmpty(weight))
                     params.put("weight", String.format("%.2f",Double.parseDouble(weight)));
 
-                if(!TextUtils.isEmpty(dob))
+                if(!TextUtils.isEmpty(dob)) {
+                    Log.i("HELP",dob);
                     params.put("date_of_birth", dob);
+                }
+                else
+                    Log.i("HELP","nodob");
 
                 if(!TextUtils.isEmpty(profile_pic))
                     params.put("profile_pic",profile_pic);
@@ -260,15 +264,6 @@ public class FormActivity extends AppCompatActivity {
             if (resultCode == RESULT_OK) {
                 try {
                     Uri resultUri = result.getUri();
-                    /*
-                    Bitmap user_img = MediaStore.Images.Media.getBitmap(getContentResolver(), uri);
-                    Bitmap resized = Bitmap.createScaledBitmap(user_img, 100, 100, true);
-                    pickImage.setImageBitmap(resized);
-
-                    ByteArrayOutputStream stream = new ByteArrayOutputStream();
-                    resized.compress(Bitmap.CompressFormat.JPEG, 80, stream);
-                    byte [] byte_arr = stream.toByteArray();
-                    profile_pic = Base64.encodeToString(byte_arr, Base64.DEFAULT);*/
 
                     Picasso.with(getApplication()).load(resultUri).into(pickImage);
 

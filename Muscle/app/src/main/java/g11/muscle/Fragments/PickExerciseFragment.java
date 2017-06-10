@@ -2,6 +2,10 @@ package g11.muscle.Fragments;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.graphics.Color;
+import android.hardware.Sensor;
+import android.hardware.SensorManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -35,6 +39,8 @@ import g11.muscle.GroupExercisesActivity;
 import g11.muscle.R;
 import g11.muscle.DB.VolleyProvider;
 
+import static android.content.Context.SENSOR_SERVICE;
+
 /**
  * A simple {@link Fragment} subclass.
  * Activities that contain this fragment must implement the
@@ -48,6 +54,8 @@ public class PickExerciseFragment extends Fragment {
 
     //
     private String email;
+
+    static boolean canRun = true;
 
     private ProgressBar progressBar;
 
@@ -92,6 +100,9 @@ public class PickExerciseFragment extends Fragment {
         createMuscleGroupGrid();
         createExerciseHistoryList();
         // Inflate the layout for this fragment
+
+        PackageManager manager = getActivity().getPackageManager();
+        canRun = manager.hasSystemFeature(PackageManager.FEATURE_SENSOR_STEP_COUNTER);
 
         return fView;
     }
@@ -225,21 +236,45 @@ public class PickExerciseFragment extends Fragment {
 
 
                         // Define the groupView adapter
-                        ArrayAdapter<String> adapter = new ArrayAdapter<>(getActivity(), android.R.layout.simple_list_item_1, history);
+                        ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_list_item_1, history){
+                            @Override
+                            public View getView(int position, View convertView, ViewGroup parent) {
+                                View view =super.getView(position, convertView, parent);
+
+                                TextView textView=(TextView) view.findViewById(android.R.id.text1);
+                                if(textView.getText().toString().equals("Running") && !canRun)
+                                    textView.setTextColor(Color.GRAY);
+                                else
+                                    textView.setTextColor(Color.WHITE);
+
+                                return view;
+                            }
+
+
+                        };
                         recent_historyView.setAdapter(adapter);
                         // Set the listeners on the list items
+
                         recent_historyView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                             public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
+
                                 //Go to exercise page
                                 String exercise_name = (String) parent.getAdapter().getItem(position);
                                 Intent intent;
-                                if(exercise_name.equals("Running"))
-                                    intent = new Intent(getActivity(), CardioActivity.class);
+                                if(exercise_name.equals("Running")){
+                                    if(!canRun)
+                                        return;
+                                    else
+                                        intent = new Intent(getActivity(), CardioActivity.class);
+
+                                }
                                 else
                                     intent = new Intent(getActivity(), ExerciseActivity.class);
+
                                 intent.putExtra("exercise_name", exercise_name);
                                 intent.putExtra("email", email);
                                 startActivity(intent);
+
                             }
                         });
                     }
