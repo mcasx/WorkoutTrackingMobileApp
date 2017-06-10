@@ -1,12 +1,17 @@
 package g11.muscle.Classes;
 
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+
+import com.woxthebox.draglistview.DragItemAdapter;
+import com.woxthebox.draglistview.DragItemRecyclerView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,7 +21,7 @@ import g11.muscle.PlanActivity;
 import g11.muscle.R;
 
 // adapter of recycler view used in training exercises list view
-public class DayPlanAdapter extends RecyclerView.Adapter<DayPlanAdapter.DayPlanAdapter_Holder>{
+public class DayPlanAdapter extends DragItemAdapter<Pair<Long, String>, DayPlanAdapter.DayPlanAdapter_Holder> {
 
     public List<String> titles;
     private List<ArrayList<PlanExerciseItem>> list;
@@ -26,6 +31,7 @@ public class DayPlanAdapter extends RecyclerView.Adapter<DayPlanAdapter.DayPlanA
         this.titles = titles;
         this.list = list;
         this.parent = parent;
+        setHasStableIds(true);
     }
 
     @Override
@@ -44,6 +50,12 @@ public class DayPlanAdapter extends RecyclerView.Adapter<DayPlanAdapter.DayPlanA
         Plan_Exercise_View adapter = new Plan_Exercise_View(list.get(position));
         holder.exercise_list_day.setAdapter(adapter);
         holder.exercise_list_day.setLayoutManager(new LinearLayoutManager(parent.getApplicationContext()));
+        holder.add_exercise_button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //TODO: Add click
+            }
+        });
     }
 
     @Override
@@ -74,15 +86,17 @@ public class DayPlanAdapter extends RecyclerView.Adapter<DayPlanAdapter.DayPlanA
         notifyItemRemoved(position);
     }
 
-    public class DayPlanAdapter_Holder extends  RecyclerView.ViewHolder {
+    public class DayPlanAdapter_Holder extends DragItemAdapter.ViewHolder {
 
         private TextView day_title;
         private android.support.v7.widget.RecyclerView exercise_list_day;
+        private FloatingActionButton add_exercise_button;
 
         private DayPlanAdapter_Holder(View itemView) {
-            super(itemView);
+            super(itemView, R.id.day_plan_card, true);
             day_title = (TextView) itemView.findViewById(R.id.day_title);
             exercise_list_day = (android.support.v7.widget.RecyclerView) itemView.findViewById(R.id.exercise_list_day);
+            add_exercise_button = (FloatingActionButton) itemView.findViewById(R.id.add_exercise_button);
         }
     }
 }

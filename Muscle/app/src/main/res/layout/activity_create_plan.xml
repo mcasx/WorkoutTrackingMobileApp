@@ -39,25 +39,23 @@
 
                 </android.support.design.widget.TextInputLayout>
 
-                <android.support.v7.widget.RecyclerView
-                    xmlns:android="http://schemas.android.com/apk/res/android"
+                <com.woxthebox.draglistview.DragItemRecyclerView
                     android:id="@+id/day_list_view"
                     android:layout_width="match_parent"
-                    android:layout_height="0dp"
-                    android:layout_weight="0.94"/>
+                    android:layout_height="match_parent"/>
 
-            <ImageView
-                android:id="@+id/add_day_button"
-                android:layout_width="0dp"
-                android:layout_height="0dp"
-                android:layout_marginEnd="10dp"
-                android:layout_marginLeft="10dp"
-                android:layout_marginRight="10dp"
-                android:layout_marginStart="10dp"
-                android:layout_marginTop="0dp"
-                android:layout_gravity="end"
-                android:onClick="onClickAddDay"
-                android:src="@drawable/ic_add_circle_black_24dp"/>
+
         </LinearLayout>
     </ScrollView>
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/add_exercise_button"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:src="@drawable/ic_add_black_24dp"
+        android:onClick="onClickAddDay"
+        android:layout_gravity="right|bottom"
+        android:layout_margin="20dp"
+        />
+
 </FrameLayout>

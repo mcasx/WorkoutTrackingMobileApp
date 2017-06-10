@@ -41,10 +41,7 @@
         <activity android:configChanges="orientation"  android:screenOrientation="portrait" 
             android:name=".LoginActivity"
             android:theme="@style/Theme.AppCompat.NoActionBar">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
+
         </activity>
         <activity android:configChanges="orientation"  android:screenOrientation="portrait" 
             android:name=".HomeActivity"
@@ -93,7 +90,12 @@
             android:name=".CardioActivity"
             android:theme="@style/Base.Theme.AppCompat" />
         <activity android:configChanges="orientation"  android:screenOrientation="portrait"  android:name=".CreatePlanActivity"
-            android:theme="@style/Base.Theme.AppCompat" />
+            android:theme="@style/Base.Theme.AppCompat" >
+        <intent-filter>
+            <action android:name="android.intent.action.MAIN" />
+            <category android:name="android.intent.category.LAUNCHER" />
+        </intent-filter>
+        </activity>
         <activity android:configChanges="orientation"  android:screenOrientation="portrait"  android:name=".DetailedRunningActivity" android:theme="@style/Base.Theme.AppCompat"/>
     </application>
 

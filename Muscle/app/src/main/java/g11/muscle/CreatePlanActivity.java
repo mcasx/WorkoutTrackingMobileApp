@@ -15,6 +15,8 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
 
+import com.woxthebox.draglistview.DragItemRecyclerView;
+
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -27,21 +29,21 @@ import g11.muscle.Classes.Plan_Exercise_View;
 
 public class CreatePlanActivity extends AppCompatActivity {
 
-    private RecyclerView recyclerView;
+    private DragItemRecyclerView recyclerView;
     private DayPlanAdapter adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_plan);
-        this.recyclerView = (RecyclerView) findViewById(R.id.day_list_view);
+        this.recyclerView = (DragItemRecyclerView) findViewById(R.id.day_list_view);
 
         ArrayList<ArrayList<PlanExerciseItem>> list = new ArrayList<>();
         ArrayList<String> titles = new ArrayList<>();
-
         adapter = new DayPlanAdapter(this, titles, list);
         recyclerView.setAdapter(adapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(CreatePlanActivity.this));
+        
     }
 
     public void onClickAddDay(View view){
