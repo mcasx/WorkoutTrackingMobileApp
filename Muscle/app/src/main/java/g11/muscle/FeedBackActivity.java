@@ -378,7 +378,7 @@ public class FeedBackActivity extends AppCompatActivity implements
         // Get a handle on the bluetooth radio
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
     }
-    
+
     @Override
     protected void onStop(){
         req_queue.cancelAll(this);
@@ -844,6 +844,9 @@ public class FeedBackActivity extends AppCompatActivity implements
         }
 
         final Set<BluetoothDevice> bdevices = mBluetoothAdapter.getBondedDevices();
+
+
+
 
         //Get bonded device names
         String[] bdname = new String[bdevices.size()];

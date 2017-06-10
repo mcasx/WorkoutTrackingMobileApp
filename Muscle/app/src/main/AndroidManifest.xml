@@ -41,11 +41,7 @@
         <activity android:configChanges="orientation"  android:screenOrientation="portrait" 
             android:name=".LoginActivity"
             android:theme="@style/Theme.AppCompat.NoActionBar">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
 
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
         </activity>
         <activity android:configChanges="orientation"  android:screenOrientation="portrait" 
             android:name=".HomeActivity"
@@ -71,13 +67,26 @@
             android:name=".ProfileActivity"
             android:label=""
             android:theme="@style/Theme.AppCompat" />
+
+
+        <activity android:configChanges="orientation"  android:screenOrientation="portrait"
+            android:name=".SetupActivity"
+            android:label=""
+            android:theme="@style/Theme.AppCompat" >
+
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+
         <activity android:configChanges="orientation"  android:screenOrientation="portrait" 
             android:name=".GroupExercisesActivity"
             android:theme="@style/Theme.AppCompat" />
         <activity android:configChanges="orientation"  android:screenOrientation="portrait" 
             android:name=".PlanActivity"
             android:theme="@style/Theme.AppCompat.NoActionBar" />
-
         <!-- android:theme="@style/Theme.AppCompat" was added for hot fix, fell free to change it -->
         <activity android:configChanges="orientation"  android:screenOrientation="portrait" 
             android:name="com.theartofdev.edmodo.cropper.CropImageActivity"
