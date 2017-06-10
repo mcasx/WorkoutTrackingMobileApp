@@ -11,7 +11,7 @@ public class PlanExerciseItem {
     private int exercise_sets;
     private String exercise_rest;
     private int exercise_weight;
-    private boolean mode; // used in my plan current exercise (oval shape)
+    private int mode; // used in my plan current exercise (oval shape)
 
     public PlanExerciseItem(String name, int reps, int sets, String rest,int weight){
         exercise_name = name;
@@ -19,10 +19,10 @@ public class PlanExerciseItem {
         exercise_sets = sets;
         exercise_rest = rest;
         exercise_weight = weight;
-        this.mode = false;
+        this.mode = 0;
     }
 
-    public PlanExerciseItem(String name, int reps, int sets, String rest,int weight, boolean mode){
+    public PlanExerciseItem(String name, int reps, int sets, String rest,int weight, int mode){
         exercise_name = name;
         exercise_reps = reps;
         exercise_sets = sets;
@@ -49,7 +49,7 @@ public class PlanExerciseItem {
 
     public int getExercise_weight() {return exercise_weight; }
 
-    public boolean getMode() { return mode; }
+    public int getMode() { return mode; }
 
     @Override
     public String toString(){
