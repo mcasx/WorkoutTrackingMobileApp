@@ -157,8 +157,9 @@
 
                     <com.github.mikephil.charting.charts.LineChart
                         android:id="@+id/lChart"
-                        android:layout_width="384dp"
-                        android:layout_height="match_parent" />
+                        android:layout_width="380dp"
+                        android:layout_height="match_parent"
+                        android:layout_margin="5dp" />
                 </LinearLayout>
 
             </HorizontalScrollView>

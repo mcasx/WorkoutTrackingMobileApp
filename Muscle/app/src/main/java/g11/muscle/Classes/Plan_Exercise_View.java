@@ -1,5 +1,6 @@
 package g11.muscle.Classes;
 
+import android.graphics.Color;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -39,8 +40,10 @@ public class Plan_Exercise_View extends RecyclerView.Adapter<Plan_Exercise_View.
         holder.plan_rest.setText(list.get(position).getExercise_rest());
         holder.plan_weight.setText(Integer.toString(list.get(position).getExercise_weight()));
 
-        if(list.get(position).getMode()) // check mark visible
+        if(list.get(position).getMode() == 1) // check mark visible
             holder.check.setVisibility(View.VISIBLE);
+        else if(list.get(position).getMode() == 0)
+            holder.itemView.setAlpha(0.55f);
         //animate(holder);
     }
 

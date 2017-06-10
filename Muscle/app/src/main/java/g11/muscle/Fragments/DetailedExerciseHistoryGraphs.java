@@ -1,5 +1,6 @@
 package g11.muscle.Fragments;
 
+import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.Bundle;
@@ -83,7 +84,6 @@ public class DetailedExerciseHistoryGraphs extends Fragment implements OnChartVa
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        Log.e(TAG,getActivity().toString());
         email = getActivity().getIntent().getStringExtra("email");
         exercise_name = getActivity().getIntent().getStringExtra("exercise_name");
 
@@ -249,9 +249,7 @@ public class DetailedExerciseHistoryGraphs extends Fragment implements OnChartVa
                     @Override
                     public void onResponse(String response) {
                         try {
-                            Log.e(TAG + " This Ex",response);
                             JSONArray jsonArray = new JSONArray(response);
-                            Log.e(TAG,jsonArray.toString());
                             try {
                                 for (int i = 0; i < jsonArray.length(); i++) {
                                     String tmp_int = new JSONObject(jsonArray.getString(i)).getString("avg_int");
@@ -302,7 +300,7 @@ public class DetailedExerciseHistoryGraphs extends Fragment implements OnChartVa
                 Map<String, String>  params = new HashMap<>();
                 try {
                     params.put("id", DetailedExerciseHistoryActivity.exerciseHistoryItem.getString("ID"));
-                }catch(JSONException je){Log.e(TAG, "No Exercise History ID");}
+                }catch(JSONException je){Log.e(TAG, "No Exercise History ID (AVG)");}
 
                 return params;
             }
@@ -439,7 +437,7 @@ public class DetailedExerciseHistoryGraphs extends Fragment implements OnChartVa
         lChart.setHighlightPerDragEnabled(true);
 
         // set an alternative background color
-        lChart.setBackgroundColor(Color.rgb(48,48,48));
+        lChart.setBackgroundColor(Color.TRANSPARENT);
         lChart.setViewPortOffsets(0f, 0f, 0f, 0f);
 
         // create a custom MarkerView (extend MarkerView) and specify the layout
@@ -457,19 +455,32 @@ public class DetailedExerciseHistoryGraphs extends Fragment implements OnChartVa
                     public void onResponse(String response) {
                         try {
                             // Chart Array Values List
+                            int minWeight  = 60;
+                            int maxWeight  = 0;
                             ArrayList<Entry> values = new ArrayList<>();
-                            JSONArray jsonArray = new JSONArray(response);
-                            Log.i("RESPONSE",response);
+                            JSONArray jsonArray = new JSONArray();
+                            try {
+                                jsonArray = new JSONArray(response);
+                            }catch (IndexOutOfBoundsException e){
+                                Log.e("RESPONSE",e.toString());
+                            }
+                            Log.e("RESPONSE",response);
                             try {
                                 for (int i = 0; i < jsonArray.length(); i++) {
-                                    String tmpWeight = new JSONObject(jsonArray.getString(i)).getString("Weight");
+                                    String tmpWeightStr = new JSONObject(jsonArray.getString(i)).getString("Weight");
+                                    int tmpWeight = Integer.parseInt(tmpWeightStr);
                                     String tmpDate = new JSONObject(jsonArray.getString(i)).getString("Date_Time");
                                     // parse String to Date - I don't know why but this adds an hour to the date
                                     Date tmpDat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.UK).parse(tmpDate);
-                                    values.add(new Entry(tmpDat.getTime(),Float.parseFloat(tmpWeight)));
+                                    values.add(new Entry(tmpDat.getTime(),tmpWeight));
+
+                                    if(minWeight > tmpWeight)
+                                        minWeight = tmpWeight;
+                                    if(maxWeight < tmpWeight)
+                                        maxWeight = tmpWeight;
                                 }
                             } catch (JSONException|ParseException jpe) {
-                                Log.i("WeightChartSetup", jpe.toString());
+                                Log.e("WeightChartSetup", jpe.toString());
                             }
                             // create a dataset and give it a type
                             LineDataSet set1 = new LineDataSet(values, "Weight");
@@ -494,11 +505,9 @@ public class DetailedExerciseHistoryGraphs extends Fragment implements OnChartVa
 
                             lChart.invalidate();
 
-
                             // get the legend (only possible after setting data)
                             Legend l = lChart.getLegend();
                             l.setEnabled(false);
-
 
                             XAxis xAxis = lChart.getXAxis();
                             xAxis.setPosition(XAxis.XAxisPosition.TOP_INSIDE);
@@ -530,8 +539,8 @@ public class DetailedExerciseHistoryGraphs extends Fragment implements OnChartVa
                             leftAxis.setDrawGridLines(true);
                             leftAxis.setGranularityEnabled(true);
 
-                            leftAxis.setAxisMinimum(30f); // min max values
-                            leftAxis.setAxisMaximum(120f);
+                            leftAxis.setAxisMinimum(minWeight - 5f); // min max values
+                            leftAxis.setAxisMaximum(maxWeight + 5f);
 
                             leftAxis.setYOffset(-9f);
                             leftAxis.setTextColor(Color.rgb(255, 192, 56));
@@ -541,9 +550,9 @@ public class DetailedExerciseHistoryGraphs extends Fragment implements OnChartVa
 
 
                         }catch (JSONException e2){
-                            Log.i("OUTER",e2.toString());
+                            Log.e("OUTER",e2.toString());
                         }catch (Exception ee){
-                            Log.i("EXECEPTION",ee.toString());
+                            Log.e("EXCEPTION",ee.toString());
                         }
                     }
                 },
@@ -560,10 +569,8 @@ public class DetailedExerciseHistoryGraphs extends Fragment implements OnChartVa
             protected Map<String, String> getParams()
             {
                 Map<String, String>  params = new HashMap<>();
-                try {
-                    params.put("exercise_id", DetailedExerciseHistoryActivity.exerciseHistoryItem.getString("ID"));
-                }catch(JSONException je){Log.e(TAG, "No Exercise History ID");}
-
+                params.put("email", email);
+                params.put("exercise_name", exercise_name);
                 return params;
             }
         };

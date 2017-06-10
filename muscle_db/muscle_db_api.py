@@ -10,12 +10,13 @@ import os.path
 from flask_jsondash.charts_builder import charts
 import c3pyo as c3
 from itertools import accumulate
-
-
+import requests
+import base64
 
 
 app = Flask(__name__)
 # Config examples.
+weekday = {"Sunday":7,"Monday":1,"Tuesday":5,"Wednesday":8,"Thursday":2,"Friday":6,"Saturday":9}
 
 app.register_blueprint(charts)
 app.config['SECRET_KEY'] = 'SECURE'
@@ -56,17 +57,17 @@ def pietest():
 #################
 ####DASHBOARD####
 """SELECT DAYNAME(Date_Time) AS dt,SUM(S.repetitions) AS Reps FROM EXE
-                      184.105.139.70 - - [08/Jun/2017 05:05:53] "GET / HTTP/1.1" 404 -           │RCISE_HISTORY AS EH JOIN SETS AS S ON EH.id = S.Exercise_history_id GROUP
+                      184.105.139.70 - - [08/Jun/2017 05:05:53] "GET / HTTP/1.1" 404 -           │RCISE_HISTORY AS EH JOIN SETS AS S ON EH.id = S.Exercise_history_id GROUP 
                       ^Croot@phpmyadmin-512mb-lon1-01:~/muscle_db#         """                     """ │BY dt;"""
 
 #################
 
 @app.route('/muscle_chart')
 def muscle_chart():
-
+ 
         conn = MySQLdb.connect(host='localhost', user='muscle', password='some_pass')
         c = conn.cursor(MySQLdb.cursors.DictCursor)
-        c.execute('USE muscle2')
+        c.execute('USE muscle2')                  
         c.execute("""
                 SELECT count(*) AS count, Muscle_name
                 FROM (SELECT Muscle_Name,Exercise_name FROM MUSCLES_WORKED) AS m_w
@@ -85,7 +86,7 @@ def male_female_chart():
 
     conn = MySQLdb.connect(host='localhost', user='muscle', password='some_pass')
     c = conn.cursor(MySQLdb.cursors.DictCursor)
-    c.execute('USE muscle2')
+    c.execute('USE muscle2')                  
     c.execute("""
             SELECT (CASE WHEN U.Gender = 0 THEN "Male" ELSE "Female" END) AS Gender, count(*) AS count
             FROM USER AS U
@@ -114,42 +115,46 @@ def male_female_chart():
       "field": "Gender",
       "title":" ",
       "type": "ordinal",
-      "axis": {
+      "axis": {          
         "labelAngle": 0
       }
     },
     "y": {
       "field": "b",
-      "title": " ",
+      "title": " ", 
       "type": "quantitative"
     },
     "color": {"field": "Gender", "type": "nominal", "scale": {"domain": ["Male", "Female"], "range": ["teal","#ff0000"]}}
   }
   }
-
+        
     return jsonify(r)
 
 @app.route('/user_signup_history')
 def user_signup_history():
     conn = MySQLdb.connect(host='localhost', user='muscle', password='some_pass')
     c = conn.cursor(MySQLdb.cursors.DictCursor)
-    c.execute('USE muscle2')
+    c.execute('USE muscle2')                  
     c.execute("""
-            SELECT DISTINCT UWH.ID, MIN(CAST(UWH.Date AS DATE)) AS `Date`
-            FROM USER_WEIGHT_HISTORY AS UWH
-            GROUP BY UWH.Date
+            SELECT reg_date,COUNT(User_Email) AS reg_users 
+            FROM (  SELECT User_email, MIN(Date) AS reg_date 
+                    FROM USER_WEIGHT_HISTORY 
+                    GROUP BY User_Email
+                 ) AS reg_table 
+            GROUP BY reg_date;
             """)
     fetched = c.fetchall()
     c.close()
     conn.close()
 
-    users = [ row['ID'] for row in fetched ]
+    users = [ row['reg_users'] for row in fetched ]
     users = list(accumulate(users))
 
     for i in range(len(fetched)):
-        fetched[i]['ID'] = users[i]
+        fetched[i]['reg_users'] = users[i]
 
-    values = [ {"date":str(row['Date']),"users":row['ID']} for row in fetched ]
+    values = [ {"date":str(row['reg_date']),"users":row['reg_users']} for row in fetched ]
+
 
     r = {   "data": {
                 "values": values
@@ -157,17 +162,18 @@ def user_signup_history():
             "mark": "line",
             "encoding": {
                 "x": {
-                  "field":"date",
+                  "field":"date", 
                   "title":" ",
+                  "timeUnit":"utcyearmonthdate",
                   "type": "temporal"
                 },
                 "y": {
                   "field": "users",
-                  "title": " ",
+                  "title": " ", 
                   "type": "quantitative"
                 }
 
-            }
+            }   
         }
     return jsonify(r)
 
@@ -175,43 +181,45 @@ def user_signup_history():
 def avg_weekly_exercises_chart():
     conn = MySQLdb.connect(host='localhost', user='muscle', password='some_pass')
     c = conn.cursor(MySQLdb.cursors.DictCursor)
-    c.execute('USE muscle2')
+    c.execute('USE muscle2')                  
     c.execute("""
             SELECT weekday, CAST(AVG(set_count) AS UNSIGNED) AS avg_weekday_sets
-            FROM(
-                SELECT DAYNAME(Date_Time) AS weekday,
-                       DAYOFWEEK(Date_Time) AS day_num,
+            FROM(                 
+                SELECT DAYNAME(Date_Time) AS weekday, 
+                       DAYOFWEEK(Date_Time) AS day_num, 
                        TO_DAYS(Date_Time) AS date,
-                       COUNT(S.Set_number) AS  set_count
+                       COUNT(S.Set_number) AS  set_count 
 
-                FROM EXERCISE_HISTORY AS EH
-                JOIN SETS AS S
-                  ON EH.id = S.Exercise_history_id
+                FROM EXERCISE_HISTORY AS EH 
+                JOIN SETS AS S 
+                  ON EH.id = S.Exercise_history_id                 
                 GROUP BY date
-                ) AS helper_table
-
+                ORDER BY day_num
+                ) AS helper_table             
+            
             GROUP BY weekday
-            ORDER BY day_num;
+            ORDER BY day_num              
             """)
     fetched = c.fetchall()
 
     r = {
         "data": {
-            "values": fetched
+            "values": [{'avg_weekday_sets': row['avg_weekday_sets'], "weekday": weekday[row['weekday']]} for row in fetched ]
         },
         "mark": "bar",
         "encoding": {
             "x": {
                 "field": "weekday",
                 "title":"Weekday",
-                "type": "nominal",
-                "axis": {
+                "type": "temporal",
+                "timeUnit":"day",
+                "axis": {          
                     "labelAngle": 0
                 }
             },
             "y": {
                 "field": "avg_weekday_sets",
-                "title": "Number of Sets",
+                "title": "Number of Sets", 
                 "type": "quantitative"
             }
         }
@@ -219,7 +227,7 @@ def avg_weekly_exercises_chart():
     return jsonify(r)
     c.close()
     conn.close()
-
+    
 
 #@app.route('/add_user/<email>/<password>/<name>/<height>/<weight>/<profile_image>/<gender>/<date_of_birth>')
 
@@ -250,18 +258,18 @@ def add_user():
         c = conn.cursor()
 
         c.execute('USE muscle2')
-
+        
         c.execute("SELECT * FROM USER WHERE Email = %s", [email])
 
         password = pbkdf2_sha256.encrypt(password, rounds=200000, salt_size=16)
 
         if c.fetchall():
             return "User already Registered"
-
+        
 
         if profile_image != "":
             c.execute('''INSERT INTO USER (Email, Password, Name, Height, Weight, Date_of_birth, Profile_image, Gender) VALUES (%s, %s, %s , %s, %s, %s, %s, %s)''', (email, password, name, height, weight, date_of_birth, profile_image_name, gender))
-
+            
             f = file("./img/profiles/" + profile_image_name, 'wb')
             f.write(profile_image)
             f.close()
@@ -314,7 +322,7 @@ def rm_comment():
         c = conn.cursor()
 
         c.execute('USE muscle2')
-
+    
         c.execute("DELETE FROM COMMENTS WHERE ID = %s", [comment])
 
         conn.commit()
@@ -532,7 +540,7 @@ def get_my_training_exercises():
         
         fetched = c.fetchall()
 
-        c.execute("""CALL GET_MY_PLAN_EXERCISE_COUNT(%s)""",[user])
+        c.execute("""CALL GET_MY_PLAN_EXERCISE_COUNT(%s)""",[user]) 
 
         fetched += c.fetchall()
         #Date time in string
@@ -656,7 +664,7 @@ def add_exercise_history_with_plan():
         c.execute("SELECT ID FROM EXERCISE_HISTORY WHERE User_email = %s order by Date_Time DESC LIMIT 1",[user])
 
         fetched = c.fetchall()
-
+        
         conn.commit()
         c.close()
         conn.close()
@@ -865,14 +873,14 @@ def update_user_char():
             c.execute('''INSERT INTO USER_WEIGHT_HISTORY(
                             User_email,
                             Weight,
-                            Date)
+                            Date) 
                         VALUES(
                             %s,
                             %s,
                             NOW())''',[ email,
                                         weight,
                             ])
-
+            
 
 
         if 'date_of_birth' in request.form:
@@ -949,7 +957,7 @@ def update_user_weight():
         c.execute('''INSERT INTO USER_WEIGHT_HISTORY(
                         User_email,
                         Weight,
-                        Date)
+                        Date) 
                     VALUES(
                         %s,
                         %s,
@@ -1046,7 +1054,7 @@ def get_user_plan_trainings():
                      FROM (SELECT * FROM TRAINING) AS T
                            JOIN (SELECT Plan,Email FROM USER) AS U
                            ON T.Plan_id = U.Plan AND U.Email = %s;""",[email])
-
+        
         fetched = c.fetchall()
         tmp = c.fetchall()
         c.close()
@@ -1067,7 +1075,7 @@ def get_plan_trainings():
         c.execute("""SELECT ID,Name
                      FROM TRAINING
              WHERE Plan_id  = %s;""",[plan])
-
+        
         fetched = c.fetchall()
         tmp = c.fetchall()
         c.close()
@@ -1218,7 +1226,7 @@ def get_exercise_muscle_stats_of_user():
         user_email = request.form['User_email']
         conn = MySQLdb.connect(host='localhost', user='muscle', password='some_pass')
         c = conn.cursor(MySQLdb.cursors.DictCursor)
-        c.execute('USE muscle2')
+        c.execute('USE muscle2')                  
         c.execute("""
                 SELECT count(*) AS count, Muscle_name
                 FROM (SELECT Muscle_Name, Exercise_name FROM MUSCLES_WORKED) AS m_w
@@ -1267,19 +1275,26 @@ def get_weight_history():
 @app.route('/get_exercise_weight_history', methods=['POST'])
 def get_exercise_weight_history():
     try:
-        exercise_id = request.form['exercise_id']
+        email = request.form['email']
+        exercise_name = request.form['exercise_name']
         conn = MySQLdb.connect(host='localhost', user='muscle', password='some_pass')
         c = conn.cursor(MySQLdb.cursors.DictCursor)
         c.execute('USE muscle2')
-        c.execute("""SELECT Weight, Date_Time
-             FROM (SELECT ID, Date_Time
-               FROM EXERCISE_HISTORY
-               WHERE ID = %s) AS EH
-               JOIN (SELECT Exercise_history_id, avg(Weight) AS Weight
-                 FROM SETS
-                 WHERE Exercise_history_id = %s) AS S
-               ON EH.ID = S.Exercise_history_id""", [exercise_id,exercise_id])
+        c.execute("""SELECT Weight, Date_Time 
+             	     FROM (SELECT ID, Date_Time
+               		   FROM EXERCISE_HISTORY
+               		   WHERE User_email = %s
+                 	     AND Exercise_name = %s
+               		   ORDER BY Date_Time) AS EH
+             	     JOIN (SELECT Exercise_history_id, Weight FROM SETS) AS S
+                     ON EH.ID = S.Exercise_history_id
+                     GROUP BY(Date_Time)""", [email,exercise_name])
         fetched = c.fetchall()
+
+        #Date time in string
+        for i in range(len(fetched)):
+            fetched[i]['Date_Time'] = str(fetched[i]['Date_Time'])
+            fetched[i]['Weight'] = str(fetched[i]['Weight'])        
         c.close()
         conn.close()
         return jsonify(fetched)
@@ -1469,10 +1484,10 @@ def get_user_profile():
 def get_users_like():
     try:
         user_email = request.form['email']
-
+        
         conn = MySQLdb.connect(host='localhost', user='muscle', password='some_pass', database='muscle2')
         c = conn.cursor(MySQLdb.cursors.DictCursor)
-
+        
         c.execute('USE muscle2')
         c.execute("""
             SELECT Email
@@ -1602,10 +1617,10 @@ def does_user_bump():
     try:
         user_email = request.form['email']
         exercise_id = int(request.form['exercise_id'])
-
+        
         conn = MySQLdb.connect(host='localhost', user='muscle', password='some_pass', database='muscle2')
         c = conn.cursor(MySQLdb.cursors.DictCursor)
-
+        
         c.execute('USE muscle2')
         c.execute("""
             SELECT *
@@ -1614,16 +1629,16 @@ def does_user_bump():
             and Exercise = %s
             """, [user_email, exercise_id])
 
-        r = c.fetchall()
-        c.close()
-        conn.close()
+        r = c.fetchall()        
+        c.close()       
+        conn.close()            
 
         if(len(r) == 0):
             return "false"
         else:
             return "true"
-
-
+            
+        
 
     except Exception as e:
         return str(e)
@@ -1634,10 +1649,10 @@ def delete_user_bump():
     try:
         user_email = request.form['email']
         exercise_id = request.form['exercise_id']
-
+        
         conn = MySQLdb.connect(host='localhost', user='muscle', password='some_pass', database='muscle2')
         c = conn.cursor(MySQLdb.cursors.DictCursor)
-
+        
         c.execute('USE muscle2')
         c.execute("""
             DELETE
@@ -1647,11 +1662,11 @@ def delete_user_bump():
             """, [user_email, exercise_id])
 
         conn.commit()
-        c.close()
+        c.close()       
         conn.close()
 
         return "Sou obrigado a returnar uma resposta senao app crasha"
-
+        
     except Exception as e:
         return str(e)
 
@@ -1661,20 +1676,20 @@ def add_user_bump():
     try:
         user_email = request.form['email']
         exercise_id = int(request.form['exercise_id'])
-
+        
         conn = MySQLdb.connect(host='localhost', user='muscle', password='some_pass', database='muscle2')
         c = conn.cursor(MySQLdb.cursors.DictCursor)
-
+        
         c.execute('USE muscle2')
         c.execute("""
             INSERT INTO BUMPS VALUES (%s, %s)
             """, [user_email, exercise_id])
 
         conn.commit()
-        c.close()
+        c.close()       
         conn.close()
-
-        return "Sou obrigado a returnar uma resposta sena a app crasha"
+        
+        return "Sou obrigado a returnar uma resposta sena a app crasha"         
 
     except Exception as e:
         return str(e)
@@ -1693,7 +1708,7 @@ def get_user_feed():
 
         conn = MySQLdb.connect(host='localhost', user='muscle', password='some_pass', database='muscle2')
         c = conn.cursor(MySQLdb.cursors.DictCursor)
-
+        
         c.execute('USE muscle2')
         c.execute("""
             SELECT *
@@ -1720,7 +1735,7 @@ def get_user_feed_and_pictures():
 
         conn = MySQLdb.connect(host='localhost', user='muscle', password='some_pass', database='muscle2')
         c = conn.cursor(MySQLdb.cursors.DictCursor)
-
+        
         c.execute('USE muscle2')
         c.execute("""
             SELECT *
@@ -1737,9 +1752,9 @@ def get_user_feed_and_pictures():
 
         #get image in user_profile_pics
         profile_dict = {row['Email']:row['Profile_image'] for row in r}
-
+        
         img_dir = "user_profile_pics/"
-
+        
         for email, img_path in profile_dict.items():
             if img_path != None and os.path.isfile(img_dir + img_path):
                 with open(img_dir + img_path, "rb") as image_file:
@@ -1754,7 +1769,7 @@ def get_user_feed_and_pictures():
     except Exception as e:
         return str(e)
 
-
+    
 @app.route('/get_comments_exercise', methods=['POST'])
 def get_comments_exercise():
     try:
@@ -1762,7 +1777,7 @@ def get_comments_exercise():
 
         conn = MySQLdb.connect(host='localhost', user='muscle', password='some_pass', database='muscle2')
         c = conn.cursor(MySQLdb.cursors.DictCursor)
-
+        
         c.execute('USE muscle2')
         c.execute("""
             SELECT COMMENTS.ID, User_email, Comment, Name, Profile_image
@@ -1800,7 +1815,7 @@ def add_comment_to_exercise():
 
         conn = MySQLdb.connect(host='localhost', user='muscle', password='some_pass', database='muscle2')
         c = conn.cursor(MySQLdb.cursors.DictCursor)
-
+        
         c.execute('USE muscle2')
         c.execute("""
             INSERT INTO COMMENTS (User_email, Exercise, Comment) VALUES (%s, %s, %s)
@@ -1823,7 +1838,7 @@ def get_bumps_exercise():
 
         conn = MySQLdb.connect(host='localhost', user='muscle', password='some_pass', database='muscle2')
         c = conn.cursor(MySQLdb.cursors.DictCursor)
-
+        
         c.execute('USE muscle2')
         c.execute("""
             SELECT COUNT(*) as bumps
@@ -1846,7 +1861,7 @@ def get_users_bumped_exercise():
 
         conn = MySQLdb.connect(host='localhost', user='muscle', password='some_pass', database='muscle2')
         c = conn.cursor(MySQLdb.cursors.DictCursor)
-
+        
         c.execute('USE muscle2')
         c.execute("""
             SELECT User_email
@@ -1869,7 +1884,7 @@ def get_user_following_amount():
 
         conn = MySQLdb.connect(host='localhost', user='muscle', password='some_pass', database='muscle2')
         c = conn.cursor(MySQLdb.cursors.DictCursor)
-
+        
         c.execute('USE muscle2')
         c.execute("""
             SELECT COUNT(*) as Amount
@@ -1892,7 +1907,7 @@ def get_user_following():
 
         conn = MySQLdb.connect(host='localhost', user='muscle', password='some_pass', database='muscle2')
         c = conn.cursor(MySQLdb.cursors.DictCursor)
-
+        
         c.execute('USE muscle2')
         c.execute("""
             SELECT Following
@@ -1980,20 +1995,19 @@ def rm_from_following():
 ## DATA PROCESSING ##
 #####################
 
-@app.route('/get_expected_exercise_result', methods=['POST'])
 def get_expected_exercise_result():
     try:
         user_email = request.form['user_email']
         exercise_name = request.form['exercise_name']
         weight = request.form['weight']
         set_number = request.form['set_number']
-
+        
         conn = MySQLdb.connect(host='localhost', user='muscle', password='some_pass', database='muscle2')
         c = conn.cursor(MySQLdb.cursors.DictCursor)
 
         c.execute('USE muscle2')
         c.execute("""
-            SELECT Gender, Weight
+            SELECT Gender, Weight 
             FROM (SELECT * FROM USER WHERE Email = %s) AS u
             JOIN EXERCISE_HISTORY
             ON u.Email = EXERCISE_HISTORY.User_email
@@ -2003,25 +2017,25 @@ def get_expected_exercise_result():
         gender, u_weight = r["Gender"], r["Weight"]
         weight_min = u_weight - 5
         weight_max = u_weight + 5
-
+            
         c.execute("""
-            SELECT Objective
-            FROM (SELECT * FROM USER WHERE Email = %s) AS u
-            JOIN PLAN
+            SELECT Objective 
+            FROM (SELECT * FROM USER WHERE Email = %s) AS u 
+            JOIN PLAN 
             ON u.Plan = PLAN.ID""", [user_email])
 
         objective = c.fetchall()[0]['Objective']
-
+        
         c.execute("""
             SELECT AVG(Intensity) AS avg_int, AVG(Intensity_deviation) AS avg_deviation, AVG(Resting_Time) as avg_rest
-            FROM USER
+            FROM USER 
             JOIN (SELECT User_email, Intensity, Intensity_deviation, Resting_Time
                 FROM (SELECT * FROM SETS WHERE Weight = %s AND Set_number = %s) AS s
                 JOIN (SELECT * FROM EXERCISE_HISTORY WHERE Exercise_name = %s) AS e_h
                 ON s.Exercise_history_id = e_h.ID) AS temp
             ON USER.Email = temp.User_email
             WHERE Gender = %s AND Weight BETWEEN %s AND %s""", [weight, set_number, exercise_name, gender, weight_min, weight_max])
-
+        
         r = c.fetchall()
         c.close()
         conn.close()
@@ -2038,14 +2052,14 @@ def get_recommended_exercises():
         user_email = request.form['user_email']
         conn = MySQLdb.connect(host='localhost', user='muscle', password='some_pass', database='muscle2')
         c = conn.cursor(MySQLdb.cursors.DictCursor)
-
+        
         c.execute('USE muscle2')
         c.execute("""
             SELECT Exercise_name, COUNT(Email) as count
             FROM ( SELECT DISTINCT u.Email, e.Exercise_name
                 FROM ( SELECT Email
                     FROM USER
-                    JOIN (SELECT *
+                    JOIN (SELECT * 
                         FROM EXERCISE_HISTORY
                         WHERE Exercise_name IN (Select Exercise_name FROM EXERCISE_HISTORY WHERE User_email = %s) ) AS e_h
                         ON USER.Email = e_h.User_email) AS u
@@ -2070,14 +2084,14 @@ def get_recommended_plans():
         user_email = request.form['user_email']
         conn = MySQLdb.connect(host='localhost', user='muscle', password='some_pass', database='muscle2')
         c = conn.cursor(MySQLdb.cursors.DictCursor)
-
+        
         c.execute('USE muscle2')
         c.execute("""
             SELECT Plan_id AS ID, Name, COUNT(Email) as count
             FROM ( SELECT DISTINCT u.Email, e.Plan_id
                 FROM ( SELECT Email
                     FROM USER
-                    JOIN (SELECT *
+                    JOIN (SELECT * 
                         FROM EXERCISE_HISTORY
                         WHERE Exercise_name IN (Select Exercise_name FROM EXERCISE_HISTORY WHERE User_email = %s) ) AS e_h
                     ON USER.Email = e_h.User_email) AS u
@@ -2128,7 +2142,7 @@ def get_recommended_follows():
         limit = int(request.form['limit'])
         conn = MySQLdb.connect(host='localhost', user='muscle', password='some_pass', database='muscle2')
         c = conn.cursor(MySQLdb.cursors.DictCursor)
-
+        
         c.execute('USE muscle2')
         c.execute("""
                 SELECT FOLLOWERS.Following, count(FOLLOWERS.Following) AS count
@@ -2145,7 +2159,7 @@ def get_recommended_follows():
         r = c.fetchall()
         c.close()
         conn.close()
-        return jsonify(r)
+        return jsonify(r) 
 
     except Exception as e:
         return str(e)
@@ -2158,14 +2172,14 @@ def is_exercise_history_shared():
         id = request.form['exercise_id']
         conn = MySQLdb.connect(host='localhost', user='muscle', password='some_pass', database='muscle2')
         c = conn.cursor(MySQLdb.cursors.DictCursor)
-
+        
         c.execute('USE muscle2')
         c.execute("""SELECT Shared from EXERCISE_HISTORY WHERE ID = %s""", [id])
 
         r = c.fetchall()
         c.close()
         conn.close()
-        return jsonify(r)
+        return jsonify(r) 
 
     except Exception as e:
         return str(e)
@@ -2177,7 +2191,7 @@ def set_exercise_history_shared():
         shared = int(request.form['shared']);
         conn = MySQLdb.connect(host='localhost', user='muscle', password='some_pass', database='muscle2')
         c = conn.cursor(MySQLdb.cursors.DictCursor)
-
+        
         print("UPDATE EXERCISE_HISTORY SET Shared = {} where ID = {}""".format(shared, id))
         c.execute('USE muscle2')
         c.execute("""UPDATE EXERCISE_HISTORY SET Shared = %s where ID = %s""", [shared, id])
@@ -2186,7 +2200,7 @@ def set_exercise_history_shared():
         c.close()
         conn.commit()
         conn.close()
-        return jsonify(r)
+        return jsonify(r) 
 
     except Exception as e:
         return str(e)
@@ -2200,21 +2214,21 @@ def get_muscle_progress():
 
         c.execute('USE muscle2')
         progress = { "Back":1, "Biceps":1, "Chest":1, "Legs":1, "Shoulders":1, "Triceps":1 }
-
+        
         for muscle in progress:
             c.execute('SELECT EXERCISE_PER_MUSCLE_ON_DATE_BLOCK(%s,%s,%s,%s)', [email, muscle, 7,0])
             temp = [ x for x in list(c.fetchall()[0].values()) if x != None ]
-            if temp != []:
+            if temp != []:  
                 exercises = { e:0 for e in temp[0].split('|') }
                 inComparison = { e:0 for e in temp[0].split('|') }
-
+                
                 for exercise in exercises:
                     avg = 0
                     i = 0
                     while i < 10:
                         c.execute('SELECT AVG_WEIGHT_DATE_BLOCK(%s,%s,%s,%s)', [email, exercise, 7*(i+1), 7*i])
                         a = list(c.fetchall()[0].values())[0]
-                        if a:
+                        if a: 
                             avg = a * 0.7 + avg * 0.3 if avg != 0 else a
                         i+=1
 
@@ -2224,7 +2238,7 @@ def get_muscle_progress():
                     a = list(c.fetchall()[0].values())[0]
                     if a:
                         inComparison[exercise] = a
-
+                
                 l = [ inComparison[x]/exercises[x] for x in exercises if exercises[x] != 0 ]
                 if l != []:
                     progress[muscle] = sum(l) / len(l)
@@ -2240,14 +2254,14 @@ def get_user_height():
         id = request.form['email']
         conn = MySQLdb.connect(host='localhost', user='muscle', password='some_pass', database='muscle2')
         c = conn.cursor(MySQLdb.cursors.DictCursor)
-
+        
         c.execute('USE muscle2')
         c.execute("""SELECT Height from USER WHERE Email = %s""", [id])
 
         r = c.fetchall()
         c.close()
         conn.close()
-        return jsonify(r[0])
+        return jsonify(r[0]) 
 
     except Exception as e:
         return str(e)
@@ -2258,17 +2272,50 @@ def get_exercise_image_name():
         id = request.form['exercise_name']
         conn = MySQLdb.connect(host='localhost', user='muscle', password='some_pass', database='muscle2')
         c = conn.cursor(MySQLdb.cursors.DictCursor)
-
+        
         c.execute('USE muscle2')
         c.execute("""SELECT Image from EXERCISE WHERE Name = %s""", [id])
 
         r = c.fetchall()
         c.close()
         conn.close()
-        return r[0]["Image"]
+        return r[0]["Image"] 
 
     except Exception as e:
         return str(e)
+
+@app.route('/add_fitbit_user', methods=['GET'])
+def add_fitbit_user():
+    try:
+        code = request.args.get('code')
+        user = request.args.get('state')
+        
+        payload = {}
+        payload['client_id'] = "228KV8"
+        payload['grant_type'] = "authorization_code"
+        payload['code'] = code
+        payload['redirect_uri'] = 'https://138.68.158.127/add_fitbit_user'
+
+        base_url = "https://api.fitbit.com/oauth2/token"
+
+        #toConvert = "228KV8:16ddd260cc613d6da167794a104941f4"
+        encoded_data = 'MjI4S1Y4OjE2ZGRkMjYwY2M2MTNkNmRhMTY3Nzk0YTEwNDk0MWY0'
+        autho = "Basic" + " " + encoded_data +"="
+        header = {"Authorization": autho}
+
+        r = requests.post(base_url, headers = header, data = payload).json()
+        conn = MySQLdb.connect(host='localhost', user='muscle', password='some_pass', database='muscle2')
+        c = conn.cursor(MySQLdb.cursors.DictCursor)
+        
+        c.execute('USE muscle2')
+        c.execute("""UPDATE USER SET Access_token = %s WHERE Email = %s""", [r['access_token'], user])
+        c.close()
+        conn.commit()
+        conn.close()
+        return "Fitbit account successfully synced"
+
+    except Exception as e:
+        print(str(e))
 
 if __name__ == '__main__':
     context = ssl.SSLContext(ssl.PROTOCOL_TLSv1_2)

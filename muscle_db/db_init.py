@@ -29,7 +29,8 @@ c.execute('''CREATE TABLE USER(
     Date_of_birth DATE NOT NULL,
     Gender BOOL NOT NULL,
     Height SMALLINT NOT NULL,
-    Weight FLOAT(3,1) NOT NULL,
+    Weight FLOAT(4,1) NOT NULL,
+    Access_token TEXT,
     Profile_image TEXT,
     Plan INTEGER,
     PRIMARY KEY(email),
@@ -128,7 +129,7 @@ c.execute('''CREATE TABLE PLAN_HISTORY(
 
 c.execute('''CREATE TABLE USER_WEIGHT_HISTORY(
     User_email Varchar(255),
-    Weight Integer,
+    Weight FLOAT(4,1),
     `Date` date,
     PRIMARY KEY(ID),
     FOREIGN KEY(Plan_id) REFERENCES PLAN(ID),
@@ -164,5 +165,29 @@ c.execute('''CREATE TABLE COMMENTS(
 	FOREIGN KEY(Exercise) REFERENCES EXERCISE_HISTORY(ID)
 	)'''
 )
+
+c.execute('''CREATE FUNCTION EXERCISE_PER_MUSCLE_ON_DATE_BLOCK(User VARCHAR(255),Muscle VARCHAR(32),T0 INT,T1 INT) RETURNS TEXT
+	BEGIN
+		DECLARE return_val TEXT;
+		SET return_val = '';
+		SELECT GROUP_CONCAT(Exercise_Name SEPARATOR '|') INTO return_val FROM (
+		SELECT DISTINCT EXERCISE_HISTORY.Exercise_Name
+		FROM EXERCISE_HISTORY
+		JOIN MUSCLES_WORKED
+		ON EXERCISE_HISTORY.Exercise_name = MUSCLES_WORKED.Exercise_name
+		WHERE MUSCLES_WORKED.Muscle_Name = Muscle AND EXERCISE_HISTORY.User_email = User AND Date_Time BETWEEN DATE_SUB(NOW(), INTERVAL T0 DAY) AND DATE_SUB(NOW(), INTERVAL T1 DAY))AS f;
+		RETURN return_val;
+	END''')
+
+c.execute('''CREATE FUNCTION AVG_WEIGHT_DATE_BLOCK(User VARCHAR(255), Exercise VARCHAR(255), T0 INT, T1 INT) RETURNS FLOAT
+	BEGIN
+		DECLARE return_val FLOAT;
+		SET return_val = 0.0;
+		SELECT AVG(Weight) into return_val
+		FROM SETS
+		JOIN (SELECT ID FROM EXERCISE_HISTORY WHERE User_email = User AND Exercise_name = Exercise AND Date_Time BETWEEN DATE_SUB(NOW(), INTERVAL T0 DAY) AND DATE_SUB(NOW(), INTERVAL T1 DAY)) as eh
+		ON SETS.Exercise_history_id = eh.ID;
+		RETURN return_val;
+	END;''')
 		
 print("Database successfully initialized")

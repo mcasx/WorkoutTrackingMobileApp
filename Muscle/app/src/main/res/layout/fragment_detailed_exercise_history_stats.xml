@@ -1,61 +1,59 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <ScrollView
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="wrap_content">
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="match_parent"
+            android:orientation="vertical">
 
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
+                android:layout_height="wrap_content"
                 android:orientation="vertical">
 
-                <LinearLayout
+                <TextView
+                    android:id="@+id/detail_bar_text"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical">
+                    android:textAlignment="center"
+                    android:textSize="18sp"
+                    android:layout_marginTop="15dp"
+                    android:text="Exercise Stats" />
 
-                    <TextView
-                        android:id="@+id/detail_bar_text"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:textAlignment="center"
-                        android:textSize="18sp"
-                        android:text="Exercise Stats" />
+                <com.github.mikephil.charting.charts.BarChart
+                    android:id="@+id/bar_chart"
+                    android:layout_width="match_parent"
+                    android:layout_height="250dp"
+                    android:layout_margin="10dp" />
+            </LinearLayout>
 
-                    <com.github.mikephil.charting.charts.BarChart
-                        android:id="@+id/bar_chart"
-                        android:layout_width="match_parent"
-                        android:layout_height="250dp"
-                        android:layout_margin="10dp" />
-                </LinearLayout>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
 
-                <LinearLayout
+                <TextView
+                    android:id="@+id/detail_line_text"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical">
+                    android:textAlignment="center"
+                    android:textSize="18sp"
+                    android:text="Exercise Weight Progress" />
 
-                    <TextView
-                        android:id="@+id/detail_line_text"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:textAlignment="center"
-                        android:textSize="18sp"
-                        android:text="Exercise Weight Progress" />
-
-                    <com.github.mikephil.charting.charts.LineChart
-                        android:id="@+id/detail_line_Chart"
-                        android:layout_width="match_parent"
-                        android:layout_height="250dp" />
-                </LinearLayout>
+                <com.github.mikephil.charting.charts.LineChart
+                    android:id="@+id/detail_line_Chart"
+                    android:layout_width="match_parent"
+                    android:layout_height="235dp"
+                    android:layout_margin="20dp"
+                    />
             </LinearLayout>
         </LinearLayout>
-    </ScrollView>
-</RelativeLayout>
+    </LinearLayout>
+</ScrollView>
