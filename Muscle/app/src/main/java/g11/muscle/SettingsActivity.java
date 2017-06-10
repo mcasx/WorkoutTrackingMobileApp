@@ -299,11 +299,12 @@ public class SettingsActivity  extends AppCompatActivity {
     }
 
     public void onClickFitbit(View view) {
-        String inURL= "https://www.fitbit.com/oauth2/authorize?response_type=token";
+        String inURL= "https://www.fitbit.com/oauth2/authorize?response_type=code";
         inURL += "&client_id=228KV8";
         inURL += "&redirect_uri=https%3A%2F%2F138.68.158.127%2Fadd_fitbit_user";
         inURL += "&scope=activity%20heartrate%20profile%20weight";
         inURL += "&expires_in=31536000";
+        inURL += "&state=" + getSharedPreferences("UserData",0).getString("email", null);
 
         Intent browse = new Intent( Intent.ACTION_VIEW , Uri.parse( inURL ) );
 

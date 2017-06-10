@@ -1,12 +1,15 @@
 package g11.muscle;
 
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
@@ -30,6 +33,7 @@ import g11.muscle.DB.VolleyProvider;
 public class GroupExercisesActivity extends AppCompatActivity {
 
     private static final String TAG = "groupExercisesActivity";
+    private static boolean canRun;
     private String email;
     private ListView exercisesView;
 
@@ -65,6 +69,9 @@ public class GroupExercisesActivity extends AppCompatActivity {
         email = intent.getStringExtra("email");
         getSupportActionBar().setTitle(group);
 
+        PackageManager manager = getPackageManager();
+        canRun = manager.hasSystemFeature(PackageManager.FEATURE_SENSOR_STEP_COUNTER);
+
         // Define title
 
         //Create the list items through a request
@@ -94,7 +101,20 @@ public class GroupExercisesActivity extends AppCompatActivity {
                         }
 
                         // Define the groupView adapter
-                        ArrayAdapter<String> adapter = new ArrayAdapter<>(GroupExercisesActivity.this, android.R.layout.simple_list_item_1, exercises);
+                        ArrayAdapter<String> adapter = new ArrayAdapter<String>(GroupExercisesActivity.this, android.R.layout.simple_list_item_1, exercises){
+                            @Override
+                            public View getView(int position, View convertView, ViewGroup parent) {
+                                View view =super.getView(position, convertView, parent);
+
+                                TextView textView=(TextView) view.findViewById(android.R.id.text1);
+                                if(textView.getText().toString().equals("Running") && !canRun)
+                                    textView.setTextColor(Color.GRAY);
+                                else
+                                    textView.setTextColor(Color.WHITE);
+
+                                return view;
+                            }
+                        };
                         exercisesView.setAdapter(adapter);
 
                         // Set the listeners on the list items
@@ -103,8 +123,12 @@ public class GroupExercisesActivity extends AppCompatActivity {
                                 //Go to exercise page
                                 String exercise_name = (String) parent.getAdapter().getItem(position);
                                 Intent intent;
-                                if(exercise_name.equals("Running"))
-                                    intent = new Intent(GroupExercisesActivity.this, CardioActivity.class);
+                                if(exercise_name.equals("Running")) {
+                                    if (!canRun)
+                                        return;
+                                    else
+                                        intent = new Intent(GroupExercisesActivity.this, CardioActivity.class);
+                                }
                                 else
                                     intent = new Intent(GroupExercisesActivity.this, ExerciseActivity.class);
                                 intent.putExtra("exercise_name", exercise_name);
