@@ -133,11 +133,13 @@ public class ExerciseMusclesFragment extends Fragment {
             @RequiresApi(api = Build.VERSION_CODES.M)
             @Override
             public void onResponse(String response) {
-
-                Picasso.with(getActivity())
-                        .load("http://138.68.158.127/muscle%20images/m_" + response)
-                        .into(muscleImage);
-
+                try {
+                    Picasso.with(getActivity())
+                            .load("http://138.68.158.127/muscle%20images/m_" + response)
+                            .into(muscleImage);
+                }catch(IllegalArgumentException e){
+                    Log.e("PICASSO_Ex_Mus_Frag",e.toString());
+                }
                 //muscleImage.setImageDrawable(loadImageFromWebOperations("http://138.68.158.127/muscle%20images/m_" + response));
 
 

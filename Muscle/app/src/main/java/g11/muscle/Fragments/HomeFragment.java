@@ -207,7 +207,6 @@ public class HomeFragment extends Fragment implements OnChartValueSelectedListen
                                 String key = iter.next();
                                 try {
                                     Double value = response.getDouble(key);
-                                    Log.e("GRAPH",key + " - " + value);
                                     list.add(new MuscleProgressItem(value, key));
                                 } catch (JSONException e) {
                                     // Something went wrong!
@@ -308,7 +307,6 @@ public class HomeFragment extends Fragment implements OnChartValueSelectedListen
         xAxis.setValueFormatter(new IAxisValueFormatter() {
             @Override
             public String getFormattedValue(float value, AxisBase axis) {
-                Log.e("VALUE",String.valueOf(value) + " Axis: " + axis);
                 return MuscleGroups[(Math.abs((int)value)/10) % MuscleGroups.length];
             }
         });

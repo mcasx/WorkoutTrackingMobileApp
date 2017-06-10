@@ -30,8 +30,10 @@ import java.util.ArrayList;
 
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.LinearLayoutManager;
+import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 
@@ -68,11 +70,17 @@ public class MyPlanFragment extends Fragment {
     private List<TrainingsItem> plan_trainings;
     private List<PlanExerciseItem> training_data;
 
+    // training_count
+    private int[] trainingExCount;
+    private int currentTrainingID;
+    private PlanExerciseItem nextExercise;
+
     //GUI
     private RecyclerView recyclerView;
     private Spinner dropdown;
+    private Button nextExerciseButton;
     private ProgressBar myPlanProgressBar;
-    private LinearLayout content;
+    private RelativeLayout content;
 
     public MyPlanFragment() {
         // Required empty public constructor
@@ -93,13 +101,6 @@ public class MyPlanFragment extends Fragment {
     }
 
     @Override
-    public void onResume(){
-        super.onResume();
-
-        getTrainings();
-    }
-
-    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Fragment View
@@ -109,7 +110,11 @@ public class MyPlanFragment extends Fragment {
 
         //GUI elements
         dropdown = (Spinner)fView.findViewById(R.id.spinner);
-        content = (LinearLayout) fView.findViewById(R.id.myPlanContent);
+
+        nextExerciseButton = (Button)fView.findViewById(R.id.buttonNextExercise);
+        nextExerciseButton.setOnClickListener(onClickListener);
+
+        content = (RelativeLayout) fView.findViewById(R.id.myPlanContent);
         myPlanProgressBar = (ProgressBar) fView.findViewById(R.id.myPlanProgressBar);
         content.setVisibility(View.INVISIBLE);
         myPlanProgressBar.setVisibility(View.VISIBLE);
@@ -166,7 +171,7 @@ public class MyPlanFragment extends Fragment {
                     public void onResponse(String response) {
                         try {
                             JSONArray jsonArray = new JSONArray(response);
-                            Log.i("HELP","in 1 onresponse");
+
                             plan_trainings.clear(); // check the list is empty before adding items
                             try {
                                 for (int i = 0; i < jsonArray.length(); i++) {
@@ -178,13 +183,14 @@ public class MyPlanFragment extends Fragment {
                             } catch (JSONException je){
                                 Log.e(TAG, je.toString());
                                 myPlanProgressBar.setVisibility(View.INVISIBLE);
-
                             }
                         }catch (JSONException e2){
                             e2.printStackTrace();
                             myPlanProgressBar.setVisibility(View.INVISIBLE);
-
                         }
+
+
+                        trainingExCount = new int[plan_trainings.size()];
 
                         String[] items = new String[plan_trainings.size()];
                         for(int i = 0; i < plan_trainings.size();i++){
@@ -194,6 +200,7 @@ public class MyPlanFragment extends Fragment {
                         dropdown.setAdapter(adapter1);
                         dropdown.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                             public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
+                                currentTrainingID = pos;
                                 getTrainingExercises(plan_trainings.get(pos).getIdStr());
                             }
                             public void onNothingSelected(AdapterView<?> parent) {
@@ -206,7 +213,7 @@ public class MyPlanFragment extends Fragment {
                     @Override
                     public void onErrorResponse(VolleyError error) {
                         //Handle error response
-                        /*
+
                         AlertDialog alertDialog = new AlertDialog.Builder(getActivity()).create();
                         alertDialog.setTitle("No Internet Connection");
                         //"Please connect your device to the Internet and try again")
@@ -217,7 +224,7 @@ public class MyPlanFragment extends Fragment {
                                         dialog.dismiss();
                                     }
                                 });
-                        alertDialog.show();*/
+                        alertDialog.show();
                         myPlanProgressBar.setVisibility(View.INVISIBLE);
                     }
                 }
@@ -250,6 +257,14 @@ public class MyPlanFragment extends Fragment {
                             try {
                                 // My Plan Exercises count
                                 countPlanExercises = Integer.parseInt(new JSONObject(jsonArray.getString(jsonArray.length()-1)).getString("Plan_Exercise_Count"));
+                                if(trainingExCount[currentTrainingID] == 0)
+                                    trainingExCount[currentTrainingID] = jsonArray.length() - 1;
+
+                                currentExerciseCount = 0;
+                                for(int j = 0; j < currentTrainingID;j++)
+                                    currentExerciseCount += trainingExCount[j];
+
+                                boolean firstUncheckedExercise = true;
 
                                 for (int i = 0; i < jsonArray.length() - 1; i++) {
                                     String tmp_name = new JSONObject(jsonArray.getString(i)).getString("Exercise_name");
@@ -258,11 +273,19 @@ public class MyPlanFragment extends Fragment {
                                     String tmp_rest = new JSONObject(jsonArray.getString(i)).getString("Resting_Time");
                                     int tmp_weight = Integer.parseInt(new JSONObject(jsonArray.getString(i)).getString("Weight"));
 
+
                                     if(currentExerciseCount < countPlanExercises){ // Exercise was already completed
-                                        training_data.add(new PlanExerciseItem(tmp_name,tmp_reps,tmp_sets,tmp_rest,tmp_weight,true));
+                                        training_data.add(new PlanExerciseItem(tmp_name,tmp_reps,tmp_sets,tmp_rest,tmp_weight,1));
                                         currentExerciseCount++;
                                     }else{
-                                        training_data.add(new PlanExerciseItem(tmp_name,tmp_reps,tmp_sets,tmp_rest,tmp_weight,false));
+                                        if((currentExerciseCount == countPlanExercises) && firstUncheckedExercise){
+                                            training_data.add(new PlanExerciseItem(tmp_name,tmp_reps,tmp_sets,tmp_rest,tmp_weight,2));
+                                            firstUncheckedExercise = false;
+                                            if(nextExercise == null)
+                                                nextExercise = new PlanExerciseItem(tmp_name,tmp_reps,tmp_sets,tmp_rest,tmp_weight,2);
+                                        }
+                                        else
+                                            training_data.add(new PlanExerciseItem(tmp_name,tmp_reps,tmp_sets,tmp_rest,tmp_weight,0));
                                     }
                                 }
                             } catch (JSONException je){
@@ -290,7 +313,7 @@ public class MyPlanFragment extends Fragment {
                     @Override
                     public void onErrorResponse(VolleyError error) {
                         //Handle error response
-                        AlertDialog alertDialog = new AlertDialog.Builder(getActivity()).create();
+                        /*AlertDialog alertDialog = new AlertDialog.Builder(getActivity()).create();
                         alertDialog.setTitle("No Internet Connection");
                         //"Please connect your device to the Internet and try again")
                         alertDialog.setMessage(ERROR_MSG);
@@ -300,8 +323,8 @@ public class MyPlanFragment extends Fragment {
                                         dialog.dismiss();
                                     }
                                 });
-                        alertDialog.show();
-                        Log.i("HELP","10");
+                        alertDialog.show();*/
+                        Log.e("HELP","10");
                         myPlanProgressBar.setVisibility(View.INVISIBLE);
                     }
                 }
@@ -321,18 +344,37 @@ public class MyPlanFragment extends Fragment {
         VolleyProvider.getInstance(getActivity()).addRequest(StrHistReq);
     }
 
+    private View.OnClickListener onClickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(final View v) {
+            if(nextExercise != null) {
+                String email = getContext().getSharedPreferences("UserData", 0).getString("email", null);
+                Intent intent = new Intent(getActivity(), ExerciseActivity.class);
+                intent.putExtra("email", email);
+                intent.putExtra("exercise_name", nextExercise.getExercise_name());
+                intent.putExtra("exercise_reps", nextExercise.getExercise_reps());
+                intent.putExtra("exercise_sets", nextExercise.getExercise_sets());
+                intent.putExtra("exercise_rest", nextExercise.getExercise_rest());
+                intent.putExtra("exercise_weight", nextExercise.getExercise_weight());
+                startActivity(intent);
+            }
+        }
+    };
+
     private class MyOnClickListener implements View.OnClickListener {
         @Override
         public void onClick(final View view) {
             int itemPosition = recyclerView.getChildLayoutPosition(view);
             PlanExerciseItem item = training_data.get(itemPosition);
 
-            if(!item.getMode()) { // Exercise not done yet
+            for(int j = 0; j < currentTrainingID;j++)
+                itemPosition += trainingExCount[j];
+
+            if(itemPosition == countPlanExercises) { // Next Exercise
                 String email = getContext().getSharedPreferences("UserData", 0).getString("email", null);
                 Intent intent = new Intent(getActivity(), ExerciseActivity.class);
                 intent.putExtra("email", email);
                 intent.putExtra("exercise_name", item.getExercise_name());
-                Log.e("CLICK ITEM",item.toString());
                 intent.putExtra("exercise_reps",item.getExercise_reps());
                 intent.putExtra("exercise_sets",item.getExercise_sets());
                 intent.putExtra("exercise_rest",item.getExercise_rest());
