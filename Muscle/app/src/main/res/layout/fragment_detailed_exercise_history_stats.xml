@@ -24,6 +24,7 @@
                     android:layout_height="wrap_content"
                     android:textAlignment="center"
                     android:textSize="18sp"
+                    android:layout_marginTop="15dp"
                     android:text="Exercise Stats" />
 
                 <com.github.mikephil.charting.charts.BarChart
@@ -50,7 +51,8 @@
                     android:id="@+id/detail_line_Chart"
                     android:layout_width="match_parent"
                     android:layout_height="235dp"
-                    android:layout_margin="10dp" />
+                    android:layout_margin="20dp"
+                    />
             </LinearLayout>
         </LinearLayout>
     </LinearLayout>
