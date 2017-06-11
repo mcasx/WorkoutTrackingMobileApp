@@ -214,7 +214,7 @@ public class MyPlanFragment extends Fragment {
                     public void onErrorResponse(VolleyError error) {
                         //Handle error response
 
-                        AlertDialog alertDialog = new AlertDialog.Builder(getActivity()).create();
+                        /*AlertDialog alertDialog = new AlertDialog.Builder(getActivity()).create();
                         alertDialog.setTitle("No Internet Connection");
                         //"Please connect your device to the Internet and try again")
                         alertDialog.setMessage(ERROR_MSG);
@@ -224,7 +224,7 @@ public class MyPlanFragment extends Fragment {
                                         dialog.dismiss();
                                     }
                                 });
-                        alertDialog.show();
+                        alertDialog.show();*/
                         myPlanProgressBar.setVisibility(View.INVISIBLE);
                     }
                 }
