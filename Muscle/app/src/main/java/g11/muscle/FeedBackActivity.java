@@ -48,6 +48,7 @@ import java.io.UnsupportedEncodingException;
 import java.sql.Time;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.Locale;
@@ -95,6 +96,9 @@ public class FeedBackActivity extends AppCompatActivity implements
     private int set_count;
     private ArrayList<Double> intensities;
     private int restTime;
+    private int start_seconds;
+    private int start_minutes;
+    private int start_hours;
 
     // first rep of the exercise
     private boolean firstRep;
@@ -141,6 +145,8 @@ public class FeedBackActivity extends AppCompatActivity implements
     // Intent vars
     private String email;
     private String exercise;
+    private String access_token;
+    private String refresh_token;
 
     ProgressDialog loadingDialog;
 
@@ -155,6 +161,10 @@ public class FeedBackActivity extends AppCompatActivity implements
         final Intent intent = getIntent();
         email = intent.getStringExtra("email");
         exercise = intent.getStringExtra("exercise_name");
+        /* FITBIT
+        access_token = intent.getStringExtra("access_token");
+        refresh_token = intent.getStringExtra("refresh_token");
+        */
 
         if(intent.getStringExtra("exercise_rest") != null) { // Plan Information
             plan_rest = intent.getStringExtra("exercise_rest");
@@ -297,11 +307,30 @@ public class FeedBackActivity extends AppCompatActivity implements
                             TimeCountStart();
                         }
                         else{
+                            /* FITBIT
+                            if(rep_count == 0){
+                                Calendar c = Calendar.getInstance();
+                                start_seconds = c.get(Calendar.SECOND);
+                                start_minutes = c.get(Calendar.MINUTE);
+                                start_hours = c.get(Calendar.HOUR);
+                            } */
+
                             firstStopped = true;
 
                             if(restTime != 0) { // save old Set and reset
                                 TimeCountStop();
                                 saveSet(new ArrayList<>(intensities),exercise_history_id,set_count,rep_count,weight,restTime);
+
+                                /* FITBIT
+                                String req_url = "https://api.fitbit.com/1/user/-/activities/heart/date/today/1d/1sec/time/";
+                                if(access_token != null){
+                                    Calendar c = Calendar.getInstance();
+                                    int end_seconds = c.get(Calendar.SECOND);
+                                    int end_minutes = c.get(Calendar.MINUTE);
+                                    int end_hours = c.get(Calendar.HOUR);
+                                    req_url += start_hours + ":" + start_minutes + "/" + end_hours + ":" + end_minutes + ".json";
+                                    getHeartRate(req_url, set_count, start_hours, start_minutes, start_seconds, end_hours, end_minutes, end_seconds);
+                                }*/
 
                                 set_count += 1; // new set
 
@@ -1035,4 +1064,76 @@ public class FeedBackActivity extends AppCompatActivity implements
             }
         }
     }
+
+    private void getHeartRate(String url, final int set_number, final int start_hours, final int start_minutes, final int start_seconds, final int end_hours, final int end_minutes, final int end_seconds){
+        StringRequest stringRequest = new StringRequest(url,
+                new Response.Listener<String>(){
+                    @Override
+                    public void onResponse(String response){
+                        try {
+                            Double avgHeartRate = 0.0;
+                            int maxHeartRate = 0;
+                            JSONObject j = new JSONObject(response);
+                            JSONArray heartRates = j.getJSONObject("activities-heart-intraday").getJSONArray("dataset");
+                            for(int i = 0; i < heartRates.length(); i++) {
+                                int tmp_heartRate = heartRates.getJSONObject(i).getInt("value");
+                                avgHeartRate += tmp_heartRate;
+                                if (maxHeartRate < avgHeartRate) maxHeartRate = tmp_heartRate;
+                            }
+                            if(heartRates.length() > 0) avgHeartRate /= heartRates.length();
+                            saveHeartRates(avgHeartRate, maxHeartRate);
+                        }catch(JSONException jse){
+                            //refreshToken(url, set_number);
+                            Log.e(TAG, "Error getting heart rate", jse);
+                        }
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error){
+                        System.out.println(error.toString());
+                    }
+                }
+        ){
+            @Override
+            protected  Map<String, String> getParams(){
+                Map<String, String> params = new HashMap<>();
+                params.put("Authorization", "Bearer " + access_token);
+                return params;
+            }
+        };
+
+        req_queue.add(stringRequest);
+    }
+
+    public void saveHeartRates(final double avg, final int max){
+        String addUserUrl = DBConnect.serverURL + "/add_heart_rate";
+          StringRequest saveRequest = new StringRequest(Request.Method.POST, addUserUrl, new Response.Listener<String>() {
+              public void onResponse(String response) {
+
+                    }
+          }, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    //Handle error response
+                    System.out.println(error.toString());
+                }
+          }){
+            // user params are specified here
+            @Override
+            protected Map<String, String> getParams()
+            {
+                    Map<String, String>  params = new HashMap<>();
+                    params.put("Max_Heart_Rate", max + "");
+                    params.put("Avg_Heart_Rate", avg + "");
+                    params.put("Set_number", set_count + "");
+                    params.put("Exercise_history_id", exercise_history_id + "");
+
+                    return params;
+                }
+          };
+
+        req_queue.add(saveRequest);
+    }
+
 }

@@ -15,9 +15,11 @@ import android.widget.TextView;
 import android.widget.ImageView;
 
 import com.android.volley.Request;
+import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -42,9 +44,12 @@ public class ExerciseActivity extends AppCompatActivity implements ExerciseFragm
     private String exercise;
     //User email
     private String email;
+    private String access_token;
+    private String refresh_token;
 
     private String rest;
     private int reps,sets,weight;
+    private RequestQueue req_queue;
 
     @Override
     public void onFragmentInteraction(Uri uri){
@@ -63,8 +68,9 @@ public class ExerciseActivity extends AppCompatActivity implements ExerciseFragm
         exercise = intent.getStringExtra("exercise_name");
         email = intent.getStringExtra("email");
 
+        req_queue = Volley.newRequestQueue(this);
         setTitle(exercise);
-        getSupportActionBar().setSubtitle("Strenght");
+        getSupportActionBar().setSubtitle("Strength");
 
         if(intent.getStringExtra("exercise_rest") != null) {
             rest = intent.getStringExtra("exercise_rest");
@@ -107,6 +113,12 @@ public class ExerciseActivity extends AppCompatActivity implements ExerciseFragm
         Intent intent = new Intent(ExerciseActivity.this, FeedBackActivity.class);
         intent.putExtra("email", email);
         intent.putExtra("exercise_name", exercise);
+        /* FITBIT
+        getTokens();
+
+        intent.putExtra("access_token", access_token);
+        intent.putExtra("refresh_token", refresh_token);
+        */
         if(rest != null)
         {
             intent.putExtra("exercise_rest",rest);
@@ -115,5 +127,42 @@ public class ExerciseActivity extends AppCompatActivity implements ExerciseFragm
             intent.putExtra("exercise_weight",weight);
         }
         startActivity(intent);
+    }
+
+    private void getTokens(){
+        String addUserUrl = DBConnect.serverURL + "/get_user_tokens";
+
+        StringRequest saveRequest = new StringRequest(Request.Method.POST, addUserUrl,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        try {
+                            JSONObject jo = new JSONObject(response);
+                            access_token = jo.getString("Access_token");
+                            refresh_token = jo.getString("Refresh_token");
+                        }catch(JSONException jse){
+                            Log.e(TAG,"Error getting tokens", jse);
+                        }
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Log.e(TAG,"Error getting user tokens", error);
+                    }
+                }
+        ){
+            // user params are specified here
+            @Override
+            protected Map<String, String> getParams()
+            {
+                Map<String, String>  params = new HashMap<>();
+
+                params.put("email", email);
+                return params;
+            }
+        };
+
+        req_queue.add(saveRequest);
     }
 }
