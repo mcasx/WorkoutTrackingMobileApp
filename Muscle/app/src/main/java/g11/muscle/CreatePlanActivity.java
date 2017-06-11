@@ -1,49 +1,45 @@
 package g11.muscle;
 
+import android.app.Activity;
 import android.content.DialogInterface;
-import android.support.v7.app.AlertDialog;
+import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.helper.ItemTouchHelper;
 import android.util.Log;
 import android.view.View;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.EditText;
-import android.widget.LinearLayout;
 import android.widget.Spinner;
 
-import com.woxthebox.draglistview.DragItemRecyclerView;
-
-import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 import g11.muscle.Classes.DayPlanAdapter;
 import g11.muscle.Classes.PlanExerciseItem;
-import g11.muscle.Classes.Plan_Exercise_View;
+import g11.muscle.Classes.SimpleItemTouchHelperCallback;
 
 public class CreatePlanActivity extends AppCompatActivity {
 
-    private DragItemRecyclerView recyclerView;
+    private RecyclerView recyclerView;
     private DayPlanAdapter adapter;
+    private final String TAG = "CreatePlanActivity";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_plan);
-        this.recyclerView = (DragItemRecyclerView) findViewById(R.id.day_list_view);
-
+        this.recyclerView = (RecyclerView) findViewById(R.id.day_list_view);
         ArrayList<ArrayList<PlanExerciseItem>> list = new ArrayList<>();
         ArrayList<String> titles = new ArrayList<>();
-        adapter = new DayPlanAdapter(this, titles, list);
+        adapter = new DayPlanAdapter(this, titles, list, this);
         recyclerView.setAdapter(adapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(CreatePlanActivity.this));
-        
+        ItemTouchHelper.Callback callback =
+                new SimpleItemTouchHelperCallback(adapter);
+        ItemTouchHelper touchHelper = new ItemTouchHelper(callback);
+        touchHelper.attachToRecyclerView(recyclerView);
     }
 
     public void onClickAddDay(View view){
@@ -75,4 +71,20 @@ public class CreatePlanActivity extends AppCompatActivity {
                 
                 .setNegativeButton("Cancel", null).show();
     }
+
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+
+        ArrayList<String> exercises;
+        if (requestCode == 1) {
+            if(resultCode == Activity.RESULT_OK){
+                exercises = data.getStringArrayListExtra("result");
+                adapter.addExercises(exercises);
+            }
+        }
+    }
+
+
+
 }

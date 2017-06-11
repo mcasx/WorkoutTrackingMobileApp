@@ -33,88 +33,78 @@
         <activity
             android:name=".ExerciseActivity"
             android:theme="@style/Theme.AppCompat" />
-
         <activity
             android:name=".ResetPassActivity"
             android:theme="@style/Theme.AppCompat.NoActionBar" />
-
         <activity
             android:name=".PickExerciseActivity"
             android:theme="@style/Theme.AppCompat.NoActionBar" />
-
         <activity
             android:name=".LoginActivity"
             android:theme="@style/Theme.AppCompat.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
         <activity
             android:name=".HomeActivity"
             android:theme="@style/Theme.AppCompat" />
-
         <activity
             android:name=".RegisterActivity"
             android:noHistory="true"
             android:theme="@style/Theme.AppCompat.NoActionBar" />
-
         <activity
             android:name=".FeedBackActivity"
             android:noHistory="true"
             android:theme="@style/Theme.AppCompat.NoActionBar" />
-
         <activity
             android:name=".FormActivity"
             android:theme="@style/Theme.AppCompat.NoActionBar" />
-
         <activity
             android:name=".SettingsActivity"
             android:theme="@style/Theme.AppCompat.NoActionBar" />
-
         <activity
             android:name=".DetailedExerciseHistoryActivity"
             android:theme="@style/Theme.AppCompat" />
-
         <activity
             android:name=".ProfileActivity"
             android:label=""
             android:theme="@style/Theme.AppCompat" />
-
-
         <activity
             android:name=".SetupActivity"
             android:label=""
-            android:theme="@style/Theme.AppCompat" >
-        </activity>
-
-
+            android:theme="@style/Theme.AppCompat"></activity>
         <activity
             android:name=".GroupExercisesActivity"
             android:theme="@style/Theme.AppCompat" />
-
-
         <activity
             android:name=".PlanActivity"
             android:theme="@style/Theme.AppCompat.NoActionBar" />
-
-        <activity android:configChanges="orientation"  android:screenOrientation="portrait" 
+        <activity
             android:name="com.theartofdev.edmodo.cropper.CropImageActivity"
+            android:configChanges="orientation"
+            android:screenOrientation="portrait"
             android:theme="@style/Base.Theme.AppCompat" />
-
-        <activity android:configChanges="orientation"  android:screenOrientation="portrait" 
+        <activity
             android:name=".CardioActivity"
+            android:configChanges="orientation"
+            android:screenOrientation="portrait"
             android:theme="@style/Base.Theme.AppCompat" />
-
         <activity
             android:name=".CreatePlanActivity"
-            android:theme="@style/Base.Theme.AppCompat" >
+            android:theme="@style/Base.Theme.AppCompat">
         </activity>
-
-        <activity android:configChanges="orientation"  android:screenOrientation="portrait"
+        <activity
             android:name=".DetailedRunningActivity"
-            android:theme="@style/Base.Theme.AppCompat"/>
+            android:configChanges="orientation"
+            android:screenOrientation="portrait"
+            android:theme="@style/Base.Theme.AppCompat" />
+        <activity android:name=".SelectExercises" android:theme="@style/Base.Theme.AppCompat">
+
+
+        </activity>
     </application>
 
 </manifest>

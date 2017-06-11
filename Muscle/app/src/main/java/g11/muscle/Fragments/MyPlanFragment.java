@@ -31,19 +31,16 @@ import java.util.ArrayList;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.widget.Button;
-import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.Spinner;
-import android.widget.TextView;
 
 import g11.muscle.Classes.PlanExerciseItem;
 import g11.muscle.Classes.TrainingsItem;
-import g11.muscle.Classes.Plan_Exercise_View;
+import g11.muscle.Classes.PlanExerciseAdapter;
 
 import g11.muscle.DB.DBConnect;
 import g11.muscle.ExerciseActivity;
-import g11.muscle.PlanActivity;
 import g11.muscle.R;
 import g11.muscle.DB.VolleyProvider;
 
@@ -299,7 +296,7 @@ public class MyPlanFragment extends Fragment {
 
                         }
 
-                        Plan_Exercise_View adapter = new Plan_Exercise_View(training_data);
+                        PlanExerciseAdapter adapter = new PlanExerciseAdapter(training_data);
                         adapter.mOnClickListener = new MyOnClickListener();
 
                         recyclerView.setAdapter(adapter);

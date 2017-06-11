@@ -1,6 +1,5 @@
 package g11.muscle.Classes;
 
-import android.graphics.Color;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -13,12 +12,12 @@ import java.util.List;
 import g11.muscle.R;
 
 // adapter of recycler view used in training exercises list view
-public class Plan_Exercise_View extends RecyclerView.Adapter<Plan_Exercise_View.Plan_Exercise_View_Holder>{
+public class PlanExerciseAdapter extends RecyclerView.Adapter<PlanExerciseAdapter.Plan_Exercise_View_Holder>{
 
     private List<PlanExerciseItem> list;
     public View.OnClickListener mOnClickListener;
 
-    public Plan_Exercise_View(List<PlanExerciseItem> list) {
+    public PlanExerciseAdapter(List<PlanExerciseItem> list) {
         this.list = list;
     }
 
