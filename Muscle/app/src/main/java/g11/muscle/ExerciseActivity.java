@@ -76,7 +76,6 @@ public class ExerciseActivity extends AppCompatActivity implements ExerciseFragm
             rest = intent.getStringExtra("exercise_rest");
             reps = intent.getIntExtra("exercise_reps",0);
             sets = intent.getIntExtra("exercise_sets",0);
-            weight = intent.getIntExtra("exercise_weight",0);
         }else
             rest = null;
 
@@ -124,7 +123,6 @@ public class ExerciseActivity extends AppCompatActivity implements ExerciseFragm
             intent.putExtra("exercise_rest",rest);
             intent.putExtra("exercise_reps",reps);
             intent.putExtra("exercise_sets",sets);
-            intent.putExtra("exercise_weight",weight);
         }
         startActivity(intent);
     }

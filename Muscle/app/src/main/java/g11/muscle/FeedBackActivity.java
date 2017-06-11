@@ -116,7 +116,7 @@ public class FeedBackActivity extends AppCompatActivity implements
 
     //Plan information (Intent)
     private String plan_rest;
-    private int plan_reps, plan_sets, plan_weight;
+    private int plan_reps, plan_sets;
     private boolean plan;
 
     // Chart set colors
@@ -170,7 +170,7 @@ public class FeedBackActivity extends AppCompatActivity implements
             plan_rest = intent.getStringExtra("exercise_rest");
             plan_reps = intent.getIntExtra("exercise_reps",0);
             plan_sets = intent.getIntExtra("exercise_sets",0);
-            plan_weight = intent.getIntExtra("exercise_weight",0);
+
 
             plan = true;
         }
