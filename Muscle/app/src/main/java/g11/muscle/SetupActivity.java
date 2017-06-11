@@ -129,7 +129,6 @@ public class SetupActivity extends AppCompatActivity {
                         if (jsonObj.has("message")) {
                             String checkpoint = jsonObj.getString("message");
                             Resources res = getResources();
-
                             Character lastChar = checkpoint.charAt(checkpoint.length() - 1);
 
                             if(Character.isDigit(lastChar)) {

@@ -311,6 +311,16 @@ public class SettingsActivity  extends AppCompatActivity {
         startActivity( browse );
     }
 
+    public void onClickSoundConf(View view) {
+        Intent intent = new Intent(SettingsActivity.this,SoundDefinitionsActivity.class);
+        startActivity(intent);
+    }
+
+    public void onClickSensorsCal(View view) {
+        Intent intent = new Intent(SettingsActivity.this,SetupActivity.class);
+        startActivity(intent);
+    }
+
     public void onClickPickDate(View v) {
         DialogFragment newFragment = new FormActivity.DatePickerFragment();
         newFragment.show(getSupportFragmentManager(), "datePicker");

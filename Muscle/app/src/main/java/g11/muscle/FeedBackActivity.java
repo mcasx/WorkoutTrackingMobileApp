@@ -137,6 +137,8 @@ public class FeedBackActivity extends AppCompatActivity implements
 
     //Sounds
     private MediaPlayer mpSound;
+    private MediaPlayer mpSetSound;
+    private boolean setVoiceSound;
 
     //global variables
     private Globals glb;
@@ -174,6 +176,7 @@ public class FeedBackActivity extends AppCompatActivity implements
         refresh_token = intent.getStringExtra("refresh_token");
         */
 
+        // global variables
         glb = Globals.getInstance();
 
         if(intent.getStringExtra("exercise_rest") != null) { // Plan Information
@@ -287,6 +290,9 @@ public class FeedBackActivity extends AppCompatActivity implements
                             else
                                 saveExerciseWithPlan();
                             firstRep = false;
+
+                            if(glb.getSetSoundEnable() == 2)
+                                playSetVoice();
                         }
 
                         if (jsonObj.has("stopped")) {
@@ -295,19 +301,16 @@ public class FeedBackActivity extends AppCompatActivity implements
 
                             getExpectedSetResults();
 
+                            if(glb.getSetSoundEnable() == 1){ //water
+                                stopMPSetSound();
+                                mpSetSound = MediaPlayer.create(FeedBackActivity.this, R.raw.waterdrop);
+                                mpSetSound.start();
+                            }
+
                             firstStopped = false;
 
                             restTime = 3; // stopped is received after 3 sec
 
-                            stopMPSound();
-                            mpSound = MediaPlayer.create(FeedBackActivity.this,R.raw.waterdrop);
-                            mpSound.start();
-
-                            /*
-                            if(plan) {
-                                timeAlert(plan_rest);
-                            }
-                            else*/
                             TimeCountStart();
                         }
                         else{
@@ -318,6 +321,7 @@ public class FeedBackActivity extends AppCompatActivity implements
                                 start_minutes = c.get(Calendar.MINUTE);
                                 start_hours = c.get(Calendar.HOUR);
                             } */
+
 
                             firstStopped = true;
 
@@ -348,6 +352,9 @@ public class FeedBackActivity extends AppCompatActivity implements
                                 progress.setProgress(rep_count*100); // reset Reps progress bar
 
                                 setsTV.setText(String.valueOf(set_count));
+
+                                if(glb.getSetSoundEnable() == 2)
+                                    playSetVoice();
 
                                 if(plan) { // set animation
                                     ObjectAnimator animation = ObjectAnimator.ofInt(progressSet, "progress", progressSet.getProgress(), set_count * 100);
@@ -386,26 +393,22 @@ public class FeedBackActivity extends AppCompatActivity implements
                                     animation.start();
                                 }
 
-                                if( rep_count <= 100 && (rep_count % 10) == 0){
-                                    int id;
-                                    if(glb.getSoundGender() == 1) // female voice
-                                        if(rep_count <= 50) // female count goes only until 50 reps
-                                            id = getResources().getIdentifier("f_" + glb.getSoundLang() + rep_count,"raw",getApplicationContext().getPackageName());
+                                if(glb.getSoundRepEnable()) { // Reps Sound enabled
+                                    if (glb.getSoundVoiceEnable() && rep_count <= 100 && (rep_count % 10) == 0) {
+                                        int id;
+                                        if (glb.getSoundGender() == 1) // female voice
+                                            id = getResources().getIdentifier("f_" + glb.getSoundLang() + rep_count, "raw", getApplicationContext().getPackageName());
                                         else
-                                            id = R.raw.boop;
-                                    else
-                                        id = getResources().getIdentifier("m_" + glb.getSoundLang() + rep_count,"raw",getApplicationContext().getPackageName());
+                                            id = getResources().getIdentifier("m_" + glb.getSoundLang() + rep_count, "raw", getApplicationContext().getPackageName());
 
-                                    stopMPSound();
-                                    if(glb.getSoundEnable())
-                                        mpSound = MediaPlayer.create(FeedBackActivity.this,id);
-                                    else
-                                        mpSound = MediaPlayer.create(FeedBackActivity.this,R.raw.boop);
-                                    mpSound.start();
-                                }else{
-                                    stopMPSound();
-                                    mpSound = MediaPlayer.create(FeedBackActivity.this,R.raw.boop);
-                                    mpSound.start();
+                                        stopMPSound();
+                                        mpSound = MediaPlayer.create(FeedBackActivity.this, id);
+                                        mpSound.start();
+                                    } else if (glb.getSoundPopEnable()) {
+                                        stopMPSound();
+                                        mpSound = MediaPlayer.create(FeedBackActivity.this, R.raw.boop);
+                                        mpSound.start();
+                                    }
                                 }
 
                                 intensities.add(Double.parseDouble(jsonObj.getString("speed")));
@@ -470,6 +473,39 @@ public class FeedBackActivity extends AppCompatActivity implements
         }
     }
 
+    private void stopMPSetSound(){
+        if(mpSetSound != null){
+            mpSetSound.stop();
+            mpSetSound.release();
+            mpSetSound = null;
+        }
+    }
+
+    private void playSetVoice(){
+        setVoiceSound = false;
+
+        stopMPSetSound();
+        mpSetSound = MediaPlayer.create(FeedBackActivity.this, R.raw.round_f_eng);
+        // Set Sound Completion
+        mpSetSound.setOnCompletionListener(new MediaPlayer.OnCompletionListener()
+        {
+            @Override
+            public void onCompletion(MediaPlayer mp)
+            {
+                if(!setVoiceSound) {
+                    int id = getResources().getIdentifier("set_f_" + glb.getSoundLang() + set_count, "raw", getApplicationContext().getPackageName());
+
+                    stopMPSetSound();
+                    mpSetSound = MediaPlayer.create(FeedBackActivity.this, id);
+                    mpSetSound.start();
+
+                    setVoiceSound = true;
+                }
+            }
+        });
+        mpSetSound.start();
+    }
+
     private Runnable runnableTimer = new Runnable() {
         @Override
         public void run() {
@@ -504,34 +540,6 @@ public class FeedBackActivity extends AppCompatActivity implements
         alertDialog.show();
         restTime++;
     }
-
-    /*private void timeAlert(String time){
-        SimpleDateFormat dateFormat = new SimpleDateFormat("hh:mm:ss", Locale.UK);
-        Date convertedDate = new Date();
-
-        try {
-            convertedDate = dateFormat.parse(time);
-        } catch (ParseException e) {
-            Log.e("FeedBackAc","Convert Time error:\n" + e.toString());
-        }
-
-        alertDialog.setMessage(time);
-        alertDialog.show();
-
-        new CountDownTimer(convertedDate.getTime() - 3000, 1000) { //stopped is received after 3 sec
-            @Override
-            public void onTick(long millisUntilFinished) {
-                restTime++;
-                alertDialog.setMessage(outFmt.format(new Date(millisUntilFinished)));
-            }
-
-            @Override
-            public void onFinish() {
-                alertDialog.cancel();
-                TimeCountStart();
-            }
-        }.start();
-    }*/
 
     private void chartSetup() {
         // Font for chart text
