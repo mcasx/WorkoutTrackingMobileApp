@@ -30,7 +30,7 @@ import java.util.Map;
 
 import g11.muscle.Classes.TrainingsItem;
 import g11.muscle.Classes.PlanExerciseItem;
-import g11.muscle.Classes.Plan_Exercise_View;
+import g11.muscle.Classes.PlanExerciseAdapter;
 import g11.muscle.DB.DBConnect;
 import g11.muscle.DB.VolleyProvider;
 
@@ -212,7 +212,7 @@ public class PlanActivity extends AppCompatActivity {
                             e2.printStackTrace();
                         }
 
-                        Plan_Exercise_View adapter = new Plan_Exercise_View(training_data);
+                        PlanExerciseAdapter adapter = new PlanExerciseAdapter(training_data);
                         adapter.mOnClickListener = new MyOnClickListener();
                         recyclerView.setAdapter(adapter);
                         recyclerView.setLayoutManager(new LinearLayoutManager(PlanActivity.this));

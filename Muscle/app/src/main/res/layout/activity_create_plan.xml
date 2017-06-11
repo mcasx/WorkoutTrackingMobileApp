@@ -5,9 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="g11.muscle.PlanActivity">
-    <ScrollView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -25,6 +23,7 @@
                     android:layout_gravity="center"
                     tools:layout_editor_absoluteX="36dp">
 
+
                     <EditText
                         android:id="@+id/name_input"
                         android:layout_width="match_parent"
@@ -39,14 +38,17 @@
 
                 </android.support.design.widget.TextInputLayout>
 
-                <com.woxthebox.draglistview.DragItemRecyclerView
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+                <android.support.v7.widget.RecyclerView
                     android:id="@+id/day_list_view"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"/>
 
 
+            </ScrollView>
         </LinearLayout>
-    </ScrollView>
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/add_exercise_button"
