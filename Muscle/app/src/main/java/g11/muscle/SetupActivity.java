@@ -47,6 +47,8 @@ public class SetupActivity extends AppCompatActivity {
     private final static int CONNECTING_STATUS = 3; // used in bluetooth handler to identify message status
     private static Handler mHandler;
 
+    private boolean weight_mode;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -56,11 +58,15 @@ public class SetupActivity extends AppCompatActivity {
 
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 
+        // when asking for weight sensor it return 2 '}'
+        weight_mode = false;
+
         setMessageRead();
-        enableAdapter();
     }
 
     protected void onStop(){
+        mConnectedThread.write("testModeOff");
+
         if(mConnectedThread != null) mConnectedThread.cancel();
         super.onStop();
     }
@@ -73,10 +79,7 @@ public class SetupActivity extends AppCompatActivity {
 
     public void onCalibrateClick(View view){
         mConnectedThread.write("testModeOn");
-        mConnectedThread.write("weight");
     }
-
-
 
     private void setMessageRead(){
         mHandler = new Handler(){
@@ -90,11 +93,22 @@ public class SetupActivity extends AppCompatActivity {
 
                     int endOfLineIndex = strBuilder.indexOf("}");
 
+                    if(weight_mode)
+                        endOfLineIndex++;
+
+                    Log.e("MESSAGE",readMessage);
                     if( endOfLineIndex >= 0){
                         JSONObject jsonObj = new JSONObject(strBuilder.substring(0,endOfLineIndex+1));
                         strBuilder.delete(0,endOfLineIndex+1);
 
+                        if (jsonObj.has("test_mode")){
+                            String tmp =  jsonObj.getString("test_mode");
 
+                            if (tmp.equals("on")){
+                                mConnectedThread.write("weight");
+                                weight_mode = true;
+                            }
+                        }
                         if (jsonObj.has("weight_sensors")) {
                             JSONObject weights = jsonObj.getJSONObject("weight_sensors");
                             String[] weights_strings = {"5", "10", "15", "20", "25", "30", "35", "40", "45", "50", "55", "60"};
@@ -106,17 +120,28 @@ public class SetupActivity extends AppCompatActivity {
                                 if(weights.getInt(s) >= 500){
                                     ((ImageView)findViewById(id)).setImageResource(R.mipmap.sensor_green);
                                 }
+                                i++;
                             }
 
-                            mConnectedThread.write("testModeOff");
+                            weight_mode = false;
+                            mConnectedThread.write("checkpoint");
                         }
+                        if (jsonObj.has("message")) {
+                            String checkpoint = jsonObj.getString("message");
+                            Resources res = getResources();
 
+                            Character lastChar = checkpoint.charAt(checkpoint.length() - 1);
+
+                            if(Character.isDigit(lastChar)) {
+                                int id = res.getIdentifier("sensorCheck" + lastChar, "id", getApplicationContext().getPackageName());
+                                ((ImageView) findViewById(id)).setImageResource(R.mipmap.sensor_green);
+                            }
+                        }
                         System.out.println("Get Data from bluetooth");
                     }
                 } catch (JSONException je){
                     Log.e(TAG,"HANDLER EXCEPTION");
                     Log.e(TAG, je.toString());
-
                 } catch (UnsupportedEncodingException uee){
                     Log.e(TAG, uee.toString());
                 }
@@ -323,8 +348,4 @@ public class SetupActivity extends AppCompatActivity {
             }
         }
     }
-
-
-
-
 }

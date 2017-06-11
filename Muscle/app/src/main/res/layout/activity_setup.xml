@@ -23,7 +23,7 @@
             android:layout_marginEnd="8dp">
 
             <ImageView
-                android:id="@+id/sensor1"
+                android:id="@+id/sensorCheck4"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
@@ -32,7 +32,7 @@
                 tools:layout_editor_absoluteY="273dp" />
 
             <ImageView
-                android:id="@+id/sensor2"
+                android:id="@+id/sensorCheck3"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
@@ -41,7 +41,7 @@
                 tools:layout_editor_absoluteY="273dp" />
 
             <ImageView
-                android:id="@+id/sensor3"
+                android:id="@+id/sensorCheck2"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
@@ -50,7 +50,7 @@
                 tools:layout_editor_absoluteY="273dp" />
 
             <ImageView
-                android:id="@+id/sensor4"
+                android:id="@+id/sensorCheck1"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
@@ -58,53 +58,13 @@
                 tools:layout_editor_absoluteX="151dp"
                 tools:layout_editor_absoluteY="273dp" />
 
-            <ImageView
-                android:id="@+id/sensor5"
+
+            <Space
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                app:srcCompat="@mipmap/sensor_red"
-                tools:layout_editor_absoluteX="151dp"
-                tools:layout_editor_absoluteY="273dp" />
+                android:layout_height="30dp" />
 
             <ImageView
-                android:id="@+id/sensor6"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                app:srcCompat="@mipmap/sensor_red"
-                tools:layout_editor_absoluteX="151dp"
-                tools:layout_editor_absoluteY="273dp" />
-
-            <ImageView
-                android:id="@+id/sensor7"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                app:srcCompat="@mipmap/sensor_red"
-                tools:layout_editor_absoluteX="151dp"
-                tools:layout_editor_absoluteY="273dp" />
-
-            <ImageView
-                android:id="@+id/sensor8"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                app:srcCompat="@mipmap/sensor_red"
-                tools:layout_editor_absoluteX="151dp"
-                tools:layout_editor_absoluteY="273dp" />
-
-            <ImageView
-                android:id="@+id/sensor9"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                app:srcCompat="@mipmap/sensor_red"
-                tools:layout_editor_absoluteX="151dp"
-                tools:layout_editor_absoluteY="273dp" />
-
-            <ImageView
-                android:id="@+id/sensor10"
+                android:id="@+id/sensor12"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
@@ -122,7 +82,88 @@
                 tools:layout_editor_absoluteY="273dp" />
 
             <ImageView
-                android:id="@+id/sensor12"
+                android:id="@+id/sensor10"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                app:srcCompat="@mipmap/sensor_red"
+                tools:layout_editor_absoluteX="151dp"
+                tools:layout_editor_absoluteY="273dp" />
+
+            <ImageView
+                android:id="@+id/sensor9"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                app:srcCompat="@mipmap/sensor_red"
+                tools:layout_editor_absoluteX="151dp"
+                tools:layout_editor_absoluteY="273dp" />
+
+            <ImageView
+                android:id="@+id/sensor8"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                app:srcCompat="@mipmap/sensor_red"
+                tools:layout_editor_absoluteX="151dp"
+                tools:layout_editor_absoluteY="273dp" />
+
+            <ImageView
+                android:id="@+id/sensor7"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                app:srcCompat="@mipmap/sensor_red"
+                tools:layout_editor_absoluteX="151dp"
+                tools:layout_editor_absoluteY="273dp" />
+
+            <ImageView
+                android:id="@+id/sensor6"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                app:srcCompat="@mipmap/sensor_red"
+                tools:layout_editor_absoluteX="151dp"
+                tools:layout_editor_absoluteY="273dp" />
+
+            <ImageView
+                android:id="@+id/sensor5"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                app:srcCompat="@mipmap/sensor_red"
+                tools:layout_editor_absoluteX="151dp"
+                tools:layout_editor_absoluteY="273dp" />
+
+            <ImageView
+                android:id="@+id/sensor4"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                app:srcCompat="@mipmap/sensor_red"
+                tools:layout_editor_absoluteX="151dp"
+                tools:layout_editor_absoluteY="273dp" />
+
+            <ImageView
+                android:id="@+id/sensor3"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                app:srcCompat="@mipmap/sensor_red"
+                tools:layout_editor_absoluteX="151dp"
+                tools:layout_editor_absoluteY="273dp" />
+
+            <ImageView
+                android:id="@+id/sensor2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                app:srcCompat="@mipmap/sensor_red"
+                tools:layout_editor_absoluteX="151dp"
+                tools:layout_editor_absoluteY="273dp" />
+
+            <ImageView
+                android:id="@+id/sensor1"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
@@ -133,7 +174,7 @@
             <Button
                 android:id="@+id/calibrateButton"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_height="60dp"
                 android:layout_gravity="center_horizontal"
 
                 android:layout_weight="1"
