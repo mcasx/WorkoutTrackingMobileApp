@@ -435,6 +435,7 @@ public class FeedFragment extends Fragment {
         private String exercise_name;
         private String user;
         private int set_amount;
+        private int id;
         private String datetime;
         private JSONObject jsonObj;
 
@@ -443,6 +444,7 @@ public class FeedFragment extends Fragment {
                 exercise_name = jo.getString("Exercise_name");
                 user = jo.getString("User_email");
                 set_amount = jo.getInt("Set_amount");
+                id = jo.getInt("ID");
                 datetime = jo.getString("Date_Time").substring(0, 16);
                 jsonObj = jo;
             } catch (JSONException je) {
@@ -460,6 +462,10 @@ public class FeedFragment extends Fragment {
 
         public int getSet_amount() {
             return set_amount;
+        }
+
+        public int getId() {
+            return id;
         }
 
         public String getDatetime() {
@@ -527,11 +533,21 @@ public class FeedFragment extends Fragment {
                     //Go to exercise page
                     DetailedExerciseHistoryActivity.exerciseHistoryItem = list[position].getJsonObj();
                     DetailedRunningActivity.exerciseHistoryItem = list[position].getJsonObj();
+
                     try {
-                        if(list[position].getJsonObj().getString("Exercise_name").equals("Running"))
-                            startActivity(new Intent(getActivity(), DetailedRunningActivity.class));
-                        else
-                            startActivity(new Intent(getActivity(), DetailedExerciseHistoryActivity.class));
+
+                        Intent intent;
+                        if(list[position].getJsonObj().getString("Exercise_name").equals("Running")) {
+                            intent = new Intent(getActivity(), DetailedRunningActivity.class);
+                        }
+                        else{
+                            intent = new Intent(getActivity(), DetailedExerciseHistoryActivity.class);
+                        }
+
+                        intent.putExtra("email", list[position].getUser());
+                        intent.putExtra("exercise_name", list[position].getJsonObj().getString("Exercise_name"));
+                        startActivity(intent);
+
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
