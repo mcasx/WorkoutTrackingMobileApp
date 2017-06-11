@@ -1080,6 +1080,7 @@ public class ProfileActivity extends AppCompatActivity {
                             // Chart Array Values List
                             ArrayList<Entry> values = new ArrayList<>();
                             JSONArray jsonArray = new JSONArray(response);
+                            Log.e("RESPONSE",response);
                             try {
                                 for (int i = 0; i < jsonArray.length(); i++) {
                                     String tmpWeight = new JSONObject(jsonArray.getString(i)).getString("Weight");

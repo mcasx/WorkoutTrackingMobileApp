@@ -37,7 +37,6 @@ public class PlanExerciseAdapter extends RecyclerView.Adapter<PlanExerciseAdapte
         holder.plan_sets.setText(Integer.toString(list.get(position).getExercise_sets()));
         holder.plan_reps.setText(Integer.toString(list.get(position).getExercise_reps()));
         holder.plan_rest.setText(list.get(position).getExercise_rest());
-        holder.plan_weight.setText(Integer.toString(list.get(position).getExercise_weight()));
 
         if(list.get(position).getMode() == 1) // check mark visible
             holder.check.setVisibility(View.VISIBLE);
@@ -77,7 +76,6 @@ public class PlanExerciseAdapter extends RecyclerView.Adapter<PlanExerciseAdapte
         private TextView plan_sets;
         private TextView plan_reps;
         private TextView plan_rest;
-        private TextView plan_weight;
         private TextView check;
 
         private Plan_Exercise_View_Holder(View itemView) {
@@ -87,7 +85,6 @@ public class PlanExerciseAdapter extends RecyclerView.Adapter<PlanExerciseAdapte
             plan_sets = (TextView) itemView.findViewById(R.id.plan_sets);
             plan_reps = (TextView) itemView.findViewById(R.id.plan_reps);
             plan_rest = (TextView) itemView.findViewById(R.id.plan_rest);
-            plan_weight = (TextView) itemView.findViewById(R.id.plan_weight);
             check = (TextView) itemView.findViewById(R.id.check);
         }
     }
