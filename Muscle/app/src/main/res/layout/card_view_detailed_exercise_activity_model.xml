@@ -33,7 +33,7 @@
                 android:layout_marginRight="25dp"
                 android:layout_marginTop="13dp"
                 android:text="TextView"
-                android:textAppearance="@android:style/TextAppearance.Material.Medium"
+                android:textSize="17sp"
                 app:layout_constraintRight_toRightOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/repetitionsText" />
 
@@ -46,7 +46,7 @@
                 android:layout_marginRight="24dp"
                 android:layout_marginTop="13dp"
                 android:text="Weight:"
-                android:textAppearance="@android:style/TextAppearance.Material.Medium"
+                android:textSize="17sp"
                 app:layout_constraintRight_toRightOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/timeText" />
 
@@ -58,7 +58,7 @@
                 android:layout_marginRight="24dp"
                 android:layout_marginTop="13dp"
                 android:text="Resting Time:"
-                android:textAppearance="@android:style/TextAppearance.Material.Medium"
+                android:textSize="17sp"
                 app:layout_constraintRight_toRightOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/intensityText" />
 
@@ -70,7 +70,7 @@
                 android:layout_marginStart="25dp"
                 android:layout_marginTop="13dp"
                 android:text="Resting Time:"
-                android:textAppearance="@android:style/TextAppearance.Material.Medium"
+                android:textSize="17sp"
                 app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/textView13" />
 
@@ -83,7 +83,7 @@
                 android:layout_marginStart="25dp"
                 android:layout_marginTop="13dp"
                 android:text="Intensity:"
-                android:textAppearance="@android:style/TextAppearance.Material.Medium"
+                android:textSize="17sp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/textView10"
@@ -98,7 +98,7 @@
                 android:layout_marginStart="25dp"
                 android:layout_marginTop="13dp"
                 android:text="Weight:"
-                android:textAppearance="@android:style/TextAppearance.Material.Medium"
+                android:textSize="17sp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/textView9"
@@ -112,7 +112,7 @@
                 android:layout_marginRight="25dp"
                 android:layout_marginTop="13dp"
                 android:text="TextView"
-                android:textAppearance="@android:style/TextAppearance.Material.Medium"
+                android:textSize="17sp"
                 app:layout_constraintRight_toRightOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/setText" />
 
@@ -120,7 +120,6 @@
                 android:id="@+id/setText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="8dp"
                 android:layout_marginLeft="16dp"
                 android:layout_marginStart="16dp"
                 android:layout_marginTop="16dp"
@@ -138,7 +137,7 @@
                 android:layout_marginStart="24dp"
                 android:layout_marginTop="13dp"
                 android:text="Repetitions:"
-                android:textAppearance="@android:style/TextAppearance.Material.Medium"
+                android:textSize="17sp"
                 app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/setText" />
 
