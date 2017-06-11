@@ -3,6 +3,7 @@ package g11.muscle;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
+import android.content.res.Resources;
 import android.graphics.Color;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -67,6 +68,7 @@ import android.os.CountDownTimer;
 import java.text.SimpleDateFormat;
 import java.text.ParseException;
 
+import g11.muscle.Classes.Globals;
 import g11.muscle.Classes.MuscleProgressItem;
 import g11.muscle.DB.DBConnect;
 import g11.muscle.DB.VolleyProvider;
@@ -129,6 +131,12 @@ public class FeedBackActivity extends AppCompatActivity implements
     private ProgressBar progress;
     private ProgressBar progressSet;
 
+    //Sounds
+    private MediaPlayer mpSound;
+
+    //global variables
+    private Globals glb;
+
     //Handler
     private static Handler mHandler;
 
@@ -156,6 +164,8 @@ public class FeedBackActivity extends AppCompatActivity implements
         email = intent.getStringExtra("email");
         exercise = intent.getStringExtra("exercise_name");
 
+        glb = Globals.getInstance();
+
         if(intent.getStringExtra("exercise_rest") != null) { // Plan Information
             plan_rest = intent.getStringExtra("exercise_rest");
             plan_reps = intent.getIntExtra("exercise_reps",0);
@@ -167,10 +177,6 @@ public class FeedBackActivity extends AppCompatActivity implements
         else {
             plan = false;
         }
-
-        //Sounds
-        final MediaPlayer repSound = MediaPlayer.create(this, R.raw.boop);
-        final MediaPlayer setSound = MediaPlayer.create(this, R.raw.waterdrop);
 
         alertDialog = new AlertDialog.Builder(this).create();
         alertDialog.setTitle("Rest Time");
@@ -277,17 +283,15 @@ public class FeedBackActivity extends AppCompatActivity implements
                             if(!firstStopped)
                                 return;
 
-                            //getExpectedSetResults();
+                            getExpectedSetResults();
 
                             firstStopped = false;
 
                             restTime = 3; // stopped is received after 3 sec
 
-                            if(setSound.isPlaying()) {
-                                setSound.pause();
-                                setSound.seekTo(0);
-                            }
-                            setSound.start();
+                            stopMPSound();
+                            mpSound = MediaPlayer.create(FeedBackActivity.this,R.raw.waterdrop);
+                            mpSound.start();
 
                             /*
                             if(plan) {
@@ -353,11 +357,27 @@ public class FeedBackActivity extends AppCompatActivity implements
                                     animation.start();
                                 }
 
-                                if(repSound.isPlaying()){
-                                    repSound.pause();
-                                    repSound.seekTo(0);
+                                if( rep_count <= 100 && (rep_count % 10) == 0){
+                                    int id;
+                                    if(glb.getSoundGender() == 1) // female voice
+                                        if(rep_count <= 50) // female count goes only until 50 reps
+                                            id = getResources().getIdentifier("f_" + glb.getSoundLang() + rep_count,"raw",getApplicationContext().getPackageName());
+                                        else
+                                            id = R.raw.boop;
+                                    else
+                                        id = getResources().getIdentifier("m_" + glb.getSoundLang() + rep_count,"raw",getApplicationContext().getPackageName());
+
+                                    stopMPSound();
+                                    if(glb.getSoundEnable())
+                                        mpSound = MediaPlayer.create(FeedBackActivity.this,id);
+                                    else
+                                        mpSound = MediaPlayer.create(FeedBackActivity.this,R.raw.boop);
+                                    mpSound.start();
+                                }else{
+                                    stopMPSound();
+                                    mpSound = MediaPlayer.create(FeedBackActivity.this,R.raw.boop);
+                                    mpSound.start();
                                 }
-                                repSound.start();
 
                                 intensities.add(Double.parseDouble(jsonObj.getString("speed")));
                                 addEntry(intensities.get(intensities.size()-1));
@@ -413,7 +433,14 @@ public class FeedBackActivity extends AppCompatActivity implements
         super.onDestroy();
     }
 
-    
+    private void stopMPSound(){
+        if(mpSound != null){
+            mpSound.stop();
+            mpSound.release();
+            mpSound = null;
+        }
+    }
+
     private Runnable runnableTimer = new Runnable() {
         @Override
         public void run() {
