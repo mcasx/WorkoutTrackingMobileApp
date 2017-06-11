@@ -99,7 +99,7 @@
         android:id="@+id/Rep"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textSize="50pt"
+        android:textSize="45pt"
         app:layout_constraintBottom_toBottomOf="@+id/progressExercise"
         app:layout_constraintLeft_toLeftOf="@+id/progressExercise"
         app:layout_constraintRight_toRightOf="@+id/progressExercise"
@@ -160,10 +160,11 @@
         tools:layout_constraintRight_creator="1"
         tools:layout_constraintLeft_creator="1"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintHorizontal_bias="0.500"
+        app:layout_constraintHorizontal_bias="0.501"
         tools:layout_constraintTop_creator="1"
         app:layout_constraintTop_toBottomOf="@+id/Exercise_name"
-        android:layout_marginTop="6pt" />
+        android:layout_marginBottom="8dp"
+        app:layout_constraintBottom_toTopOf="@+id/progressExercise" />
 
     <android.support.constraint.Guideline
         android:layout_width="wrap_content"

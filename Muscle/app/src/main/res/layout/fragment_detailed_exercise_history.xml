@@ -64,7 +64,7 @@
                         android:layout_marginRight="25dp"
                         android:layout_marginTop="13dp"
                         android:text="TextView"
-                        android:textAppearance="@android:style/TextAppearance.Material.Medium"
+                        android:textSize="20sp"
                         app:layout_constraintRight_toRightOf="parent"
                         app:layout_constraintTop_toBottomOf="@+id/numOfSets" />
 
@@ -76,7 +76,7 @@
                         android:layout_marginRight="24dp"
                         android:layout_marginTop="13dp"
                         android:text="TextView"
-                        android:textAppearance="@android:style/TextAppearance.Material.Medium"
+                        android:textSize="20sp"
                         app:layout_constraintRight_toRightOf="parent"
                         app:layout_constraintTop_toBottomOf="@+id/repetitionsText" />
 
@@ -88,7 +88,7 @@
                         android:layout_marginStart="25dp"
                         android:layout_marginTop="13dp"
                         android:text="Time:"
-                        android:textAppearance="@android:style/TextAppearance.Material.Medium"
+                        android:textSize="20sp"
                         app:layout_constraintLeft_toLeftOf="parent"
                         app:layout_constraintTop_toBottomOf="@+id/textView8" />
 
@@ -101,7 +101,7 @@
                         android:layout_marginStart="25dp"
                         android:layout_marginTop="13dp"
                         android:text="Number of Sets:"
-                        android:textAppearance="@android:style/TextAppearance.Material.Medium"
+                        android:textSize="20sp"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintLeft_toLeftOf="parent"
                         app:layout_constraintTop_toBottomOf="@+id/textView9"
@@ -115,7 +115,7 @@
                         android:layout_marginRight="24dp"
                         android:layout_marginTop="13dp"
                         android:text="TextView"
-                        android:textAppearance="@android:style/TextAppearance.Material.Medium"
+                        android:textSize="20sp"
                         app:layout_constraintRight_toRightOf="parent"
                         app:layout_constraintTop_toBottomOf="@+id/setText" />
 
@@ -123,7 +123,6 @@
                         android:id="@+id/setText"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginEnd="8dp"
                         android:layout_marginLeft="16dp"
                         android:layout_marginStart="16dp"
                         android:layout_marginTop="16dp"
@@ -141,7 +140,7 @@
                         android:layout_marginStart="24dp"
                         android:layout_marginTop="13dp"
                         android:text="Average Intensity:"
-                        android:textAppearance="@android:style/TextAppearance.Material.Medium"
+                        android:textSize="20sp"
                         app:layout_constraintLeft_toLeftOf="parent"
                         app:layout_constraintTop_toBottomOf="@+id/setText" />
 
