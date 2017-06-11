@@ -174,7 +174,7 @@ public class PickExerciseFragment extends Fragment {
                         }
 
                         // Set the listeners on the groups items
-                        ArrayAdapter<String> adapter = new ArrayAdapter<>(getActivity(), android.R.layout.simple_list_item_1, groups);
+                        ArrayAdapter<String> adapter = new ArrayAdapter<>(getActivity(), R.layout.gridcard, groups);
                         groupsView.setAdapter(adapter);
                         groupsView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                             public void onItemClick(AdapterView<?> parent, View v, int position, long id) {

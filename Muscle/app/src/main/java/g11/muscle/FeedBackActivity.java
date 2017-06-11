@@ -215,7 +215,7 @@ public class FeedBackActivity extends AppCompatActivity implements
         nameTV.setText(exercise);
         repsTV.setText(String.valueOf(0));
 
-        setsTV.setText(String.valueOf(set_count));
+        setsTV.setText("Set " + String.valueOf(set_count));
 
         if(plan){
             repsTotalTV.setVisibility(View.VISIBLE);

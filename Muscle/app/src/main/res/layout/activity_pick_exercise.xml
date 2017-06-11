@@ -10,7 +10,7 @@
     <GridView
         android:id="@+id/groups"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"/>
 
     <TextView
         android:layout_height="wrap_content"

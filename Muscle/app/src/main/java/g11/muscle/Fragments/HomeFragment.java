@@ -8,6 +8,7 @@ import android.graphics.Color;
 import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.constraint.ConstraintLayout;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
@@ -16,7 +17,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.GridView;
-import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.ArrayAdapter;
 import android.widget.ProgressBar;
@@ -83,7 +83,7 @@ public class HomeFragment extends Fragment implements OnChartValueSelectedListen
     private GridView muscle_groupView;
     private HorizontalBarChart bChart;
 
-    private LinearLayout homeLinearLayout;
+    private ConstraintLayout homeConstraintLayout;
     // Chart font
     private Typeface mTfLight;
 
@@ -113,9 +113,9 @@ public class HomeFragment extends Fragment implements OnChartValueSelectedListen
 
         muscle_groupView = (GridView)fView.findViewById(R.id.groups);
         progressBar = (ProgressBar)fView.findViewById(R.id.homeProgressBar);
-        homeLinearLayout = (LinearLayout)fView.findViewById(R.id.homeLinearLayout);
+        homeConstraintLayout = (ConstraintLayout)fView.findViewById(R.id.homeConstraintLayout);
         progressBar.setVisibility(View.VISIBLE);
-        homeLinearLayout.setVisibility(View.INVISIBLE);
+        homeConstraintLayout.setVisibility(View.INVISIBLE);
 
         recList = (ListView) fView.findViewById(R.id.home_rec_list);
 
@@ -221,7 +221,7 @@ public class HomeFragment extends Fragment implements OnChartValueSelectedListen
                             barChartSetup();
                         }
                     progressBar.setVisibility(View.INVISIBLE);
-                    homeLinearLayout.setVisibility(View.VISIBLE);
+                    homeConstraintLayout.setVisibility(View.VISIBLE);
                     }
 
                 },

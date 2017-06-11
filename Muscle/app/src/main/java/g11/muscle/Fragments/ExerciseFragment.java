@@ -55,7 +55,6 @@ public class ExerciseFragment extends Fragment {
 
     //GUI
     private TextView exerciseView;
-    private TextView kindView;
     private ImageView imgView;
 
     private TextView descriptionView;
@@ -82,7 +81,6 @@ public class ExerciseFragment extends Fragment {
 
         //GUI elements
         exerciseView  = (TextView)fView.findViewById(R.id.exercise);
-        kindView  = (TextView)fView.findViewById(R.id.kind);
         imgView = (ImageView)fView.findViewById(R.id.image);
         descriptionView = (TextView)fView.findViewById(R.id.description);
 
@@ -105,7 +103,6 @@ public class ExerciseFragment extends Fragment {
                         try{
                             JSONObject jsonObject = new JSONObject(response);
                             descriptionView.setText(jsonObject.getString("Description"));
-                            //kindView.setText(jsonObject.getString("Kind"));
 
                             //Image name must be in lowercase
                             String DrawableName = jsonObject.getString("Image").toLowerCase();

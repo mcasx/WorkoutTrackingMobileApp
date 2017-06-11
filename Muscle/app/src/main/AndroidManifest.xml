@@ -29,74 +29,92 @@
         android:theme="@style/Muscle">
 
         <!-- android:theme="@style/Theme.AppCompat" was added for hot fix, fell free to change it -->
-        <activity android:configChanges="orientation"  android:screenOrientation="portrait" 
+
+        <activity
             android:name=".ExerciseActivity"
             android:theme="@style/Theme.AppCompat" />
-        <activity android:configChanges="orientation"  android:screenOrientation="portrait" 
+
+        <activity
             android:name=".ResetPassActivity"
             android:theme="@style/Theme.AppCompat.NoActionBar" />
-        <activity android:configChanges="orientation"  android:screenOrientation="portrait" 
+
+        <activity
             android:name=".PickExerciseActivity"
             android:theme="@style/Theme.AppCompat.NoActionBar" />
-        <activity android:configChanges="orientation"  android:screenOrientation="portrait" 
+
+        <activity
             android:name=".LoginActivity"
             android:theme="@style/Theme.AppCompat.NoActionBar">
-
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
         </activity>
-        <activity android:configChanges="orientation"  android:screenOrientation="portrait" 
+
+        <activity
             android:name=".HomeActivity"
             android:theme="@style/Theme.AppCompat" />
-        <activity android:configChanges="orientation"  android:screenOrientation="portrait" 
+
+        <activity
             android:name=".RegisterActivity"
             android:noHistory="true"
             android:theme="@style/Theme.AppCompat.NoActionBar" />
-        <activity android:configChanges="orientation"  android:screenOrientation="portrait" 
+
+        <activity
             android:name=".FeedBackActivity"
             android:noHistory="true"
             android:theme="@style/Theme.AppCompat.NoActionBar" />
-        <activity android:configChanges="orientation"  android:screenOrientation="portrait" 
+
+        <activity
             android:name=".FormActivity"
             android:theme="@style/Theme.AppCompat.NoActionBar" />
-        <activity android:configChanges="orientation"  android:screenOrientation="portrait" 
+
+        <activity
             android:name=".SettingsActivity"
             android:theme="@style/Theme.AppCompat.NoActionBar" />
-        <activity android:configChanges="orientation"  android:screenOrientation="portrait" 
+
+        <activity
             android:name=".DetailedExerciseHistoryActivity"
             android:theme="@style/Theme.AppCompat" />
-        <activity android:configChanges="orientation"  android:screenOrientation="portrait" 
+
+        <activity
             android:name=".ProfileActivity"
             android:label=""
             android:theme="@style/Theme.AppCompat" />
 
 
-        <activity android:configChanges="orientation"  android:screenOrientation="portrait"
+        <activity
             android:name=".SetupActivity"
             android:label=""
             android:theme="@style/Theme.AppCompat" >
         </activity>
 
 
-        <activity android:configChanges="orientation"  android:screenOrientation="portrait" 
+        <activity
             android:name=".GroupExercisesActivity"
             android:theme="@style/Theme.AppCompat" />
-        <activity android:configChanges="orientation"  android:screenOrientation="portrait" 
+
+
+        <activity
             android:name=".PlanActivity"
             android:theme="@style/Theme.AppCompat.NoActionBar" />
-        <!-- android:theme="@style/Theme.AppCompat" was added for hot fix, fell free to change it -->
+
         <activity android:configChanges="orientation"  android:screenOrientation="portrait" 
             android:name="com.theartofdev.edmodo.cropper.CropImageActivity"
             android:theme="@style/Base.Theme.AppCompat" />
+
         <activity android:configChanges="orientation"  android:screenOrientation="portrait" 
             android:name=".CardioActivity"
             android:theme="@style/Base.Theme.AppCompat" />
-        <activity android:configChanges="orientation"  android:screenOrientation="portrait"  android:name=".CreatePlanActivity"
+
+        <activity
+            android:name=".CreatePlanActivity"
             android:theme="@style/Base.Theme.AppCompat" >
-        <intent-filter>
-            <action android:name="android.intent.action.MAIN" />
-            <category android:name="android.intent.category.LAUNCHER" />
-        </intent-filter>
         </activity>
-        <activity android:configChanges="orientation"  android:screenOrientation="portrait"  android:name=".DetailedRunningActivity" android:theme="@style/Base.Theme.AppCompat"/>
+
+        <activity android:configChanges="orientation"  android:screenOrientation="portrait"
+            android:name=".DetailedRunningActivity"
+            android:theme="@style/Base.Theme.AppCompat"/>
     </application>
 
 </manifest>

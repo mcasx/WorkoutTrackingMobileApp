@@ -84,7 +84,7 @@ public class PickExerciseActivity extends AppCompatActivity {
                         }
 
                         // Set the listeners on the groups items
-                        ArrayAdapter<String> adapter = new ArrayAdapter<>(PickExerciseActivity.this, android.R.layout.simple_list_item_1, groups);
+                        ArrayAdapter<String> adapter = new ArrayAdapter<>(PickExerciseActivity.this, R.layout.gridcard, groups);
                         groupsView.setAdapter(adapter);
                         groupsView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                             public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
