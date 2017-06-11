@@ -466,6 +466,7 @@ public class FeedBackActivity extends AppCompatActivity implements
         super.onDestroy();
     }
 
+    //The 3 need to be different func to put the Media Player equals null
     private void stopMPSound(){
         if(mpRepSound != null){
             mpRepSound.stop();

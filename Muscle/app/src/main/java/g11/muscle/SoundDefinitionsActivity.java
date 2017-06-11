@@ -5,6 +5,7 @@ import android.provider.MediaStore;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.method.LinkMovementMethod;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
@@ -14,6 +15,7 @@ import android.widget.CompoundButton;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.Spinner;
+import android.widget.TextView;
 
 import g11.muscle.Classes.Globals;
 
@@ -32,6 +34,7 @@ public class SoundDefinitionsActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sound_definitions);
+        setTitle("Sound Settings");
 
         glb = Globals.getInstance();
 
@@ -176,9 +179,9 @@ public class SoundDefinitionsActivity extends AppCompatActivity {
         AlertDialog alertDialog = new AlertDialog.Builder(SoundDefinitionsActivity.this).create();
         alertDialog.setTitle("Licenses");
         //"Please connect your device to the Internet and try again")
-        alertDialog.setMessage("Female voice courtesy of Corsica_S at http://www.freesound.org/people/Corsica_S \n" +
-                               "(packs: \"Numbers 0-20\", \"Counting to 20\", \"Texas Hold 'Em\")\n" +
-                               "under Attribution License \n" +
+        alertDialog.setMessage("Female voice courtesy of Corsica_S at \nhttp://www.freesound.org/people/Corsica_S \n" +
+                               "\nPacks: \n    -\"Numbers 0-20\" \n    -\"Counting to 20\" \n    -\"Texas Hold 'Em\"\n" +
+                               "\nUnder Attribution License \n" +
                                "https://creativecommons.org/licenses/by/3.0/\n");
         alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
                 new DialogInterface.OnClickListener() {
