@@ -102,8 +102,10 @@
             android:screenOrientation="portrait"
             android:theme="@style/Base.Theme.AppCompat" />
         <activity android:name=".SelectExercises" android:theme="@style/Base.Theme.AppCompat">
-
-
+        </activity>
+        <activity
+            android:name=".SoundDefinitionsActivity"
+            android:theme="@style/Base.Theme.AppCompat">
         </activity>
     </application>
 
