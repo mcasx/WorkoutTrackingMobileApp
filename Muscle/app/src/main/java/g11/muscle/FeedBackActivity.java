@@ -136,7 +136,8 @@ public class FeedBackActivity extends AppCompatActivity implements
     private ProgressBar progressSet;
 
     //Sounds
-    private MediaPlayer mpSound;
+    private MediaPlayer mpRepSound;
+    private MediaPlayer mpRepVoiceSound;
     private MediaPlayer mpSetSound;
     private boolean setVoiceSound;
 
@@ -401,13 +402,13 @@ public class FeedBackActivity extends AppCompatActivity implements
                                         else
                                             id = getResources().getIdentifier("m_" + glb.getSoundLang() + rep_count, "raw", getApplicationContext().getPackageName());
 
-                                        stopMPSound();
-                                        mpSound = MediaPlayer.create(FeedBackActivity.this, id);
-                                        mpSound.start();
+                                        stopMPVoiceSound();
+                                        mpRepVoiceSound = MediaPlayer.create(FeedBackActivity.this, id);
+                                        mpRepVoiceSound.start();
                                     } else if (glb.getSoundPopEnable()) {
                                         stopMPSound();
-                                        mpSound = MediaPlayer.create(FeedBackActivity.this, R.raw.boop);
-                                        mpSound.start();
+                                        mpRepSound = MediaPlayer.create(FeedBackActivity.this, R.raw.boop);
+                                        mpRepSound.start();
                                     }
                                 }
 
@@ -466,10 +467,18 @@ public class FeedBackActivity extends AppCompatActivity implements
     }
 
     private void stopMPSound(){
-        if(mpSound != null){
-            mpSound.stop();
-            mpSound.release();
-            mpSound = null;
+        if(mpRepSound != null){
+            mpRepSound.stop();
+            mpRepSound.release();
+            mpRepSound = null;
+        }
+    }
+
+    private void stopMPVoiceSound(){
+        if(mpRepVoiceSound != null){
+            mpRepVoiceSound.stop();
+            mpRepVoiceSound.release();
+            mpRepVoiceSound = null;
         }
     }
 
