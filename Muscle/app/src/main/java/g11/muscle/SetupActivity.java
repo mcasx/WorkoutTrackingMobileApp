@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.Set;
 import java.util.UUID;
 
+import g11.muscle.DB.MuscleDbContract;
 import g11.muscle.R;
 
 public class SetupActivity extends AppCompatActivity {
@@ -49,6 +50,9 @@ public class SetupActivity extends AppCompatActivity {
 
     private boolean weight_mode;
 
+    private android.app.AlertDialog alertDialog;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -61,13 +65,15 @@ public class SetupActivity extends AppCompatActivity {
         // when asking for weight sensor it return 2 '}'
         weight_mode = false;
 
+        alertDialog = new android.app.AlertDialog.Builder(SetupActivity.this).create();
         setMessageRead();
     }
 
     protected void onStop(){
-        mConnectedThread.write("testModeOff");
-
-        if(mConnectedThread != null) mConnectedThread.cancel();
+        if(mConnectedThread != null){
+            mConnectedThread.write("testModeOff");
+            mConnectedThread.cancel();
+        }
         super.onStop();
     }
 
@@ -78,7 +84,19 @@ public class SetupActivity extends AppCompatActivity {
     }
 
     public void onCalibrateClick(View view){
-        mConnectedThread.write("testModeOn");
+        if(mConnectedThread != null) {
+            mConnectedThread.write("testModeOn");
+            alertDialog.setMessage("Push the bar");
+            alertDialog.setButton(android.app.AlertDialog.BUTTON_NEUTRAL, "OK",
+                    new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.dismiss();
+                        }
+                    });
+            alertDialog.show();
+        }
+        else
+            Log.e("BLUETOOTH", "NOT CONNECTED");
     }
 
     private void setMessageRead(){
@@ -105,7 +123,18 @@ public class SetupActivity extends AppCompatActivity {
                             String tmp =  jsonObj.getString("test_mode");
 
                             if (tmp.equals("on")){
-                                mConnectedThread.write("weight");
+                                alertDialog.dismiss();
+                                Toast.makeText(getApplicationContext(), "Testing Weight Sensors...", Toast.LENGTH_SHORT).show();
+
+                                Handler handler = new Handler();
+                                final Runnable r = new Runnable() {
+                                    public void run() {
+                                        Log.e("WRITE","NOW");
+                                        mConnectedThread.write("weight");
+                                    }
+                                };
+                                handler.postDelayed(r, 2000);
+
                                 weight_mode = true;
                             }
                         }
@@ -117,13 +146,21 @@ public class SetupActivity extends AppCompatActivity {
                             int i = 1;
                             for(String s: weights_strings){
                                 int id = res.getIdentifier("sensor" + i, "id", getApplicationContext().getPackageName());
-                                if(weights.getInt(s) >= 500){
+                                if(weights.getInt(s) >= 520){
                                     ((ImageView)findViewById(id)).setImageResource(R.mipmap.sensor_green);
                                 }
                                 i++;
                             }
 
                             weight_mode = false;
+                            alertDialog.setButton(android.app.AlertDialog.BUTTON_NEUTRAL, "OK",
+                                    new DialogInterface.OnClickListener() {
+                                        public void onClick(DialogInterface dialog, int which) {
+                                            Toast.makeText(getApplicationContext(), "Testing Checkpoint Sensors...", Toast.LENGTH_SHORT).show();
+                                            dialog.dismiss();
+                                        }
+                                    });
+                            alertDialog.show();
                             mConnectedThread.write("checkpoint");
                         }
                         if (jsonObj.has("message")) {
@@ -307,9 +344,6 @@ public class SetupActivity extends AppCompatActivity {
 
         final Set<BluetoothDevice> bdevices = mBluetoothAdapter.getBondedDevices();
 
-
-
-
         //Get bonded device names
         String[] bdname = new String[bdevices.size()];
         int i = 0;
@@ -320,7 +354,17 @@ public class SetupActivity extends AppCompatActivity {
         //Create the listener for each item in the dialog list
         DialogInterface.OnClickListener listener = new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
+                SetupActivity.this.runOnUiThread(new Runnable()
+                {
+                    public void run()
+                    {
+                        Toast.makeText(SetupActivity.this, "Connecting to Bluetooth...", Toast.LENGTH_SHORT).show();
+                    }
+                });
+
+                Log.e(TAG, bdevices.toArray(new BluetoothDevice[0])[which].toString());
                 startBTConnection(bdevices.toArray(new BluetoothDevice[0])[which]);
+                //getSharedPreferences("UserData", 0).edit().
             }
         };
 

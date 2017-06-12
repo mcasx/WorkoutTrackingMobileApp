@@ -152,6 +152,7 @@ public class FeedBackActivity extends AppCompatActivity implements
     private RequestQueue req_queue;
 
     private AlertDialog alertDialog;
+    private String expectedText;
 
     // Intent vars
     private String email;
@@ -202,7 +203,7 @@ public class FeedBackActivity extends AppCompatActivity implements
                 alertDialog.dismiss();
             }
         });
-
+        expectedText = "";
         restTime = 0;
 
         firstRep = true;
@@ -937,6 +938,13 @@ public class FeedBackActivity extends AppCompatActivity implements
         //Create the listener for each item in the dialog list
         DialogInterface.OnClickListener listener = new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
+                FeedBackActivity.this.runOnUiThread(new Runnable()
+                {
+                    public void run()
+                    {
+                        Toast.makeText(FeedBackActivity.this, "Connecting to Bluetooth...", Toast.LENGTH_SHORT).show();
+                    }
+                });
                 startBTConnection(bdevices.toArray(new BluetoothDevice[0])[which]);
             }
         };
