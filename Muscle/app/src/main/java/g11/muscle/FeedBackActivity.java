@@ -3,6 +3,7 @@ package g11.muscle;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.support.v7.app.AppCompatActivity;
@@ -12,6 +13,7 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.content.Intent;
 import android.os.Handler;
+import android.support.v7.widget.ShareActionProvider;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
@@ -37,6 +39,7 @@ import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.highlight.Highlight;
 import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
 import com.github.mikephil.charting.listener.OnChartValueSelectedListener;
+import com.google.gson.Gson;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -97,6 +100,8 @@ public class FeedBackActivity extends AppCompatActivity implements
     private int rep_count;
     private int set_count;
     private ArrayList<Double> intensities;
+    private double intensityDeviation;
+    private double intensityAVG;
     private int restTime;
     private int start_seconds;
     private int start_minutes;
@@ -153,6 +158,7 @@ public class FeedBackActivity extends AppCompatActivity implements
 
     private AlertDialog alertDialog;
     private String expectedText;
+
 
     // Intent vars
     private String email;
@@ -211,6 +217,8 @@ public class FeedBackActivity extends AppCompatActivity implements
         firstStopped = false; // don't want to count the first Stop if any rep was done
 
         intensities = new ArrayList<>();
+        intensityDeviation = 0;
+        intensityAVG = 0;
         last_checkpoint = 10;
 
         // for bluetooth data
@@ -313,6 +321,7 @@ public class FeedBackActivity extends AppCompatActivity implements
 
                             restTime = 3; // stopped is received after 3 sec
 
+                            expectedText = "";
                             TimeCountStart();
                         }
                         else{
@@ -521,9 +530,9 @@ public class FeedBackActivity extends AppCompatActivity implements
         @Override
         public void run() {
             if(!plan)
-                alertDialog.setMessage(outFmt.format(new Date((restTime)*1000)));
+                alertDialog.setMessage(outFmt.format(new Date((restTime)*1000)) + "\n" + expectedText);
             else
-                alertDialog.setMessage(outFmt.format(new Date((restTime)*1000)) + "    (" + plan_rest.substring(2) + ")");
+                alertDialog.setMessage(outFmt.format(new Date((restTime)*1000)) + "    (" + plan_rest.substring(2) + ")"  + "\n" + expectedText);
 
             if(startedTimer){
                 restTime++;
@@ -545,9 +554,9 @@ public class FeedBackActivity extends AppCompatActivity implements
         handler.postDelayed(runnableTimer, 1000);
 
         if(!plan)
-            alertDialog.setMessage(outFmt.format(new Date((restTime)*1000)));
+            alertDialog.setMessage(outFmt.format(new Date((restTime)*1000))  + "\n" + expectedText);
         else
-            alertDialog.setMessage(outFmt.format(new Date((restTime)*1000)) + "    (" + plan_rest.substring(2) + ")");
+            alertDialog.setMessage(outFmt.format(new Date((restTime)*1000)) + "    (" + plan_rest.substring(2) + ")"  + "\n" + expectedText);
         alertDialog.show();
         restTime++;
     }
@@ -713,7 +722,26 @@ public class FeedBackActivity extends AppCompatActivity implements
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
-                        Log.e("ExpectedResponse",response);
+                        intensityAVG = calculateAverage(intensities);
+                        double stdDeviation = 0;
+                        for(Double x : intensities){
+                            stdDeviation += Math.pow((x-intensityAVG),2);
+                        }
+                        stdDeviation /= intensities.size();
+                        intensityDeviation = stdDeviation;
+
+                        try {
+                            JSONObject jsonObj = new JSONArray(response).getJSONObject(0);
+                            double tmpSTDDev =jsonObj.getDouble("avg_deviation");
+                            double tmpInt = jsonObj.getDouble("avg_int");
+
+                            if(intensityDeviation > (1.5 * tmpSTDDev))
+                                expectedText = "\nYou were too inconsistent, try lowering the weight.";
+                            else if(intensityAVG > (1.5 * tmpInt))
+                                expectedText = "\nIt seems it was too easy for you, try increasing the weight";
+                        }catch(JSONException e){
+                            Log.e("JSON_PARSE",e.toString());
+                        }
                     }
                 },
                 new Response.ErrorListener() {
@@ -890,11 +918,13 @@ public class FeedBackActivity extends AppCompatActivity implements
                 params.put("resting_time", "00" + String.valueOf(timeRest).substring(2));
 
                 double intensityAvg = calculateAverage(intensities);
+                intensityAVG = intensityAvg;
                 double stdDeviation = 0;
                 for(Double x : intensities){
                     stdDeviation += Math.pow((x-intensityAvg),2);
                 }
                 stdDeviation /= intensities.size();
+                intensityDeviation = stdDeviation;
                 params.put("intensity_deviation", ""+stdDeviation);
                 return params;
             }
@@ -945,7 +975,15 @@ public class FeedBackActivity extends AppCompatActivity implements
                         Toast.makeText(FeedBackActivity.this, "Connecting to Bluetooth...", Toast.LENGTH_SHORT).show();
                     }
                 });
-                startBTConnection(bdevices.toArray(new BluetoothDevice[0])[which]);
+                BluetoothDevice bt = bdevices.toArray(new BluetoothDevice[0])[which];
+
+                Gson gson = new Gson();
+                String json = gson.toJson(bt);
+                SharedPreferences sh = getSharedPreferences("UserData", 0);
+                sh.edit().putString("bluetoothDevice", json).apply();
+
+                startBTConnection(bt);
+
             }
         };
 
@@ -973,7 +1011,11 @@ public class FeedBackActivity extends AppCompatActivity implements
             return;
         }
 
-        createDevicePickDialog();
+        SharedPreferences sp = getSharedPreferences("UserData", 0);
+        if(sp.contains("bluetoothDevice"))
+            startBTConnection(new Gson().fromJson(sp.getString("bluetoothDevice", null), BluetoothDevice.class));
+        else
+            createDevicePickDialog();
     }
 
     private void startBTConnection(BluetoothDevice muscleDevice){
@@ -990,7 +1032,11 @@ public class FeedBackActivity extends AppCompatActivity implements
             // Make sure the request was successful
             if (resultCode == RESULT_OK) {
                 // Get a handle on the bluetooth radio
-                createDevicePickDialog();
+                SharedPreferences sp = getSharedPreferences("UserData", 0);
+                if(sp.contains("bluetoothDevice"))
+                    startBTConnection(new Gson().fromJson(sp.getString("bluetoothDevice", null), BluetoothDevice.class));
+                else
+                    createDevicePickDialog();
             }
         }
     }

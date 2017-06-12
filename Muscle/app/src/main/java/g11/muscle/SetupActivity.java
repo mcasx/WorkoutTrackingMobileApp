@@ -7,6 +7,7 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
@@ -16,6 +17,8 @@ import android.view.View;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.ImageView;
 import android.widget.Toast;
+
+import com.google.gson.Gson;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -86,7 +89,7 @@ public class SetupActivity extends AppCompatActivity {
     public void onCalibrateClick(View view){
         if(mConnectedThread != null) {
             mConnectedThread.write("testModeOn");
-            alertDialog.setMessage("Push the bar");
+            alertDialog.setMessage("Slightly pull the bar and set it back down.");
             alertDialog.setButton(android.app.AlertDialog.BUTTON_NEUTRAL, "OK",
                     new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int which) {
@@ -153,6 +156,7 @@ public class SetupActivity extends AppCompatActivity {
                             }
 
                             weight_mode = false;
+                            alertDialog.setMessage("Pull the bar all the way up and set it back down.");
                             alertDialog.setButton(android.app.AlertDialog.BUTTON_NEUTRAL, "OK",
                                     new DialogInterface.OnClickListener() {
                                         public void onClick(DialogInterface dialog, int which) {
@@ -169,6 +173,7 @@ public class SetupActivity extends AppCompatActivity {
                             Character lastChar = checkpoint.charAt(checkpoint.length() - 1);
 
                             if(Character.isDigit(lastChar)) {
+                                alertDialog.dismiss();
                                 int id = res.getIdentifier("sensorCheck" + lastChar, "id", getApplicationContext().getPackageName());
                                 ((ImageView) findViewById(id)).setImageResource(R.mipmap.sensor_green);
                             }
@@ -199,7 +204,11 @@ public class SetupActivity extends AppCompatActivity {
             return;
         }
 
-        createDevicePickDialog();
+        SharedPreferences sp = getSharedPreferences("UserData", 0);
+        if(sp.contains("bluetoothDevice"))
+            startBTConnection(new Gson().fromJson(sp.getString("bluetoothDevice", null), BluetoothDevice.class));
+        else
+            createDevicePickDialog();
     }
 
 
@@ -363,8 +372,14 @@ public class SetupActivity extends AppCompatActivity {
                 });
 
                 Log.e(TAG, bdevices.toArray(new BluetoothDevice[0])[which].toString());
-                startBTConnection(bdevices.toArray(new BluetoothDevice[0])[which]);
-                //getSharedPreferences("UserData", 0).edit().
+                BluetoothDevice bt = bdevices.toArray(new BluetoothDevice[0])[which];
+                Gson gson = new Gson();
+                String json = gson.toJson(bt);
+                SharedPreferences sh = getSharedPreferences("UserData", 0);
+                sh.edit().putString("bluetoothDevice", json).apply();
+
+                startBTConnection(bt);
+
             }
         };
 
@@ -387,7 +402,11 @@ public class SetupActivity extends AppCompatActivity {
             // Make sure the request was successful
             if (resultCode == RESULT_OK) {
                 // Get a handle on the bluetooth radio
-                createDevicePickDialog();
+                SharedPreferences sp = getSharedPreferences("UserData", 0);
+                if(sp.contains("bluetoothDevice"))
+                    startBTConnection(new Gson().fromJson(sp.getString("bluetoothDevice", null), BluetoothDevice.class));
+                else
+                    createDevicePickDialog();
             }
         }
     }
