@@ -737,8 +737,8 @@ public class FeedBackActivity extends AppCompatActivity implements
 
                             if(intensityDeviation > (1.5 * tmpSTDDev))
                                 expectedText = "\nYou were too inconsistent, try lowering the weight.";
-                            else if(intensityAVG > (1.5 * tmpInt))
-                                expectedText = "\nIt seems it was too easy for you, try increasing the weight";
+                            else if(intensityAVG > (1.3 * tmpInt))
+                                expectedText = "\nIt seems it was too easy for you, try increasing the weight.";
                         }catch(JSONException e){
                             Log.e("JSON_PARSE",e.toString());
                         }
